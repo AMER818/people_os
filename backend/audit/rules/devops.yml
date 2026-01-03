@@ -1,0 +1,65 @@
+dimension: devops
+version: v1.0.0
+
+# Signal definitions
+signals:
+  deployment_scripts:
+    description: "Automated deployment scripts exist"
+    min: 1
+    weight: 0.3
+    severity: major
+    
+  backup_strategy:
+    description: "Backup mechanism implemented"
+    min: 1
+    weight: 0.4
+    severity: critical
+    
+  environment_config:
+    description: "Environment configuration templates"
+    min: 1
+    weight: 0.1
+    severity: minor
+    
+  docker_support:
+    description: "Docker/containerization support"
+    min: 0
+    weight: 0.1
+    severity: minor
+    
+  ci_cd_config:
+    description: "CI/CD pipeline configuration"
+    min: 0
+    weight: 0.1
+    severity: minor
+
+# Scoring configuration
+scoring:
+  base_score: 5.0
+  deductions:
+    - signal: deployment_scripts
+      formula: "(1 - min(value, 1)) * 1.5"
+      description: "Manual deployment = high error risk"
+      
+    - signal: backup_strategy
+      formula: "(1 - value) * 2.5"
+      description: "No backups = catastrophic data loss risk"
+      
+    - signal: environment_config
+      formula: "(1 - value) * 0.5"
+      description: "Environment templates improve consistency"
+
+# Thresholds
+thresholds:
+  block_release: 2.5
+  require_review: 3.0
+  excellent: 4.5
+
+# Metadata
+meta:
+  owner: "devops-lead"
+  last_updated: "2026-01-03"
+  changelog:
+    - date: "2026-01-03"
+      change: "Initial DevOps audit rules"
+      author: "system"

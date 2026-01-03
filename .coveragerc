@@ -1,0 +1,10 @@
+[run]
+omit =
+    backend/verify_*
+    backend/audit/*
+    backend/scripts/*
+    backend/tests/*
+    backend/reproduce_issue.py
+    backend/initialize_auth.py
+    backend/ensure_schema.py
+    backend/migrations/*

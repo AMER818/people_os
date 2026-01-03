@@ -1,0 +1,41 @@
+{
+    "SOC2": {
+        "CC6.1": {
+            "description": "Logical access security",
+            "dimensions": [
+                "Security",
+                "Architecture"
+            ],
+            "evidence_signals": [
+                "rbac_enabled",
+                "mfa_usage",
+                "layer_violation_count"
+            ]
+        },
+        "CC7.1": {
+            "description": "System monitoring",
+            "dimensions": [
+                "DevOps",
+                "AI Layer"
+            ],
+            "evidence_signals": [
+                "logging_coverage",
+                "error_rate",
+                "prompt_token_usage"
+            ]
+        }
+    },
+    "ISO27001": {
+        "A.12.1.2": {
+            "description": "Change management",
+            "dimensions": [
+                "DevOps",
+                "Code Quality"
+            ],
+            "evidence_signals": [
+                "pr_audit_pass_rate",
+                "cicd_fail_count"
+            ]
+        }
+    }
+}

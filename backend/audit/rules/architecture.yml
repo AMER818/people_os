@@ -1,0 +1,49 @@
+dimension: architecture
+version: v1.0.0
+
+# Signal definitions
+signals:
+  ui_to_db_violations:
+    description: "UI components accessing database directly"
+    max: 0
+    weight: 0.5
+    severity: major
+    
+  circular_imports_risk:
+    description: "Potential circular dependency patterns"
+    max: 3
+    weight: 0.3
+    severity: minor
+    
+  module_count:
+    description: "Number of independent modules"
+    min: 5
+    weight: 0.2
+    severity: minor
+
+# Scoring configuration
+scoring:
+  base_score: 5.0
+  deductions:
+    - signal: ui_to_db_violations
+      formula: "count * 0.8"
+      description: "Layer violations are architectural anti-patterns"
+      
+    - signal: circular_imports_risk
+      formula: "count * 0.2"
+      description: "Circular dependencies reduce maintainability"
+
+# Thresholds
+thresholds:
+  block_release: 2.5
+  require_review: 3.5
+  excellent: 4.5
+
+# Metadata
+meta:
+  owner: "architect"
+  last_updated: "2026-01-03"
+  changelog:
+    - date: "2026-01-03"
+      change: "Initial architecture audit rules"
+      author: "system"

@@ -1,0 +1,59 @@
+dimension: api_stability
+version: v1.0.0
+
+# Signal definitions
+signals:
+  versioned_endpoints:
+    description: "Percentage of endpoints with version prefixes"
+    min: 50
+    weight: 0.3
+    severity: minor
+    
+  pagination_support:
+    description: "Pagination implementation present"
+    min: 1
+    weight: 0.2
+    severity: minor
+    
+  error_handling:
+    description: "Consistent error handling"
+    min: 1
+    weight: 0.3
+    severity: major
+    
+  response_consistency:
+    description: "Consistent response shapes"
+    min: 1
+    weight: 0.2
+    severity: minor
+
+# Scoring configuration
+scoring:
+  base_score: 5.0
+  deductions:
+    - signal: versioned_endpoints
+      formula: "(100 - value) / 50"
+      description: "Lack of versioning reduces long-term stability"
+      
+    - signal: pagination_support
+      formula: "(1 - value) * 1.0"
+      description: "Missing pagination impacts scalability"
+      
+    - signal: error_handling
+      formula: "(1 - value) * 1.5"
+      description: "Inconsistent errors confuse API consumers"
+
+# Thresholds
+thresholds:
+  block_release: 2.5
+  require_review: 3.0
+  excellent: 4.5
+
+# Metadata
+meta:
+  owner: "api-lead"
+  last_updated: "2026-01-03"
+  changelog:
+    - date: "2026-01-03"
+      change: "Initial API stability rules"
+      author: "system"

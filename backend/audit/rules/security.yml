@@ -1,0 +1,55 @@
+dimension: security
+version: v1.0.0
+
+# Signal definitions
+signals:
+  hardcoded_secrets:
+    description: "Number of potential hardcoded secrets detected"
+    max: 0
+    weight: 0.6
+    severity: critical
+    
+  rbac_coverage:
+    description: "Percentage of endpoints with authentication/authorization (0-100)"
+    min: 80
+    weight: 0.3
+    severity: major
+    
+  rate_limited_endpoints:
+    description: "Number of critical endpoints with rate limiting"
+    min: 3
+    weight: 0.1
+    severity: minor
+
+# Scoring configuration
+scoring:
+  base_score: 5.0
+  deductions:
+    - signal: hardcoded_secrets
+      formula: "count * 1.0"
+      description: "Each secret exposure is critical (-1.0 point)"
+      
+    - signal: rbac_coverage
+      formula: "(100 - coverage) / 20"
+      description: "Below 100% coverage deducts proportionally"
+      
+  bonuses:
+    - signal: rate_limited_endpoints
+      formula: "count * 0.1"
+      description: "Bonus for rate limiting (capped at +0.5)"
+      max_bonus: 0.5
+
+# Thresholds
+thresholds:
+  block_release: 3.5
+  require_review: 4.0
+  excellent: 4.8
+
+# Metadata
+meta:
+  owner: "security-lead"
+  last_updated: "2026-01-03"
+  changelog:
+    - date: "2026-01-03"
+      change: "Initial security baseline"
+      author: "system"

@@ -1,0 +1,50 @@
+# Fix All Issues - Implementation Plan
+
+## 🔴 Critical Issues (Fix Immediately)
+
+### Security
+- [x] Fix `qs` vulnerability in NestJS backend (0 vulnerabilities now)
+- [x] Pin Python dependencies with versions
+
+### TypeScript Errors
+- [/] Fix file casing inconsistencies (1/7 files fixed)
+- [ ] Add explicit types for event handlers
+- [ ] Remove unused imports
+- [ ] Fix schema mismatches
+
+### Testing
+- [x] Frontend test configuration (DONE)
+- [x] PayrollService tests (DONE - 23/23 passing)
+
+## 🟠 High Priority Issues
+
+### Backend Testing
+- [ ] Add Employees service tests
+- [ ] Add Recruitment service tests
+- [ ] Add Attendance service tests
+
+### Type Safety
+- [ ] Fix Candidate schema mismatch (firstName/lastName vs name)
+- [ ] Fix Employee schema fields (email, phone)
+- [ ] Update frontend types to match Prisma schema
+
+### Code Quality
+- [ ] Remove console.log statements
+- [ ] Eliminate TypeScript 'any' usage in services
+- [ ] Enable ESLint pre-commit hooks
+
+## 🟡 Medium Priority Issues
+
+### Database
+- [ ] Fix date field types (String → DateTime)
+- [ ] Clean up schema comments
+- [ ] Add database constraints
+
+### Documentation
+- [ ] Add JSDoc comments to services
+- [ ] Update API response examples
+
+## Progress Tracking
+- Critical: 1/4 complete
+- High Priority: 0/9 complete  
+- Medium Priority: 0/5 complete

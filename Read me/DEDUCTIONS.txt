@@ -1,0 +1,23 @@
+generate new code or make changes in existing deduction form as per below requirement,
+show below fields in separate pan
+HR plant (optional)
+employee code (mandatory)
+employee name (fetch from master data)
+department (fetch from master data)
+designation (fetch from master data)
+
+show below columns in separate pan
+deduction details
+Amounts
+%age
+from date (mandatory)
+to date
+
+add buttons at bottom
+
+add
+edit
+save
+discard
+delete
+close

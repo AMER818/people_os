@@ -1,0 +1,60 @@
+dimension: ai_layer
+version: v1.0.0
+
+# Signal definitions
+signals:
+  ai_integrations:
+    description: "Number of AI integration points"
+    min: 0
+    weight: 0.2
+    severity: minor
+    
+  prompt_versioning:
+    description: "Prompts are versioned"
+    min: 1
+    weight: 0.3
+    severity: major
+    
+  input_validation:
+    description: "Input validation on AI calls"
+    min: 1
+    weight: 0.3
+    severity: major
+    
+  ai_error_handling:
+    description: "Error handling for AI failures"
+    min: 1
+    weight: 0.2
+    severity: minor
+
+# Scoring configuration
+scoring:
+  base_score: 5.0
+  conditional:
+    - condition: "ai_integrations == 0"
+      score: 4.0
+      description: "Neutral score if no AI usage"
+      
+  deductions:
+    - signal: prompt_versioning
+      formula: "(1 - value) * 2.0"
+      description: "Unversioned prompts = reproducibility issues"
+      
+    - signal: input_validation
+      formula: "(1 - value) * 1.5"
+      description: "Unvalidated AI inputs = security risk"
+
+# Thresholds
+thresholds:
+  block_release: 3.0
+  require_review: 3.5
+  excellent: 4.5
+
+# Metadata
+meta:
+  owner: "ai-lead"
+  last_updated: "2026-01-03"
+  changelog:
+    - date: "2026-01-03"
+      change: "Initial AI layer audit rules"
+      author: "system"

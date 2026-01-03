@@ -1,0 +1,53 @@
+dimension: testing
+version: v1.0.0
+
+# Signal definitions
+signals:
+  test_coverage:
+    description: "Estimated test coverage percentage (0-100)"
+    min: 50
+    weight: 0.5
+    severity: major
+    
+  untested_critical_paths:
+    description: "Number of critical files without corresponding tests"
+    max: 2
+    weight: 0.3
+    severity: major
+    
+  test_files_count:
+    description: "Total number of test files"
+    min: 10
+    weight: 0.2
+    severity: minor
+
+# Scoring configuration
+scoring:
+  base_score: 5.0
+  deductions:
+    - signal: test_coverage
+      formula: "(100 - coverage) / 20"
+      description: "Below 100% coverage deducts points"
+      
+    - signal: untested_critical_paths
+      formula: "count * 0.5"
+      description: "Each untested critical file deducts 0.5 points"
+      
+    - signal: test_files_count
+      formula: "max(0, (20 - count) * 0.1)"
+      description: "Fewer than 20 test files deducts points"
+
+# Thresholds
+thresholds:
+  block_release: 3.0
+  require_review: 3.5
+  excellent: 4.5
+
+# Metadata
+meta:
+  owner: "qa-lead"
+  last_updated: "2026-01-03"
+  changelog:
+    - date: "2026-01-03"
+      change: "Initial testing baseline"
+      author: "system"

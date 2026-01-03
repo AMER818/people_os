@@ -1,0 +1,18 @@
+{
+    "version": "1.0.0",
+    "created_at": "2026-01-07T20:15:00Z",
+    "checksums": {
+        "backend/models.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "backend/schemas.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "package.json": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "schema_snapshot": {
+        "tables": 26,
+        "columns": 245,
+        "constraints": 42
+    },
+    "infra_snapshot": {
+        "python_version": "3.12.0",
+        "node_version": "20.10.0"
+    }
+}

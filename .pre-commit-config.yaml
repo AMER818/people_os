@@ -1,0 +1,23 @@
+# Pre-commit hook configuration for theme compliance
+# Install: pre-commit install
+# Run manually: pre-commit run --all-files
+
+repos:
+  - repo: local
+    hooks:
+      - id: theme-compliance
+        name: Theme Compliance Check
+        entry: python scripts/enforce_theme_scan.py --path modules --path components --path src --fail-on-match
+        language: system
+        types: [typescript, typescriptreact]
+        stages: [commit]
+        pass_filenames: false
+        verbose: true
+        
+      - id: no-hardcoded-colors
+        name: No Hard-coded Colors
+        entry: sh -c 'grep -r --include="*.tsx" --include="*.ts" --color=never "bg-\|text-\|border-\|shadow-" modules components src | grep -E "#[0-9a-fA-F]{3,6}|rgb\(" && exit 1 || exit 0'
+        language: system
+        types: [typescript, typescriptreact]
+        stages: [commit]
+        pass_filenames: false

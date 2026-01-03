@@ -1,0 +1,199 @@
+# All Unused Imports - Complete List
+
+**Total Instances Found:** 15+
+
+## 📍 By File
+
+### 1. [modules/Dashboard.tsx](file:///d:/Python/HCM_WEB/modules/Dashboard.tsx)
+**Unused Imports:** 4 instances
+
+| Line | Import Name | Reason | Impact |
+|------|-------------|--------|---------|
+| 12 | `ChevronRight` | Never used in component | ~1KB |
+| 35 | `Legend` | Recharts component not rendered | ~500B |
+| 89 | `handleQuickAction` | Function declared but never called | N/A (local var) |
+| 336 | `entry` | Parameter in map function not used | N/A (local var) |
+
+**Recommendation:** Remove all 4
+
+---
+
+### 2. [modules/employee/EmployeeDetailHeader.tsx](file:///d:/Python/HCM_WEB/modules/employee/EmployeeDetailHeader.tsx)
+**Unused Imports:** 1 instance
+
+| Line | Import Name | Reason |
+|------|-------------|--------|
+| 4 | `CheckCircle2` | Icon imported but never rendered |
+
+**Recommendation:** Remove
+
+---
+
+### 3. [modules/employee/EmployeeInfoTab.tsx](file:///d:/Python/HCM_WEB/modules/employee/EmployeeInfoTab.tsx)
+**Unused Imports:** 9 instances
+
+| Line | Import Name | Reason |
+|------|-------------|--------|
+| 1 | `useState` | React hook imported but never used |
+| 9 | `GitBranch` | Icon never rendered |
+| 11 | `BrainCircuit` | Icon never rendered |
+| 12 | `RefreshCw` | Icon never rendered |
+| 13 | `Star` | Icon never rendered |
+| 14 | `Zap` | Icon never rendered |
+| 15 | `AlertCircle` | Icon never rendered |
+| 16 | `ChevronRight` | Icon never rendered |
+| 19 | `Briefcase` | Icon never rendered |
+| 22 | `Award` | Icon never rendered |
+| 23 | `Factory` | Icon never rendered |
+| 28 | `Sun` | Icon never rendered |
+| 43 | `GRADE_TO_DESIGNATIONS` | Constant imported but never used |
+| 59 | `isAnalyzing` | State variable declared but never used |
+| 60 | `aiSuggestions` | State variable declared but never used |
+
+**Recommendation:** Remove all 15 (likely cleanup from refactoring)
+
+---
+
+### 4. [modules/employee/EmployeeDashboard.tsx](file:///d:/Python/HCM_WEB/modules/employee/EmployeeDashboard.tsx)
+**Unused Imports:** 1 instance
+
+| Line | Import Name | Reason |
+|------|-------------|--------|
+| 2 | `Download` | Icon imported but lazy-loaded exports used instead |
+
+**Recommendation:** Remove (exports are dynamically imported)
+
+---
+
+### 5. [modules/employee/EmployeeTabs.tsx](file:///d:/Python/HCM_WEB/modules/employee/EmployeeTabs.tsx)
+**Unused Imports:** 1 instance
+
+| Line | Import Name | Reason |
+|------|-------------|--------|
+| 8 | `Award` | Icon never rendered |
+
+**Recommendation:** Remove
+
+---
+
+### 6. [modules/Governance.tsx](file:///d:/Python/HCM_WEB/modules/Governance.tsx)
+**Unused Imports:** 1 instance
+
+| Line | Import Name | Reason |
+|------|-------------|--------|
+| 13 | `Download` | Icon imported but lazy-loaded export used |
+
+**Recommendation:** Remove
+
+---
+
+### 7. [modules/JobPostings.tsx](file:///d:/Python/HCM_WEB/modules/JobPostings.tsx)
+**Unused Imports:** 1 instance
+
+| Line | Import Name | Reason |
+|------|-------------|--------|
+| 12 | `DollarSign` | Icon never rendered |
+
+**Recommendation:** Remove
+
+---
+
+### 8. [modules/payroll/PayrollLedger.tsx](file:///d:/Python/HCM_WEB/modules/payroll/PayrollLedger.tsx)
+**Unused Imports:** 1 instance
+
+| Line | Import Name | Reason |
+|------|-------------|--------|
+| 2 | `Download` | Icon imported multiple times, likely duplicate |
+
+**Recommendation:** Remove
+
+---
+
+### 9. [modules/SystemSettings.tsx](file:///d:/Python/HCM_WEB/modules/SystemSettings.tsx)
+**Unused Imports:** 2 instances (Currently showing in type-check)
+
+| Line | Import Name | Reason |
+|------|-------------|--------|
+| 39 | `CheckCircle2` | Icon never rendered |
+| 42 | `ChevronRight` | Icon never rendered |
+
+**Recommendation:** Remove both
+
+---
+
+## 📊 Summary Statistics
+
+| Category | Count | Est. Bundle Impact |
+|----------|-------|-------------------|
+| **Lucide Icons** | 13 | ~13-15KB (if tree-shaking fails) |
+| **React hooks** | 1 | ~0KB (tree-shaken) |
+| **Constants** | 1 | ~500B |
+| **Local variables** | 4 | 0KB (removed at compile) |
+| **TOTAL** | **19 instances** | **~15KB max** |
+
+---
+
+## 🎯 Recommendation: Remove All
+
+**Reasons:**
+1. **Bundle size:** Could save up to 15KB if tree-shaking doesn't work perfectly
+2. **Code clarity:** Reduces confusion about what's actually used
+3. **Maintenance:** Easier to understand component dependencies
+4. **Build time:** Fewer imports = faster compilation
+
+**Impact of NOT removing:**
+- ⚠️ Slightly larger bundle (not critical)
+- ⚠️ TypeScript compilation warnings
+- ⚠️ Code appears more complex than it is
+- ✅ No runtime impact
+
+---
+
+## ⚡ Quick-Fix Options
+
+### Option 1: Manual (Safest)
+Remove each import one by one - you know the code best
+
+### Option 2: Automated Fix Script
+```bash
+# This would remove unused imports automatically
+npx eslint --fix modules/
+```
+**Risk:** Might remove needed imports if ESLint rules are too aggressive
+
+### Option 3: IDE Auto-fix
+- VSCode: Right-click → "Organize Imports"
+- Each file individually
+
+---
+
+## 📝 Detailed Removal Instructions
+
+### Dashboard.tsx
+```diff
+- import {
+-   Users,
+-   TrendingUp,
+-   ChevronRight,  // ← Remove this
+-   ...
+- } from 'lucide-react';
+```
+
+Remove line 89: `const handleQuickAction = ...` (entire function)
+Remove line 35: `Legend,` from Recharts imports
+
+### EmployeeInfoTab.tsx (Biggest offender - 15 unused)
+```diff
+- import { useState } from 'react';  // ← Remove if not used
+- import {
+-   GitBranch,     // ← Remove
+-   BrainCircuit,  // ← Remove
+-   RefreshCw,     // ← Remove
+-   ...
+- } from 'lucide-react';
+```
+
+---
+
+**Decision Time:**  
+Should I proceed with removing all these unused imports? It's safe and improves code quality.

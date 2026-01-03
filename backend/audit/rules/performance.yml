@@ -1,0 +1,50 @@
+dimension: performance
+version: v1.0.0
+
+# Signal definitions
+signals:
+  memoization_usage:
+    description: "Components using useMemo/useCallback/memo"
+    max: 1000
+    weight: 0.1
+    severity: info
+    
+  lazy_loading:
+    description: "Components using React.lazy/Suspense"
+    max: 100
+    weight: 0.2
+    severity: info
+    
+  large_assets:
+    description: "Assets larger than 500KB"
+    max: 0
+    weight: 1.0
+    severity: major
+
+# Scoring configuration
+scoring:
+  base_score: 5.0
+  deductions:
+    - signal: large_assets
+      formula: "count * 0.5" # 0.5 points per large file
+      description: "Large assets kill load time"
+      
+  bonuses:
+    - signal: virtualization
+      formula: "min(0.5, count * 0.1)"
+      description: "Virtualization handles large lists efficiently"
+
+# Thresholds
+thresholds:
+  block_release: 3.0
+  require_review: 4.0
+  excellent: 4.8
+
+# Metadata
+meta:
+  owner: "frontend-lead"
+  last_updated: "2026-01-10"
+  changelog:
+    - date: "2026-01-10"
+      change: "Initial Performance audit rules"
+      author: "system"

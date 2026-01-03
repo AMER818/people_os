@@ -1,0 +1,53 @@
+dimension: ui_ux
+version: v1.0.0
+
+# Signal definitions
+signals:
+  hardcoded_colors:
+    description: "Hardcoded color values (#hex, rgb)"
+    max: 50
+    weight: 0.3
+    severity: minor
+    
+  hardcoded_spacing:
+    description: "Hardcoded px values"
+    max: 100
+    weight: 0.2
+    severity: minor
+    
+  accessibility_violations:
+    description: "Components missing accessibility attributes"
+    max: 10
+    weight: 0.5
+    severity: major
+
+# Scoring configuration
+scoring:
+  base_score: 5.0
+  deductions:
+    - signal: hardcoded_colors
+      formula: "count / 50"
+      description: "Design tokens improve consistency"
+      
+    - signal: hardcoded_spacing
+      formula: "count / 100"
+      description: "Spacing scale improves UI coherence"
+      
+    - signal: accessibility_violations
+      formula: "count / 10"
+      description: "Accessibility is non-negotiable for modern UIs"
+
+# Thresholds
+thresholds:
+  block_release: 2.5
+  require_review: 3.0
+  excellent: 4.5
+
+# Metadata
+meta:
+  owner: "design-lead"
+  last_updated: "2026-01-03"
+  changelog:
+    - date: "2026-01-03"
+      change: "Initial UI/UX audit rules"
+      author: "system"

@@ -1,0 +1,40 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Backup and temporary files
+backup
+test_output*.txt
+test_debug_output*.txt
+
+# Database Standardization
+*.db
+!backend/data/hunzal_hcm.db
+
+# Environment Variables
+.env
+.env.*
+backend/backups/*.db
+backend/uploads/*
+!backend/uploads/.gitkeep

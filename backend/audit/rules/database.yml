@@ -1,0 +1,61 @@
+dimension: database
+version: v1.0.0
+
+# Signal definitions
+signals:
+  foreign_keys_enforced:
+    description: "Whether foreign key constraints are enabled"
+    min: 1
+    weight: 0.3
+    severity: major
+    
+  indexes_count:
+    description: "Number of database indexes"
+    min: 10
+    weight: 0.2
+    severity: minor
+    
+  tables_without_indexes:
+    description: "Tables missing any indexes"
+    max: 2
+    weight: 0.3
+    severity: major
+    
+  migration_files:
+    description: "Number of migration files"
+    min: 5
+    weight: 0.2
+    severity: minor
+
+# Scoring configuration
+scoring:
+  base_score: 5.0
+  deductions:
+    - signal: foreign_keys_enforced
+      formula: "(1 - value) * 2.0"
+      description: "No FK enforcement is a major issue"
+      
+    - signal: tables_without_indexes
+      formula: "count * 0.5"
+      description: "Each unindexed table deducts 0.5 points"
+      
+  bonuses:
+    - signal: indexes_count
+      formula: "min(1.0, count / 20)"
+      description: "Bonus for good index coverage"
+      max_bonus: 1.0
+
+# Thresholds
+thresholds:
+  block_release: 3.0
+  require_review: 3.5
+  excellent: 4.5
+
+# Metadata
+meta:
+  owner: "database-lead"
+  last_updated: "2026-01-03"
+  changelog:
+    - date: "2026-01-03"
+      change: "Initial database audit rules"
+      author: "system"

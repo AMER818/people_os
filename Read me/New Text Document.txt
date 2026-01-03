@@ -1,0 +1,34 @@
+https://github.com/aamerjaved818/HCM_WEB
+analyze my project and share accordingly.
+
+why you are still failing to fix it, grid data area shows under sidebar on startup, after refreshing becomes normal.
+
+make a comprehensive mechanism for group/company/org level hod assignment, and same for plant/office level independently.
+
+i don't like chrome testing, use code based testing. note it, update it.
+
+mapp all fields, data saving, ensure 100% working.
+
+Setup E2E Testing Infrastructure (Playwright)
+
+enhance the Dashboard with beautiful hovering effects.
+
+Deployment & Automation
+New Setup: Run npm run setup to initialize everything automatically.
+New Commands: npm run start:all, npm run dev, npm run build (Replaced all .bat files).
+
+Login Experience Upgraded
+
+I have successfully fine-tuned the login screen with a premium, glassmorphic design.
+
+Enhancements:
+
+Visuals: Added a dynamic background with subtle animations and a "frosted glass" card effect.
+Interactions: Improved input focus states and added a smooth "verifying" animation on the button.
+Success State: Added a satisfying "Access Granted" confirmation before redirecting.
+
+i think all data showing in access control is fixed/hardcoded/initial/constant.
+
+Project-Wide Deep Cleanup Protocol
+Project-Wide Deep Audit Protocol
+Project Structure Cleanup

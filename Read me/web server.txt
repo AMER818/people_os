@@ -1,0 +1,6 @@
+Verifying Production Build (Test Server)
+User wants validation that "production mode" is active.
+
+The "Test Server" (Port 4040) runs npm run preview, which serves the dist/ folder (Production Build).
+The "Live Server" (Port 5050) runs npm run dev (Development Mode).
+I will verify the dist/ folder exists and was recently updated to confirm the production build succeeded.

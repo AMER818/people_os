@@ -1,0 +1,37 @@
+# Drift Detection Rules
+dimension: drift_detection
+version: v1.0.0
+
+signals:
+  adr_count:
+    description: "Number of Architecture Decision Records"
+    min: 5
+    severity: Major
+  undocumented_modules:
+    description: "Modules without architectural documentation"
+    max: 0
+    severity: Minor
+  drift_violation_count:
+    description: "Detected deviations from ADR patterns"
+    max: 0
+    severity: Critical
+
+scoring:
+  base_score: 5.0
+  deductions:
+    - signal: undocumented_modules
+      formula: "count * 0.5"
+    - signal: drift_violation_count
+      formula: "count * 1.5"
+  bonuses:
+    - signal: adr_count
+      formula: "min(count * 0.1, 0.5)"
+      max_bonus: 0.5
+
+thresholds:
+  release_blocker_drift: 2
+  warning_drift: 1
+
+meta:
+  owner: "architect"
+  category: "Architecture"
