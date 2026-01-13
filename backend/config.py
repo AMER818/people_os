@@ -8,7 +8,7 @@ class APIConfig:
     """API Configuration Constants"""
     PROJECT_NAME: str = "Hunzal HCM API"
     VERSION: str = "1.0.0"
-    PORT: int = int(os.getenv("PORT", 3002))
+    PORT: int = int(os.getenv("PORT", 8000))
     ENVIRONMENT: str = os.getenv("APP_ENV", "development")
 
 class DatabaseConfig:

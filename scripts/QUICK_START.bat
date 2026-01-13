@@ -95,7 +95,7 @@ echo ========================================================================
 echo                         DATABASE STATUS
 echo ========================================================================
 echo.
-echo Database File: d:/Python/HCM_WEB/backend/data/hunzal_hcm.db
+echo Database File: d:/Project/PEOPLE_OS/backend/data/hunzal_hcm.db
 echo.
 echo Roles Seeded:
 echo   Root ............................ ✅

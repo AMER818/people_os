@@ -1,0 +1,1024 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.0.2, pluggy-1.6.0 -- D:\Project\PEOPLE_OS\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: D:\Project\PEOPLE_OS
+configfile: pytest.ini
+plugins: anyio-3.7.1, cov-7.0.0
+collecting ... collected 10 items
+
+backend/tests/test_auth_api.py::TestAuthEndpoints::test_login_success [DEBUG] client fixture: create_all
+2026-01-12 10:26:21 - hunzal_hcm - INFO - Starting Application Lifecycle...
+INFO:hunzal_hcm:Starting Application Lifecycle...
+--- [STARTUP] Verifying Database Configuration ---
+--- [STARTUP] Verifying Database Configuration ---
+ERROR
+backend/tests/test_auth_api.py::TestAuthEndpoints::test_login_invalid_credentials [DEBUG] client fixture: create_all
+2026-01-12 10:26:21 - hunzal_hcm - INFO - Starting Application Lifecycle...
+INFO:hunzal_hcm:Starting Application Lifecycle...
+--- [STARTUP] Verifying Database Configuration ---
+--- [STARTUP] Verifying Database Configuration ---
+ERROR
+backend/tests/test_auth_api.py::TestAuthEndpoints::test_login_nonexistent_user [DEBUG] client fixture: create_all
+2026-01-12 10:26:22 - hunzal_hcm - INFO - Starting Application Lifecycle...
+INFO:hunzal_hcm:Starting Application Lifecycle...
+--- [STARTUP] Verifying Database Configuration ---
+--- [STARTUP] Verifying Database Configuration ---
+ERROR
+backend/tests/test_auth_api.py::TestAuthEndpoints::test_login_inactive_user [DEBUG] client fixture: create_all
+2026-01-12 10:26:22 - hunzal_hcm - INFO - Starting Application Lifecycle...
+INFO:hunzal_hcm:Starting Application Lifecycle...
+--- [STARTUP] Verifying Database Configuration ---
+--- [STARTUP] Verifying Database Configuration ---
+ERROR
+backend/tests/test_auth_api.py::TestProtectedEndpoints::test_protected_endpoint_without_token [DEBUG] client fixture: create_all
+2026-01-12 10:26:22 - hunzal_hcm - INFO - Starting Application Lifecycle...
+INFO:hunzal_hcm:Starting Application Lifecycle...
+--- [STARTUP] Verifying Database Configuration ---
+--- [STARTUP] Verifying Database Configuration ---
+ERROR
+backend/tests/test_auth_api.py::TestProtectedEndpoints::test_protected_endpoint_with_invalid_token [DEBUG] client fixture: create_all
+INFO:hunzal_hcm:Starting Application Lifecycle...
+2026-01-12 10:26:23 - hunzal_hcm - INFO - Starting Application Lifecycle...
+--- [STARTUP] Verifying Database Configuration ---
+--- [STARTUP] Verifying Database Configuration ---
+ERROR
+backend/tests/test_auth_api.py::TestProtectedEndpoints::test_protected_endpoint_with_valid_token [DEBUG] client fixture: create_all
+2026-01-12 10:26:23 - hunzal_hcm - INFO - Starting Application Lifecycle...
+INFO:hunzal_hcm:Starting Application Lifecycle...
+--- [STARTUP] Verifying Database Configuration ---
+--- [STARTUP] Verifying Database Configuration ---
+ERROR
+backend/tests/test_auth_api.py::TestRBACEndpoints::test_admin_only_endpoint_as_admin [DEBUG] client fixture: create_all
+2026-01-12 10:26:23 - hunzal_hcm - INFO - Starting Application Lifecycle...
+INFO:hunzal_hcm:Starting Application Lifecycle...
+--- [STARTUP] Verifying Database Configuration ---
+--- [STARTUP] Verifying Database Configuration ---
+ERROR
+backend/tests/test_auth_api.py::TestRBACEndpoints::test_admin_only_endpoint_as_regular_user [DEBUG] client fixture: create_all
+2026-01-12 10:26:24 - hunzal_hcm - INFO - Starting Application Lifecycle...
+INFO:hunzal_hcm:Starting Application Lifecycle...
+--- [STARTUP] Verifying Database Configuration ---
+--- [STARTUP] Verifying Database Configuration ---
+ERROR
+backend/tests/test_auth_api.py::TestHealthCheck::test_health_check [DEBUG] client fixture: create_all
+2026-01-12 10:26:24 - hunzal_hcm - INFO - Starting Application Lifecycle...
+INFO:hunzal_hcm:Starting Application Lifecycle...
+--- [STARTUP] Verifying Database Configuration ---
+--- [STARTUP] Verifying Database Configuration ---
+ERROR
+
+=================================== ERRORS ====================================
+___________ ERROR at setup of TestAuthEndpoints.test_login_success ____________
+
+    @pytest.fixture(scope="function")
+    def client():
+        # Create tables
+        print("[DEBUG] client fixture: create_all")
+        Base.metadata.create_all(bind=engine)
+    
+        def override_get_db():
+            try:
+                print("[DEBUG] client fixture: override_get_db yield")
+                db = TestingSessionLocal()
+                yield db
+            finally:
+                print("[DEBUG] client fixture: override_get_db close")
+                db.close()
+    
+        app.dependency_overrides[get_db] = override_get_db
+>       with TestClient(app) as c:
+             ^^^^^^^^^^^^^^^
+
+backend\tests\conftest.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\starlette\testclient.py:745: in __enter__
+    portal.call(self.wait_startup)
+.venv\Lib\site-packages\anyio\from_thread.py:277: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+.venv\Lib\site-packages\anyio\from_thread.py:217: in _call_func
+    retval = await retval
+             ^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\testclient.py:780: in wait_startup
+    await receive()
+.venv\Lib\site-packages\starlette\testclient.py:771: in receive
+    self.task.result()
+C:\Python\Python312\Lib\concurrent\futures\_base.py:449: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+.venv\Lib\site-packages\anyio\from_thread.py:217: in _call_func
+    retval = await retval
+             ^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\testclient.py:761: in lifespan
+    await self.app(scope, self.stream_receive.receive, self.stream_send.send)
+.venv\Lib\site-packages\fastapi\applications.py:1106: in __call__
+    await super().__call__(scope, receive, send)
+.venv\Lib\site-packages\starlette\applications.py:122: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\errors.py:149: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\cors.py:75: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\exceptions.py:55: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:20: in __call__
+    raise e
+.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:17: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:707: in __call__
+    await self.lifespan(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:677: in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\routing.py:566: in __aenter__
+    await self._router.startup()
+.venv\Lib\site-packages\starlette\routing.py:654: in startup
+    await handler()
+backend\main.py:112: in startup_event
+    enforce_clean_db_state()
+backend\security\db_enforcer.py:40: in enforce_clean_db_state
+    print(f"\u2139\ufe0f  NOTE: Authorized database will be created at: {auth_db_path}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <encodings.cp1252.IncrementalEncoder object at 0x000001B43F46BE30>
+input = '\u2139\ufe0f  NOTE: Authorized database will be created at: D:\\\\Python\\\\PEOPLE_OS\\\\:memory:'
+final = False
+
+    def encode(self, input, final=False):
+>       return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+
+C:\Python\Python312\Lib\encodings\cp1252.py:19: UnicodeEncodeError
+----------------------------- Captured log setup ------------------------------
+INFO     hunzal_hcm:main.py:103 Starting Application Lifecycle...
+_____ ERROR at setup of TestAuthEndpoints.test_login_invalid_credentials ______
+
+    @pytest.fixture(scope="function")
+    def client():
+        # Create tables
+        print("[DEBUG] client fixture: create_all")
+        Base.metadata.create_all(bind=engine)
+    
+        def override_get_db():
+            try:
+                print("[DEBUG] client fixture: override_get_db yield")
+                db = TestingSessionLocal()
+                yield db
+            finally:
+                print("[DEBUG] client fixture: override_get_db close")
+                db.close()
+    
+        app.dependency_overrides[get_db] = override_get_db
+>       with TestClient(app) as c:
+             ^^^^^^^^^^^^^^^
+
+backend\tests\conftest.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\starlette\testclient.py:745: in __enter__
+    portal.call(self.wait_startup)
+.venv\Lib\site-packages\anyio\from_thread.py:277: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+.venv\Lib\site-packages\anyio\from_thread.py:217: in _call_func
+    retval = await retval
+             ^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\testclient.py:780: in wait_startup
+    await receive()
+.venv\Lib\site-packages\starlette\testclient.py:771: in receive
+    self.task.result()
+C:\Python\Python312\Lib\concurrent\futures\_base.py:449: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+.venv\Lib\site-packages\anyio\from_thread.py:217: in _call_func
+    retval = await retval
+             ^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\testclient.py:761: in lifespan
+    await self.app(scope, self.stream_receive.receive, self.stream_send.send)
+.venv\Lib\site-packages\fastapi\applications.py:1106: in __call__
+    await super().__call__(scope, receive, send)
+.venv\Lib\site-packages\starlette\applications.py:122: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\errors.py:149: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\cors.py:75: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\exceptions.py:55: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:20: in __call__
+    raise e
+.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:17: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:707: in __call__
+    await self.lifespan(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:677: in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\routing.py:566: in __aenter__
+    await self._router.startup()
+.venv\Lib\site-packages\starlette\routing.py:654: in startup
+    await handler()
+backend\main.py:112: in startup_event
+    enforce_clean_db_state()
+backend\security\db_enforcer.py:40: in enforce_clean_db_state
+    print(f"\u2139\ufe0f  NOTE: Authorized database will be created at: {auth_db_path}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <encodings.cp1252.IncrementalEncoder object at 0x000001B43F46BE30>
+input = '\u2139\ufe0f  NOTE: Authorized database will be created at: D:\\\\Python\\\\PEOPLE_OS\\\\:memory:'
+final = False
+
+    def encode(self, input, final=False):
+>       return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+
+C:\Python\Python312\Lib\encodings\cp1252.py:19: UnicodeEncodeError
+----------------------------- Captured log setup ------------------------------
+INFO     hunzal_hcm:main.py:103 Starting Application Lifecycle...
+_______ ERROR at setup of TestAuthEndpoints.test_login_nonexistent_user _______
+
+    @pytest.fixture(scope="function")
+    def client():
+        # Create tables
+        print("[DEBUG] client fixture: create_all")
+        Base.metadata.create_all(bind=engine)
+    
+        def override_get_db():
+            try:
+                print("[DEBUG] client fixture: override_get_db yield")
+                db = TestingSessionLocal()
+                yield db
+            finally:
+                print("[DEBUG] client fixture: override_get_db close")
+                db.close()
+    
+        app.dependency_overrides[get_db] = override_get_db
+>       with TestClient(app) as c:
+             ^^^^^^^^^^^^^^^
+
+backend\tests\conftest.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\starlette\testclient.py:745: in __enter__
+    portal.call(self.wait_startup)
+.venv\Lib\site-packages\anyio\from_thread.py:277: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+.venv\Lib\site-packages\anyio\from_thread.py:217: in _call_func
+    retval = await retval
+             ^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\testclient.py:780: in wait_startup
+    await receive()
+.venv\Lib\site-packages\starlette\testclient.py:771: in receive
+    self.task.result()
+C:\Python\Python312\Lib\concurrent\futures\_base.py:449: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+.venv\Lib\site-packages\anyio\from_thread.py:217: in _call_func
+    retval = await retval
+             ^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\testclient.py:761: in lifespan
+    await self.app(scope, self.stream_receive.receive, self.stream_send.send)
+.venv\Lib\site-packages\fastapi\applications.py:1106: in __call__
+    await super().__call__(scope, receive, send)
+.venv\Lib\site-packages\starlette\applications.py:122: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\errors.py:149: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\cors.py:75: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\exceptions.py:55: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:20: in __call__
+    raise e
+.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:17: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:707: in __call__
+    await self.lifespan(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:677: in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\routing.py:566: in __aenter__
+    await self._router.startup()
+.venv\Lib\site-packages\starlette\routing.py:654: in startup
+    await handler()
+backend\main.py:112: in startup_event
+    enforce_clean_db_state()
+backend\security\db_enforcer.py:40: in enforce_clean_db_state
+    print(f"\u2139\ufe0f  NOTE: Authorized database will be created at: {auth_db_path}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <encodings.cp1252.IncrementalEncoder object at 0x000001B43F46BE30>
+input = '\u2139\ufe0f  NOTE: Authorized database will be created at: D:\\\\Python\\\\PEOPLE_OS\\\\:memory:'
+final = False
+
+    def encode(self, input, final=False):
+>       return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+
+C:\Python\Python312\Lib\encodings\cp1252.py:19: UnicodeEncodeError
+----------------------------- Captured log setup ------------------------------
+INFO     hunzal_hcm:main.py:103 Starting Application Lifecycle...
+________ ERROR at setup of TestAuthEndpoints.test_login_inactive_user _________
+
+    @pytest.fixture(scope="function")
+    def client():
+        # Create tables
+        print("[DEBUG] client fixture: create_all")
+        Base.metadata.create_all(bind=engine)
+    
+        def override_get_db():
+            try:
+                print("[DEBUG] client fixture: override_get_db yield")
+                db = TestingSessionLocal()
+                yield db
+            finally:
+                print("[DEBUG] client fixture: override_get_db close")
+                db.close()
+    
+        app.dependency_overrides[get_db] = override_get_db
+>       with TestClient(app) as c:
+             ^^^^^^^^^^^^^^^
+
+backend\tests\conftest.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\starlette\testclient.py:745: in __enter__
+    portal.call(self.wait_startup)
+.venv\Lib\site-packages\anyio\from_thread.py:277: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+.venv\Lib\site-packages\anyio\from_thread.py:217: in _call_func
+    retval = await retval
+             ^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\testclient.py:780: in wait_startup
+    await receive()
+.venv\Lib\site-packages\starlette\testclient.py:771: in receive
+    self.task.result()
+C:\Python\Python312\Lib\concurrent\futures\_base.py:449: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+.venv\Lib\site-packages\anyio\from_thread.py:217: in _call_func
+    retval = await retval
+             ^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\testclient.py:761: in lifespan
+    await self.app(scope, self.stream_receive.receive, self.stream_send.send)
+.venv\Lib\site-packages\fastapi\applications.py:1106: in __call__
+    await super().__call__(scope, receive, send)
+.venv\Lib\site-packages\starlette\applications.py:122: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\errors.py:149: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\cors.py:75: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\exceptions.py:55: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:20: in __call__
+    raise e
+.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:17: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:707: in __call__
+    await self.lifespan(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:677: in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\routing.py:566: in __aenter__
+    await self._router.startup()
+.venv\Lib\site-packages\starlette\routing.py:654: in startup
+    await handler()
+backend\main.py:112: in startup_event
+    enforce_clean_db_state()
+backend\security\db_enforcer.py:40: in enforce_clean_db_state
+    print(f"\u2139\ufe0f  NOTE: Authorized database will be created at: {auth_db_path}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <encodings.cp1252.IncrementalEncoder object at 0x000001B43F46BE30>
+input = '\u2139\ufe0f  NOTE: Authorized database will be created at: D:\\\\Python\\\\PEOPLE_OS\\\\:memory:'
+final = False
+
+    def encode(self, input, final=False):
+>       return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+
+C:\Python\Python312\Lib\encodings\cp1252.py:19: UnicodeEncodeError
+----------------------------- Captured log setup ------------------------------
+INFO     hunzal_hcm:main.py:103 Starting Application Lifecycle...
+_ ERROR at setup of TestProtectedEndpoints.test_protected_endpoint_without_token _
+
+    @pytest.fixture(scope="function")
+    def client():
+        # Create tables
+        print("[DEBUG] client fixture: create_all")
+        Base.metadata.create_all(bind=engine)
+    
+        def override_get_db():
+            try:
+                print("[DEBUG] client fixture: override_get_db yield")
+                db = TestingSessionLocal()
+                yield db
+            finally:
+                print("[DEBUG] client fixture: override_get_db close")
+                db.close()
+    
+        app.dependency_overrides[get_db] = override_get_db
+>       with TestClient(app) as c:
+             ^^^^^^^^^^^^^^^
+
+backend\tests\conftest.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\starlette\testclient.py:745: in __enter__
+    portal.call(self.wait_startup)
+.venv\Lib\site-packages\anyio\from_thread.py:277: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+.venv\Lib\site-packages\anyio\from_thread.py:217: in _call_func
+    retval = await retval
+             ^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\testclient.py:780: in wait_startup
+    await receive()
+.venv\Lib\site-packages\starlette\testclient.py:771: in receive
+    self.task.result()
+C:\Python\Python312\Lib\concurrent\futures\_base.py:449: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+.venv\Lib\site-packages\anyio\from_thread.py:217: in _call_func
+    retval = await retval
+             ^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\testclient.py:761: in lifespan
+    await self.app(scope, self.stream_receive.receive, self.stream_send.send)
+.venv\Lib\site-packages\fastapi\applications.py:1106: in __call__
+    await super().__call__(scope, receive, send)
+.venv\Lib\site-packages\starlette\applications.py:122: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\errors.py:149: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\cors.py:75: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\exceptions.py:55: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:20: in __call__
+    raise e
+.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:17: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:707: in __call__
+    await self.lifespan(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:677: in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\routing.py:566: in __aenter__
+    await self._router.startup()
+.venv\Lib\site-packages\starlette\routing.py:654: in startup
+    await handler()
+backend\main.py:112: in startup_event
+    enforce_clean_db_state()
+backend\security\db_enforcer.py:40: in enforce_clean_db_state
+    print(f"\u2139\ufe0f  NOTE: Authorized database will be created at: {auth_db_path}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <encodings.cp1252.IncrementalEncoder object at 0x000001B43F46BE30>
+input = '\u2139\ufe0f  NOTE: Authorized database will be created at: D:\\\\Python\\\\PEOPLE_OS\\\\:memory:'
+final = False
+
+    def encode(self, input, final=False):
+>       return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+
+C:\Python\Python312\Lib\encodings\cp1252.py:19: UnicodeEncodeError
+----------------------------- Captured log setup ------------------------------
+INFO     hunzal_hcm:main.py:103 Starting Application Lifecycle...
+_ ERROR at setup of TestProtectedEndpoints.test_protected_endpoint_with_invalid_token _
+
+    @pytest.fixture(scope="function")
+    def client():
+        # Create tables
+        print("[DEBUG] client fixture: create_all")
+        Base.metadata.create_all(bind=engine)
+    
+        def override_get_db():
+            try:
+                print("[DEBUG] client fixture: override_get_db yield")
+                db = TestingSessionLocal()
+                yield db
+            finally:
+                print("[DEBUG] client fixture: override_get_db close")
+                db.close()
+    
+        app.dependency_overrides[get_db] = override_get_db
+>       with TestClient(app) as c:
+             ^^^^^^^^^^^^^^^
+
+backend\tests\conftest.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\starlette\testclient.py:745: in __enter__
+    portal.call(self.wait_startup)
+.venv\Lib\site-packages\anyio\from_thread.py:277: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+.venv\Lib\site-packages\anyio\from_thread.py:217: in _call_func
+    retval = await retval
+             ^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\testclient.py:780: in wait_startup
+    await receive()
+.venv\Lib\site-packages\starlette\testclient.py:771: in receive
+    self.task.result()
+C:\Python\Python312\Lib\concurrent\futures\_base.py:449: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+.venv\Lib\site-packages\anyio\from_thread.py:217: in _call_func
+    retval = await retval
+             ^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\testclient.py:761: in lifespan
+    await self.app(scope, self.stream_receive.receive, self.stream_send.send)
+.venv\Lib\site-packages\fastapi\applications.py:1106: in __call__
+    await super().__call__(scope, receive, send)
+.venv\Lib\site-packages\starlette\applications.py:122: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\errors.py:149: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\cors.py:75: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\exceptions.py:55: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:20: in __call__
+    raise e
+.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:17: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:707: in __call__
+    await self.lifespan(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:677: in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\routing.py:566: in __aenter__
+    await self._router.startup()
+.venv\Lib\site-packages\starlette\routing.py:654: in startup
+    await handler()
+backend\main.py:112: in startup_event
+    enforce_clean_db_state()
+backend\security\db_enforcer.py:40: in enforce_clean_db_state
+    print(f"\u2139\ufe0f  NOTE: Authorized database will be created at: {auth_db_path}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <encodings.cp1252.IncrementalEncoder object at 0x000001B43F46BE30>
+input = '\u2139\ufe0f  NOTE: Authorized database will be created at: D:\\\\Python\\\\PEOPLE_OS\\\\:memory:'
+final = False
+
+    def encode(self, input, final=False):
+>       return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+
+C:\Python\Python312\Lib\encodings\cp1252.py:19: UnicodeEncodeError
+----------------------------- Captured log setup ------------------------------
+INFO     hunzal_hcm:main.py:103 Starting Application Lifecycle...
+_ ERROR at setup of TestProtectedEndpoints.test_protected_endpoint_with_valid_token _
+
+    @pytest.fixture(scope="function")
+    def client():
+        # Create tables
+        print("[DEBUG] client fixture: create_all")
+        Base.metadata.create_all(bind=engine)
+    
+        def override_get_db():
+            try:
+                print("[DEBUG] client fixture: override_get_db yield")
+                db = TestingSessionLocal()
+                yield db
+            finally:
+                print("[DEBUG] client fixture: override_get_db close")
+                db.close()
+    
+        app.dependency_overrides[get_db] = override_get_db
+>       with TestClient(app) as c:
+             ^^^^^^^^^^^^^^^
+
+backend\tests\conftest.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\starlette\testclient.py:745: in __enter__
+    portal.call(self.wait_startup)
+.venv\Lib\site-packages\anyio\from_thread.py:277: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+.venv\Lib\site-packages\anyio\from_thread.py:217: in _call_func
+    retval = await retval
+             ^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\testclient.py:780: in wait_startup
+    await receive()
+.venv\Lib\site-packages\starlette\testclient.py:771: in receive
+    self.task.result()
+C:\Python\Python312\Lib\concurrent\futures\_base.py:449: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+.venv\Lib\site-packages\anyio\from_thread.py:217: in _call_func
+    retval = await retval
+             ^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\testclient.py:761: in lifespan
+    await self.app(scope, self.stream_receive.receive, self.stream_send.send)
+.venv\Lib\site-packages\fastapi\applications.py:1106: in __call__
+    await super().__call__(scope, receive, send)
+.venv\Lib\site-packages\starlette\applications.py:122: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\errors.py:149: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\cors.py:75: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\exceptions.py:55: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:20: in __call__
+    raise e
+.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:17: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:707: in __call__
+    await self.lifespan(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:677: in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\routing.py:566: in __aenter__
+    await self._router.startup()
+.venv\Lib\site-packages\starlette\routing.py:654: in startup
+    await handler()
+backend\main.py:112: in startup_event
+    enforce_clean_db_state()
+backend\security\db_enforcer.py:40: in enforce_clean_db_state
+    print(f"\u2139\ufe0f  NOTE: Authorized database will be created at: {auth_db_path}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <encodings.cp1252.IncrementalEncoder object at 0x000001B43F46BE30>
+input = '\u2139\ufe0f  NOTE: Authorized database will be created at: D:\\\\Python\\\\PEOPLE_OS\\\\:memory:'
+final = False
+
+    def encode(self, input, final=False):
+>       return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+
+C:\Python\Python312\Lib\encodings\cp1252.py:19: UnicodeEncodeError
+----------------------------- Captured log setup ------------------------------
+INFO     hunzal_hcm:main.py:103 Starting Application Lifecycle...
+____ ERROR at setup of TestRBACEndpoints.test_admin_only_endpoint_as_admin ____
+
+    @pytest.fixture(scope="function")
+    def client():
+        # Create tables
+        print("[DEBUG] client fixture: create_all")
+        Base.metadata.create_all(bind=engine)
+    
+        def override_get_db():
+            try:
+                print("[DEBUG] client fixture: override_get_db yield")
+                db = TestingSessionLocal()
+                yield db
+            finally:
+                print("[DEBUG] client fixture: override_get_db close")
+                db.close()
+    
+        app.dependency_overrides[get_db] = override_get_db
+>       with TestClient(app) as c:
+             ^^^^^^^^^^^^^^^
+
+backend\tests\conftest.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\starlette\testclient.py:745: in __enter__
+    portal.call(self.wait_startup)
+.venv\Lib\site-packages\anyio\from_thread.py:277: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+.venv\Lib\site-packages\anyio\from_thread.py:217: in _call_func
+    retval = await retval
+             ^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\testclient.py:780: in wait_startup
+    await receive()
+.venv\Lib\site-packages\starlette\testclient.py:771: in receive
+    self.task.result()
+C:\Python\Python312\Lib\concurrent\futures\_base.py:449: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+.venv\Lib\site-packages\anyio\from_thread.py:217: in _call_func
+    retval = await retval
+             ^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\testclient.py:761: in lifespan
+    await self.app(scope, self.stream_receive.receive, self.stream_send.send)
+.venv\Lib\site-packages\fastapi\applications.py:1106: in __call__
+    await super().__call__(scope, receive, send)
+.venv\Lib\site-packages\starlette\applications.py:122: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\errors.py:149: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\cors.py:75: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\exceptions.py:55: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:20: in __call__
+    raise e
+.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:17: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:707: in __call__
+    await self.lifespan(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:677: in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\routing.py:566: in __aenter__
+    await self._router.startup()
+.venv\Lib\site-packages\starlette\routing.py:654: in startup
+    await handler()
+backend\main.py:112: in startup_event
+    enforce_clean_db_state()
+backend\security\db_enforcer.py:40: in enforce_clean_db_state
+    print(f"\u2139\ufe0f  NOTE: Authorized database will be created at: {auth_db_path}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <encodings.cp1252.IncrementalEncoder object at 0x000001B43F46BE30>
+input = '\u2139\ufe0f  NOTE: Authorized database will be created at: D:\\\\Python\\\\PEOPLE_OS\\\\:memory:'
+final = False
+
+    def encode(self, input, final=False):
+>       return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+
+C:\Python\Python312\Lib\encodings\cp1252.py:19: UnicodeEncodeError
+----------------------------- Captured log setup ------------------------------
+INFO     hunzal_hcm:main.py:103 Starting Application Lifecycle...
+_ ERROR at setup of TestRBACEndpoints.test_admin_only_endpoint_as_regular_user _
+
+    @pytest.fixture(scope="function")
+    def client():
+        # Create tables
+        print("[DEBUG] client fixture: create_all")
+        Base.metadata.create_all(bind=engine)
+    
+        def override_get_db():
+            try:
+                print("[DEBUG] client fixture: override_get_db yield")
+                db = TestingSessionLocal()
+                yield db
+            finally:
+                print("[DEBUG] client fixture: override_get_db close")
+                db.close()
+    
+        app.dependency_overrides[get_db] = override_get_db
+>       with TestClient(app) as c:
+             ^^^^^^^^^^^^^^^
+
+backend\tests\conftest.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\starlette\testclient.py:745: in __enter__
+    portal.call(self.wait_startup)
+.venv\Lib\site-packages\anyio\from_thread.py:277: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+.venv\Lib\site-packages\anyio\from_thread.py:217: in _call_func
+    retval = await retval
+             ^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\testclient.py:780: in wait_startup
+    await receive()
+.venv\Lib\site-packages\starlette\testclient.py:771: in receive
+    self.task.result()
+C:\Python\Python312\Lib\concurrent\futures\_base.py:449: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+.venv\Lib\site-packages\anyio\from_thread.py:217: in _call_func
+    retval = await retval
+             ^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\testclient.py:761: in lifespan
+    await self.app(scope, self.stream_receive.receive, self.stream_send.send)
+.venv\Lib\site-packages\fastapi\applications.py:1106: in __call__
+    await super().__call__(scope, receive, send)
+.venv\Lib\site-packages\starlette\applications.py:122: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\errors.py:149: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\cors.py:75: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\exceptions.py:55: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:20: in __call__
+    raise e
+.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:17: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:707: in __call__
+    await self.lifespan(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:677: in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\routing.py:566: in __aenter__
+    await self._router.startup()
+.venv\Lib\site-packages\starlette\routing.py:654: in startup
+    await handler()
+backend\main.py:112: in startup_event
+    enforce_clean_db_state()
+backend\security\db_enforcer.py:40: in enforce_clean_db_state
+    print(f"\u2139\ufe0f  NOTE: Authorized database will be created at: {auth_db_path}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <encodings.cp1252.IncrementalEncoder object at 0x000001B43F46BE30>
+input = '\u2139\ufe0f  NOTE: Authorized database will be created at: D:\\\\Python\\\\PEOPLE_OS\\\\:memory:'
+final = False
+
+    def encode(self, input, final=False):
+>       return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+
+C:\Python\Python312\Lib\encodings\cp1252.py:19: UnicodeEncodeError
+----------------------------- Captured log setup ------------------------------
+INFO     hunzal_hcm:main.py:103 Starting Application Lifecycle...
+_____________ ERROR at setup of TestHealthCheck.test_health_check _____________
+
+    @pytest.fixture(scope="function")
+    def client():
+        # Create tables
+        print("[DEBUG] client fixture: create_all")
+        Base.metadata.create_all(bind=engine)
+    
+        def override_get_db():
+            try:
+                print("[DEBUG] client fixture: override_get_db yield")
+                db = TestingSessionLocal()
+                yield db
+            finally:
+                print("[DEBUG] client fixture: override_get_db close")
+                db.close()
+    
+        app.dependency_overrides[get_db] = override_get_db
+>       with TestClient(app) as c:
+             ^^^^^^^^^^^^^^^
+
+backend\tests\conftest.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\starlette\testclient.py:745: in __enter__
+    portal.call(self.wait_startup)
+.venv\Lib\site-packages\anyio\from_thread.py:277: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+.venv\Lib\site-packages\anyio\from_thread.py:217: in _call_func
+    retval = await retval
+             ^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\testclient.py:780: in wait_startup
+    await receive()
+.venv\Lib\site-packages\starlette\testclient.py:771: in receive
+    self.task.result()
+C:\Python\Python312\Lib\concurrent\futures\_base.py:449: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+.venv\Lib\site-packages\anyio\from_thread.py:217: in _call_func
+    retval = await retval
+             ^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\testclient.py:761: in lifespan
+    await self.app(scope, self.stream_receive.receive, self.stream_send.send)
+.venv\Lib\site-packages\fastapi\applications.py:1106: in __call__
+    await super().__call__(scope, receive, send)
+.venv\Lib\site-packages\starlette\applications.py:122: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\errors.py:149: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\cors.py:75: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\exceptions.py:55: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:20: in __call__
+    raise e
+.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:17: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:707: in __call__
+    await self.lifespan(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:677: in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\routing.py:566: in __aenter__
+    await self._router.startup()
+.venv\Lib\site-packages\starlette\routing.py:654: in startup
+    await handler()
+backend\main.py:112: in startup_event
+    enforce_clean_db_state()
+backend\security\db_enforcer.py:40: in enforce_clean_db_state
+    print(f"\u2139\ufe0f  NOTE: Authorized database will be created at: {auth_db_path}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <encodings.cp1252.IncrementalEncoder object at 0x000001B43F46BE30>
+input = '\u2139\ufe0f  NOTE: Authorized database will be created at: D:\\\\Python\\\\PEOPLE_OS\\\\:memory:'
+final = False
+
+    def encode(self, input, final=False):
+>       return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+
+C:\Python\Python312\Lib\encodings\cp1252.py:19: UnicodeEncodeError
+----------------------------- Captured log setup ------------------------------
+INFO     hunzal_hcm:main.py:103 Starting Application Lifecycle...
+============================== warnings summary ===============================
+backend\database.py:38
+  D:\Project\PEOPLE_OS\backend\database.py:38: MovedIn20Warning: The ``declarative_base()`` function is now available as sqlalchemy.orm.declarative_base(). (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    Base = declarative_base()
+
+.venv\Lib\site-packages\pydantic\_internal\_config.py:271: 65 warnings
+  D:\Project\PEOPLE_OS\.venv\Lib\site-packages\pydantic\_internal\_config.py:271: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
+    warnings.warn(DEPRECATION_MESSAGE, DeprecationWarning)
+
+backend\main.py:100
+  D:\Project\PEOPLE_OS\backend\main.py:100: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    @app.on_event("startup")
+
+.venv\Lib\site-packages\fastapi\applications.py:4547
+  D:\Project\PEOPLE_OS\.venv\Lib\site-packages\fastapi\applications.py:4547: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    return self.router.on_event(event_type)
+
+backend/tests/test_auth_api.py: 10 warnings
+  D:\Project\PEOPLE_OS\.venv\Lib\site-packages\httpx\_client.py:680: DeprecationWarning: The 'app' shortcut is now deprecated. Use the explicit style 'transport=WSGITransport(app=...)' instead.
+    warnings.warn(message, DeprecationWarning)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+ERROR backend/tests/test_auth_api.py::TestAuthEndpoints::test_login_success - UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+ERROR backend/tests/test_auth_api.py::TestAuthEndpoints::test_login_invalid_credentials - UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+ERROR backend/tests/test_auth_api.py::TestAuthEndpoints::test_login_nonexistent_user - UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+ERROR backend/tests/test_auth_api.py::TestAuthEndpoints::test_login_inactive_user - UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+ERROR backend/tests/test_auth_api.py::TestProtectedEndpoints::test_protected_endpoint_without_token - UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+ERROR backend/tests/test_auth_api.py::TestProtectedEndpoints::test_protected_endpoint_with_invalid_token - UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+ERROR backend/tests/test_auth_api.py::TestProtectedEndpoints::test_protected_endpoint_with_valid_token - UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+ERROR backend/tests/test_auth_api.py::TestRBACEndpoints::test_admin_only_endpoint_as_admin - UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+ERROR backend/tests/test_auth_api.py::TestRBACEndpoints::test_admin_only_endpoint_as_regular_user - UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+ERROR backend/tests/test_auth_api.py::TestHealthCheck::test_health_check - UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+======================= 78 warnings, 10 errors in 4.10s =======================

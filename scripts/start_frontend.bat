@@ -1,5 +1,6 @@
 @echo off
 cd /d "%~dp0"
+cd ..
 echo Starting Hunzal HCM Frontend...
 echo --------------------------------
 echo URL: http://localhost:5173

@@ -2,20 +2,26 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 import sys
 import os
 
-# Add backend to path
+# Set test environment to use in-memory DB
+os.environ["DATABASE_URL"] = "sqlite:///:memory:"
+os.environ["APP_ENV"] = "test"
+
+# Add backend to path (if not already handled by pytest pythonpath)
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from database import Base
-from main import app, get_db
+from backend.database import Base
+from backend.main import app, get_db
 
-# Use in-memory SQLite for tests
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test_hunzal_hcm.db"
+# Use in-memory SQLite for tests - now handled by DATABASE_URL env var
+SQLALCHEMY_DATABASE_URL = os.environ["DATABASE_URL"]
 
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False},
+    poolclass=StaticPool # Add StaticPool for in-memory
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

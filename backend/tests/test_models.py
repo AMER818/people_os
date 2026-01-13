@@ -74,7 +74,7 @@ def test_designation_model(db: Session):
     db.add(grade)
     db.commit()
 
-    desig = DBDesignation(id="Des1_M", name="Manager", gradeId="G_DES_M", organization_id="ORG_DES_M")
+    desig = DBDesignation(id="Des1_M", name="Manager", grade_id="G_DES_M", organization_id="ORG_DES_M")
     db.add(desig)
     db.commit()
     db.refresh(desig)

@@ -63,6 +63,7 @@ const AssetManagement = React.lazy(() => import('./modules/assets'));
 const AnalyticsInsights = React.lazy(() => import('./modules/analytics'));
 
 const SystemSettings = React.lazy(() => import('./modules/system-settings'));
+const OrganizationSetup = React.lazy(() => import('./modules/org-setup'));
 const SelfService = React.lazy(() => import('./modules/self-service'));
 const LearningModule = React.lazy(() => import('./modules/learning'));
 const PerformanceModule = React.lazy(() => import('./modules/performance'));
@@ -519,6 +520,15 @@ const AppContent: React.FC = () => {
           <RoleGuard permission="system_config">
             <div className="h-full p-6 md:p-8">
               <SystemSettings />
+            </div>
+          </RoleGuard>
+        );
+
+      case 'org-settings':
+        return (
+          <RoleGuard permission="manage_master_data">
+            <div className="h-full">
+              <OrganizationSetup />
             </div>
           </RoleGuard>
         );

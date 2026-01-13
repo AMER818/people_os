@@ -21,14 +21,14 @@ def test_candidate_schema():
     cand = CandidateCreate(
         id="C1", email="cand@example.com", positionApplied="Dev", appliedDate="2025-01-01"
     )
-    assert cand.currentStage == "Applied"
+    assert cand.current_stage == "Applied"
 
 def test_job_vacancy_schema():
     job = JobVacancyCreate(
         id="J1", title="Dev", department="IT", location="Remote",
         type="Full-time", postedDate="2025-01-01", status="Open"
     )
-    assert job.applicants == 0
+    assert job.applicants_count == 0
 
 def test_plant_schema():
     plant = PlantCreate(id="P1", name="Plant 1", code="P01", organizationId="ORG1")
@@ -36,7 +36,7 @@ def test_plant_schema():
 
 def test_department_schema():
     dept = DepartmentCreate(id="D1", name="HR", code="HR01", organizationId="ORG1")
-    assert dept.isActive is True
+    assert dept.is_active is True
 
 def test_grade_schema():
     grade = GradeCreate(id="G1", name="G1", level=1, organizationId="ORG1")
@@ -44,4 +44,4 @@ def test_grade_schema():
 
 def test_shift_schema():
     shift = ShiftCreate(id="S1", name="Morning", code="M", organizationId="ORG1")
-    assert shift.isActive is True
+    assert shift.is_active is True

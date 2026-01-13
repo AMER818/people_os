@@ -6,84 +6,127 @@ Priority: HIGH (Critical Security Path)
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
+from sqlalchemy.pool import StaticPool
 import sys
 import os
 
-# Add backend to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import sys
+import os
 
-from main import app
-from database import get_db, engine
-import models
+# Add root to path (optional if running from root, but good for safety)
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-client = TestClient(app)
+from backend.main import app
+from backend.database import get_db, engine
+import backend.models as models
+from backend.dependencies import get_password_hash
 
 # Test credentials from environment variables (moved out of hardcoded strings)
 TEST_USER_PASSWORD = os.getenv("TEST_USER_PASSWORD", "test-secure-password-123")
-# Hashed value for TEST_USER_PASSWORD using bcrypt with cost factor 12
-TEST_USER_PASSWORD_HASH = "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW"
-
-
-@pytest.fixture(scope="module")
-def test_db():
-    """Create test database"""
-    models.Base.metadata.create_all(bind=engine)
-    yield
-    models.Base.metadata.drop_all(bind=engine)
-
-
-@pytest.fixture(scope="function")
-def db_session(test_db):
-    """Get test database session"""
-    connection = engine.connect()
-    transaction = connection.begin()
-    session = Session(bind=connection)
-    
-    yield session
-    
-    session.close()
-    transaction.rollback()
-    connection.close()
+# Hashed value for TEST_USER_PASSWORD
+TEST_USER_PASSWORD_HASH = get_password_hash(TEST_USER_PASSWORD)
 
 
 @pytest.fixture
-def test_user(db_session):
-    """Create test user"""
+def test_organization(db):
+    """Create a test organization"""
+    org = models.DBOrganization(
+        id="org-1",
+        name="Test Org",
+        code="ORG1"
+    )
+    db.add(org)
+    db.commit()
+    db.refresh(org)
+    return org
+
+@pytest.fixture
+def regular_user(db, test_organization):
+    """Create regular user"""
+    regular_user = models.DBUser(
+        id="regular-user-1",
+        username="regular",
+        name="Regular User",
+        email="regular@example.com",
+        role="Manager",
+        password_hash=TEST_USER_PASSWORD_HASH,
+        organization_id=test_organization.id,
+        is_active=True
+    )
+    db.add(regular_user)
+    db.commit()
+    db.refresh(regular_user)
+    return regular_user
+
+@pytest.fixture
+def admin_user(db, test_organization):
+    """Create admin user"""
+    admin_user = models.DBUser(
+        id="admin-user-1",
+        username="admin",
+        name="Admin User",
+        email="admin@example.com",
+        role="SystemAdmin",
+        password_hash=TEST_USER_PASSWORD_HASH,
+        organization_id=test_organization.id,
+        is_active=True
+    )
+    db.add(admin_user)
+    db.commit()
+    db.refresh(admin_user)
+    return admin_user
+
+@pytest.fixture
+def inactive_user(db, test_organization):
+    """Create inactive user"""
+    inactive_user = models.DBUser(
+        id="inactive-user-1",
+        username="inactive",
+        name="Inactive User",
+        email="inactive@example.com",
+        role="Business Admin",
+        password_hash=TEST_USER_PASSWORD_HASH,
+        organization_id=test_organization.id,
+        is_active=False
+    )
+    db.add(inactive_user)
+    db.commit()
+    db.refresh(inactive_user)
+    return inactive_user
+
+@pytest.fixture
+def test_user(db, test_organization):
+    """Create a test user"""
     user = models.DBUser(
-        id="test-user-1",
+        id="user-1",
         username="testuser",
         name="Test User",
         email="test@example.com",
-        role="HRAdmin",
-        hashed_password=TEST_USER_PASSWORD_HASH,
+        role="Business Admin",
+        password_hash=TEST_USER_PASSWORD_HASH,
         organization_id="org-1",
-        status="Active"
+        is_active=True
     )
-    db_session.add(user)
-    db_session.commit()
-    db_session.refresh(user)
+    # Check if exists (unlikely with function scope)
+    # db.add(user)
+    # Logic: conftest db fixture drops all. So clean state.
+    db.add(user)
+    db.commit()
+    db.refresh(user)
     return user
 
 
 class TestAuthEndpoints:
     """Test authentication endpoints"""
     
-    def test_login_success(self, test_user, db_session):
+    def test_login_success(self, client, test_user):
         """Test successful login"""
-        # Override get_db to use test session
-        def override_get_db():
-            try:
-                yield db_session
-            finally:
-                pass
-        
-        app.dependency_overrides[get_db] = override_get_db
-        
         # Act
         response = client.post(
-            "/auth/login",
-            data={
+            "/api/auth/login",
+            json={
                 "username": "testuser",
                 "password": TEST_USER_PASSWORD
             }
@@ -95,25 +138,14 @@ class TestAuthEndpoints:
         assert "access_token" in data
         assert data["token_type"] == "bearer"
         assert data["user"]["username"] == "testuser"
-        assert data["user"]["role"] == "HRAdmin"
-        
-        # Cleanup
-        app.dependency_overrides.clear()
+        assert data["user"]["role"] == "Business Admin"
     
-    def test_login_invalid_credentials(self, test_user, db_session):
+    def test_login_invalid_credentials(self, client, test_user):
         """Test login with invalid credentials"""
-        def override_get_db():
-            try:
-                yield db_session
-            finally:
-                pass
-        
-        app.dependency_overrides[get_db] = override_get_db
-        
         # Act
         response = client.post(
-            "/auth/login",
-            data={
+            "/api/auth/login",
+            json={
                 "username": "testuser",
                 "password": "wrongpassword"
             }
@@ -122,23 +154,13 @@ class TestAuthEndpoints:
         # Assert
         assert response.status_code == 401
         assert "detail" in response.json()
-        
-        app.dependency_overrides.clear()
     
-    def test_login_nonexistent_user(self, db_session):
+    def test_login_nonexistent_user(self, client):
         """Test login with nonexistent user"""
-        def override_get_db():
-            try:
-                yield db_session
-            finally:
-                pass
-        
-        app.dependency_overrides[get_db] = override_get_db
-        
         # Act
         response = client.post(
-            "/auth/login",
-            data={
+            "/api/auth/login",
+            json={
                 "username": "nonexistent",
                 "password": "password"
             }
@@ -146,53 +168,27 @@ class TestAuthEndpoints:
         
         # Assert
         assert response.status_code == 401
-        
-        app.dependency_overrides.clear()
     
-    def test_login_inactive_user(self, db_session):
+    def test_login_inactive_user(self, client, inactive_user):
         """Test login with inactive user"""
-        # Arrange
-        inactive_user = models.DBUser(
-            id="inactive-1",
-            username="inactive",
-            name="Inactive User",
-            email="inactive@example.com",
-            role="HRAdmin",
-            hashed_password=TEST_USER_PASSWORD_HASH,
-            organization_id="org-1",
-            status="Inactive"
-        )
-        db_session.add(inactive_user)
-        db_session.commit()
-        
-        def override_get_db():
-            try:
-                yield db_session
-            finally:
-                pass
-        
-        app.dependency_overrides[get_db] = override_get_db
-        
         # Act
         response = client.post(
-            "/auth/login",
-            data={
+            "/api/auth/login",
+            json={
                 "username": "inactive",
                 "password": TEST_USER_PASSWORD
             }
         )
         
         # Assert
-        assert response.status_code == 401
-        assert "User account is not active" in response.json()["detail"]
-        
-        app.dependency_overrides.clear()
+        assert response.status_code == 403
+        assert "User account is not active" in response.json()["detail"] or "Account is inactive" in response.json()["detail"]
 
 
 class TestProtectedEndpoints:
     """Test JWT token validation on protected endpoints"""
     
-    def test_protected_endpoint_without_token(self):
+    def test_protected_endpoint_without_token(self, client):
         """Test accessing protected endpoint without token"""
         # Act
         response = client.get("/api/employees")
@@ -201,7 +197,7 @@ class TestProtectedEndpoints:
         assert response.status_code == 401
         assert "detail" in response.json()
     
-    def test_protected_endpoint_with_invalid_token(self):
+    def test_protected_endpoint_with_invalid_token(self, client):
         """Test accessing protected endpoint with invalid token"""
         # Act
         response = client.get(
@@ -212,20 +208,12 @@ class TestProtectedEndpoints:
         # Assert
         assert response.status_code == 401
     
-    def test_protected_endpoint_with_valid_token(self, test_user, db_session):
+    def test_protected_endpoint_with_valid_token(self, client, test_user):
         """Test accessing protected endpoint with valid token"""
         # First login to get token
-        def override_get_db():
-            try:
-                yield db_session
-            finally:
-                pass
-        
-        app.dependency_overrides[get_db] = override_get_db
-        
         login_response = client.post(
-            "/auth/login",
-            data={
+            "/api/auth/login",
+            json={
                 "username": "testuser",
                 "password": TEST_USER_PASSWORD
             }
@@ -240,42 +228,19 @@ class TestProtectedEndpoints:
         )
         
         # Assert
+        # 200 or 404 (if no employees) usually 200 with empty list
         assert response.status_code == 200
-        
-        app.dependency_overrides.clear()
 
 
 class TestRBACEndpoints:
     """Test Role-Based Access Control"""
     
-    def test_admin_only_endpoint_as_admin(self, db_session):
+    def test_admin_only_endpoint_as_admin(self, client, admin_user):
         """Test admin-only endpoint with SystemAdmin role"""
-        # Arrange - Create admin user
-        admin_user = models.DBUser(
-            id="admin-1",
-            username="admin",
-            name="Admin User",
-            email="admin@example.com",
-            role="SystemAdmin",
-            hashed_password=TEST_USER_PASSWORD_HASH,
-            organization_id="org-1",
-            status="Active"
-        )
-        db_session.add(admin_user)
-        db_session.commit()
-        
-        def override_get_db():
-            try:
-                yield db_session
-            finally:
-                pass
-        
-        app.dependency_overrides[get_db] = override_get_db
-        
         # Login as admin
         login_response = client.post(
-            "/auth/login",
-            data={"username": "admin", "password": TEST_USER_PASSWORD}
+            "/api/auth/login",
+            json={"username": "admin", "password": TEST_USER_PASSWORD}
         )
         token = login_response.json()["access_token"]
         
@@ -287,37 +252,13 @@ class TestRBACEndpoints:
         
         # Assert
         assert response.status_code == 200
-        
-        app.dependency_overrides.clear()
     
-    def test_admin_only_endpoint_as_regular_user(self, db_session):
+    def test_admin_only_endpoint_as_regular_user(self, client, regular_user):
         """Test admin-only endpoint with HRManager role (should fail)"""
-        # Arrange
-        regular_user = models.DBUser(
-            id="regular-1",
-            username="regular",
-            name="Regular User",
-            email="regular@example.com",
-            role="HRManager",
-            hashed_password=TEST_USER_PASSWORD_HASH,
-            organization_id="org-1",
-            status="Active"
-        )
-        db_session.add(regular_user)
-        db_session.commit()
-        
-        def override_get_db():
-            try:
-                yield db_session
-            finally:
-                pass
-        
-        app.dependency_overrides[get_db] = override_get_db
-        
         # Login as regular user
         login_response = client.post(
-            "/auth/login",
-            data={"username": "regular", "password": TEST_USER_PASSWORD}
+            "/api/auth/login",
+            json={"username": "regular", "password": TEST_USER_PASSWORD}
         )
         token = login_response.json()["access_token"]
         
@@ -330,14 +271,12 @@ class TestRBACEndpoints:
         # Assert
         assert response.status_code == 403
         assert "Access Forbidden" in response.json()["detail"]
-        
-        app.dependency_overrides.clear()
 
 
 class TestHealthCheck:
     """Test health check endpoint"""
     
-    def test_health_check(self):
+    def test_health_check(self, client):
         """Test health check endpoint"""
         # Act
         response = client.get("/health")

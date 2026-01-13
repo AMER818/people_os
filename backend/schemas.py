@@ -119,7 +119,7 @@ class EmployeeBase(BaseModel):
     employment_type: Optional[str] = Field(None, alias="employmentType")
     email: str
     phone: Optional[str] = None
-    organization_id: Optional[str] = Field(None, alias="organizationId")
+    organization_id: str = Field(..., alias="organizationId")
 
     class Config:
         populate_by_name = True
@@ -187,7 +187,7 @@ class CandidateBase(BaseModel):
     skills: Union[list[str], str] = []
     applied_date: str = Field(..., alias="appliedDate")
     avatar: Optional[str] = None
-    organization_id: Optional[str] = Field(None, alias="organizationId")
+    organization_id: str = Field(..., alias="organizationId")
 
     class Config:
         populate_by_name = True
@@ -238,6 +238,8 @@ class PlantBase(BaseModel):
     name: str
     location: Optional[str] = None
     code: str
+    head_of_plant: Optional[str] = Field(None, alias="headOfPlant")
+    contact_number: Optional[str] = Field(None, alias="contactNumber")
     is_active: bool = Field(True, alias="isActive")
     current_sequence: int = Field(0, alias="currentSequence")
 
@@ -247,14 +249,38 @@ class PlantBase(BaseModel):
 
 class PlantCreate(PlantBase):
     id: Optional[str] = None
-    organization_id: Optional[str] = Field(None, alias="organizationId")
+    organization_id: str = Field(..., alias="organizationId")
     divisions: list[PlantDivisionCreate] = []
 
 
 class Plant(PlantBase, AuditBase):
     id: str
-    organization_id: Optional[str] = Field(None, alias="organizationId")
+    organization_id: str = Field(..., alias="organizationId")
     divisions: list[PlantDivision] = Field(default=[], alias="plant_divisions")
+
+    class Config:
+        from_attributes = True
+        populate_by_name = True
+
+
+
+class EmploymentLevelBase(BaseModel):
+    name: str
+    code: str
+    description: Optional[str] = None
+    is_active: bool = Field(True, alias="isActive")
+    organization_id: str = Field(..., alias="organizationId")
+
+    class Config:
+        populate_by_name = True
+
+
+class EmploymentLevelCreate(EmploymentLevelBase):
+    id: Optional[str] = None
+
+
+class EmploymentLevel(EmploymentLevelBase, AuditBase):
+    id: str
 
     class Config:
         from_attributes = True
@@ -325,8 +351,8 @@ class DepartmentCreate(BaseModel):
     code: str
     name: str
     is_active: bool = Field(True, alias="isActive")
-    organization_id: Optional[str] = Field(None, alias="organizationId")
-    plant_id: Optional[str] = Field(None, alias="plantId")  # Added for Plant hierarchy
+    organization_id: str = Field(..., alias="organizationId")
+    plant_id: str = Field(..., alias="plantId")  # Added for Plant hierarchy
     hod_id: Optional[str] = Field(None, alias="hodId")
 
     class Config:
@@ -347,7 +373,7 @@ class SubDepartmentCreate(BaseModel):
     name: str
     parent_department_id: str = Field(..., alias="parentDepartmentId")
     is_active: bool = Field(True, alias="isActive")
-    organization_id: Optional[str] = Field(None, alias="organizationId")
+    organization_id: str = Field(..., alias="organizationId")
 
     class Config:
         populate_by_name = True
@@ -365,10 +391,8 @@ class GradeCreate(BaseModel):
     name: str
     level: int = 0
     is_active: bool = Field(True, alias="isActive")
-    organization_id: Optional[str] = Field(None, alias="organizationId")
-    employment_level_id: Optional[str] = Field(
-        None, alias="employmentLevelId"
-    )  # Added for Hierarchy
+    organization_id: str = Field(..., alias="organizationId")
+    employment_level_id: str = Field(..., alias="employmentLevelId")
 
     class Config:
         populate_by_name = True
@@ -384,9 +408,10 @@ class Grade(GradeCreate, AuditBase):
 class DesignationCreate(BaseModel):
     id: Optional[str] = None
     name: str
-    grade_id: Optional[str] = Field(None, alias="gradeId")
+    grade_id: str = Field(..., alias="gradeId")
+    department_id: str = Field(..., alias="departmentId")
     is_active: bool = Field(True, alias="isActive")
-    organization_id: Optional[str] = Field(None, alias="organizationId")
+    organization_id: str = Field(..., alias="organizationId")
 
     class Config:
         populate_by_name = True
@@ -410,7 +435,7 @@ class ShiftCreate(BaseModel):
     break_duration: Optional[int] = Field(0, alias="breakDuration")
     work_days: Optional[list[str]] = Field([], alias="workDays")
     is_active: bool = Field(True, alias="isActive")
-    organization_id: Optional[str] = Field(None, alias="organizationId")
+    organization_id: str = Field(..., alias="organizationId")
 
     class Config:
         populate_by_name = True
@@ -441,7 +466,7 @@ class EmploymentLevelCreate(BaseModel):
     code: str
     description: Optional[str] = None
     is_active: bool = Field(True, alias="isActive")
-    organization_id: Optional[str] = Field(None, alias="organizationId")
+    organization_id: str = Field(..., alias="organizationId")
 
     class Config:
         populate_by_name = True
@@ -468,7 +493,7 @@ class PositionCreate(BaseModel):
     reports_to: Optional[str] = Field(None, alias="reportsTo")
     description: Optional[str] = None
     is_active: bool = True
-    organization_id: Optional[str] = Field(None, alias="organizationId")
+    organization_id: str = Field(..., alias="organizationId")
 
     class Config:
         populate_by_name = True
@@ -497,7 +522,7 @@ class HolidayCreate(BaseModel):
     type: Optional[str] = None
     is_recurring: bool = False
     description: Optional[str] = None
-    organization_id: Optional[str] = Field(None, alias="organizationId")
+    organization_id: str = Field(..., alias="organizationId")
 
     class Config:
         populate_by_name = True
@@ -527,7 +552,7 @@ class BankCreate(BaseModel):
     swift_code: Optional[str] = Field(None, alias="swiftCode")
     currency: str = "PKR"
     is_active: bool = True
-    organization_id: Optional[str] = Field(None, alias="organizationId")
+    organization_id: str = Field(..., alias="organizationId")
 
     class Config:
         populate_by_name = True
@@ -554,7 +579,7 @@ class AuditLogBase(BaseModel):
     action: str
     status: str
     time: str
-    organization_id: Optional[str] = Field(None, alias="organizationId")
+    organization_id: str = Field(..., alias="organizationId")
 
     class Config:
         populate_by_name = True
@@ -582,7 +607,7 @@ class JobVacancyBase(BaseModel):
     description: str = ""
     requirements: list[str] = []
     salary_range: str = Field("", alias="salaryRange")
-    organization_id: Optional[str] = Field(None, alias="organizationId")
+    organization_id: str = Field(..., alias="organizationId")
 
     class Config:
         populate_by_name = True
@@ -608,7 +633,7 @@ class GoalBase(BaseModel):
     due_date: str = Field(..., alias="dueDate")
     weight: int = 1
     description: str
-    organization_id: Optional[str] = Field(None, alias="organizationId")
+    organization_id: str = Field(..., alias="organizationId")
 
     class Config:
         populate_by_name = True
@@ -633,7 +658,7 @@ class PerformanceReviewBase(BaseModel):
     feedback: str
     reviewer_id: str = Field(..., alias="reviewerId")
     review_date: str = Field(..., alias="reviewDate")
-    organization_id: Optional[str] = Field(None, alias="organizationId")
+    organization_id: str = Field(..., alias="organizationId")
 
     class Config:
         populate_by_name = True
@@ -658,7 +683,7 @@ class UserBase(BaseModel):
     role: str
     name: Optional[str] = None  # Full name for display
     email: Optional[str] = None  # Email for account recovery
-    organization_id: Optional[str] = Field(None, alias="organizationId")
+    organization_id: str = Field(..., alias="organizationId")
     employee_id: Optional[str] = Field(None, alias="employeeId")
     status: Optional[str] = "Active"  # string status
     is_system_user: Optional[bool] = Field(
@@ -678,7 +703,7 @@ class UserUpdate(BaseModel):
     username: Optional[str] = None
     password: Optional[str] = None
     role: Optional[str] = None
-    organization_id: Optional[str] = Field(None, alias="organizationId")
+    organization_id: str = Field(..., alias="organizationId")
     employeeId: Optional[str] = None
     status: Optional[str] = None
     profileStatus: Optional[str] = None  # Support frontend sending profileStatus
@@ -719,7 +744,7 @@ class PayrollSettingsBase(BaseModel):
     custom_formulas: dict = Field({}, alias="customFormulas")
     overtime_rules: dict = Field({}, alias="overtime")
 
-    organization_id: Optional[str] = Field(None, alias="organizationId")
+    organization_id: str = Field(..., alias="organizationId")
 
     @model_validator(mode="before")
     @classmethod
@@ -810,7 +835,7 @@ class AIConfigurationBase(BaseModel):
     api_key: Optional[str] = Field(None, alias="apiKey")
     status: str = "offline"
     agents_config: Union[str, dict] = Field("{}", alias="agentsConfig")
-    organization_id: Optional[str] = Field(None, alias="organizationId")
+    organization_id: str = Field(..., alias="organizationId")
 
     @field_validator("agents_config", mode="before")
     def parse_agents(cls, v):
@@ -851,7 +876,7 @@ class NotificationSettingsBase(BaseModel):
     sms_provider: Optional[str] = Field(None, alias="smsProvider")
     sms_from_number: Optional[str] = Field(None, alias="smsFromNumber")
     
-    organization_id: Optional[str] = Field(None, alias="organizationId")
+    organization_id: str = Field(..., alias="organizationId")
     
     class Config:
         populate_by_name = True
@@ -873,7 +898,7 @@ class ComplianceSettingsBase(BaseModel):
     min_wage: float = Field(0.0, alias="minWage")
     eobi_rate: float = Field(0.0, alias="eobiRate")
     social_security_rate: float = Field(0.0, alias="socialSecurityRate")
-    organization_id: Optional[str] = Field(None, alias="organizationId")
+    organization_id: str = Field(..., alias="organizationId")
 
     class Config:
         populate_by_name = True

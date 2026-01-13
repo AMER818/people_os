@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { testOpenAIConnection, getChatResponse } from '../services/openaiService';
+import { testOpenAIConnection, getChatResponse } from '../openaiService';
 
 /**
  * Unit Tests: OpenAI Service

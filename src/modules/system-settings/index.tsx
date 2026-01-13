@@ -33,10 +33,6 @@ import { AuditDashboard } from './audit/AuditDashboard';
 import { SYSTEM_CONFIG } from './admin/systemConfig';
 import ComplianceSettings from './admin/ComplianceSettings';
 import SecuritySettings from './admin/SecuritySettings';
-import DepartmentManagement from './org-setup/DepartmentManagement';
-import DesignationManagement from './org-setup/DesignationManagement';
-import ShiftManagement from './org-setup/ShiftManagement';
-import { Building, Users, Clock } from 'lucide-react';
 
 const SystemSettings: React.FC = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -129,9 +125,7 @@ const SystemSettings: React.FC = () => {
 
   const sections = [
     { id: 'dashboard', label: 'Dashboard', icon: Layout },
-    { id: 'org-structure', label: 'Departments', icon: Building },
-    { id: 'designations', label: 'Positions', icon: Users },
-    { id: 'shifts', label: 'Shifts', icon: Clock },
+
     { id: 'sys-admin', label: 'Access Control', icon: ShieldCheck },
     { id: 'ai', label: 'AI Settings', icon: BrainCircuit },
     { id: 'integrations', label: 'Integrations', icon: Cloud },
@@ -192,12 +186,6 @@ const SystemSettings: React.FC = () => {
         {activeSection === 'dashboard' && (
           <DashboardOverview systemHealth={systemHealth} storageUsage={storageUsage} />
         )}
-
-        {activeSection === 'org-structure' && <DepartmentManagement onSync={handleSyncSettings} />}
-
-        {activeSection === 'designations' && <DesignationManagement onSync={handleSyncSettings} />}
-
-        {activeSection === 'shifts' && <ShiftManagement onSync={handleSyncSettings} />}
 
         {activeSection === 'sys-admin' && <UserManagement onSync={handleSyncSettings} />}
 

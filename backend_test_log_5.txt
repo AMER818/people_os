@@ -1,0 +1,1055 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.0.2, pluggy-1.6.0 -- D:\Project\PEOPLE_OS\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: D:\Project\PEOPLE_OS
+configfile: pytest.ini
+plugins: anyio-3.7.1, cov-7.0.0
+collecting ... collected 10 items
+
+backend/tests/test_auth_api.py::TestAuthEndpoints::test_login_success FAILED [ 10%]
+backend/tests/test_auth_api.py::TestAuthEndpoints::test_login_invalid_credentials PASSED [ 20%]
+backend/tests/test_auth_api.py::TestAuthEndpoints::test_login_nonexistent_user PASSED [ 30%]
+backend/tests/test_auth_api.py::TestAuthEndpoints::test_login_inactive_user FAILED [ 40%]
+backend/tests/test_auth_api.py::TestProtectedEndpoints::test_protected_endpoint_without_token PASSED [ 50%]
+backend/tests/test_auth_api.py::TestProtectedEndpoints::test_protected_endpoint_with_invalid_token PASSED [ 60%]
+backend/tests/test_auth_api.py::TestProtectedEndpoints::test_protected_endpoint_with_valid_token FAILED [ 70%]
+backend/tests/test_auth_api.py::TestRBACEndpoints::test_admin_only_endpoint_as_admin FAILED [ 80%]
+backend/tests/test_auth_api.py::TestRBACEndpoints::test_admin_only_endpoint_as_regular_user FAILED [ 90%]
+backend/tests/test_auth_api.py::TestHealthCheck::test_health_check PASSED [100%]
+
+================================== FAILURES ===================================
+____________________ TestAuthEndpoints.test_login_success _____________________
+
+self = <test_auth_api.TestAuthEndpoints object at 0x0000014AD05889B0>
+test_user = <backend.models.DBUser object at 0x0000014AD06EBA70>
+db_session = <sqlalchemy.orm.session.Session object at 0x0000014AD05DFB30>
+
+    def test_login_success(self, test_user, db_session):
+        """Test successful login"""
+        # Override get_db to use test session
+        def override_get_db():
+            try:
+                yield db_session
+            finally:
+                pass
+    
+        app.dependency_overrides[get_db] = override_get_db
+    
+        # Act
+>       response = client.post(
+            "/api/auth/login",
+            json={
+                "username": "testuser",
+                "password": TEST_USER_PASSWORD
+            }
+        )
+
+backend\tests\test_auth_api.py:159: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\starlette\testclient.py:590: in post
+    return super().post(
+.venv\Lib\site-packages\httpx\_client.py:1145: in post
+    return self.request(
+.venv\Lib\site-packages\starlette\testclient.py:465: in request
+    return super().request(
+.venv\Lib\site-packages\httpx\_client.py:827: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\httpx\_client.py:914: in send
+    response = self._send_handling_auth(
+.venv\Lib\site-packages\httpx\_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+.venv\Lib\site-packages\httpx\_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\httpx\_client.py:1015: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\testclient.py:342: in handle_request
+    raise exc
+.venv\Lib\site-packages\starlette\testclient.py:339: in handle_request
+    portal.call(self.app, scope, receive, send)
+.venv\Lib\site-packages\anyio\from_thread.py:277: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+.venv\Lib\site-packages\anyio\from_thread.py:217: in _call_func
+    retval = await retval
+             ^^^^^^^^^^^^
+.venv\Lib\site-packages\fastapi\applications.py:1106: in __call__
+    await super().__call__(scope, receive, send)
+.venv\Lib\site-packages\starlette\applications.py:122: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\errors.py:184: in __call__
+    raise exc
+.venv\Lib\site-packages\starlette\middleware\errors.py:162: in __call__
+    await self.app(scope, receive, _send)
+.venv\Lib\site-packages\starlette\middleware\cors.py:83: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\exceptions.py:79: in __call__
+    raise exc
+.venv\Lib\site-packages\starlette\middleware\exceptions.py:68: in __call__
+    await self.app(scope, receive, sender)
+.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:20: in __call__
+    raise e
+.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:17: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:718: in __call__
+    await route.handle(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:276: in handle
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:66: in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\fastapi\routing.py:274: in app
+    raw_response = await run_endpoint_function(
+.venv\Lib\site-packages\fastapi\routing.py:193: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\concurrency.py:41: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\anyio\to_thread.py:33: in run_sync
+    return await get_asynclib().run_sync_in_worker_thread(
+.venv\Lib\site-packages\anyio\_backends\_asyncio.py:877: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+.venv\Lib\site-packages\anyio\_backends\_asyncio.py:807: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\slowapi\extension.py:766: in sync_wrapper
+    response = func(*args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+login_data = LoginRequest(username='testuser', password='test-secure-password-123')
+request = <starlette.requests.Request object at 0x0000014AD03E00B0>
+db = <sqlalchemy.orm.session.Session object at 0x0000014AD0312270>
+
+    @app.post("/api/auth/login", tags=["Authentication"])
+    @limiter.limit(auth_config.LOGIN_RATE_LIMIT)
+    def login(login_data: schemas.LoginRequest, request: Request, db: Session = Depends(get_db)):
+        logger.debug(f"Received login request for user: {login_data.username}")
+    
+        user = (
+            db.query(models.DBUser)
+            .filter(models.DBUser.username == login_data.username)
+            .first()
+        )
+    
+        if not user:
+            # Timing attack mitigation (verify fake hash)
+            # pwd_context.verify("fake", "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWrn3ILAWOiP0jo.z.g")
+            logger.warning(f"Login failed: User '{login_data.username}' not found.")
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+        # Verify Password (Bcrypt)
+        if not verify_password(login_data.password, user.password_hash):
+            logger.warning(f"Login failed: Password mismatch for '{login_data.username}'.")
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+        if not user.is_active:
+            logger.warning(f"Login failed: Account inactive for '{login_data.username}'.")
+            raise HTTPException(status_code=403, detail="Account is inactive")
+    
+        # Check for System-Wide MFA Enforcement
+>       flags = crud.get_system_flags(db, user.organization_id)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: get_system_flags() takes 1 positional argument but 2 were given
+
+backend\main.py:228: TypeError
+_________________ TestAuthEndpoints.test_login_inactive_user __________________
+
+self = <sqlalchemy.engine.base.Connection object at 0x0000014AD08009B0>
+dialect = <sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x0000014ACC5B9370>
+context = <sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext object at 0x0000014AD0800DD0>
+statement = <sqlalchemy.dialects.sqlite.base.SQLiteCompiler object at 0x0000014AD0777440>
+parameters = [('inactive-1', 'inactive', '$2b$12$LA7rjPBKQE3znUIkBIJCSeEIRV6zfuUBbQmes0aIISgqTHmV65Oji', 'HRAdmin', 'Inactive User', 'inactive@example.com', ...)]
+
+    def _exec_single_context(
+        self,
+        dialect: Dialect,
+        context: ExecutionContext,
+        statement: Union[str, Compiled],
+        parameters: Optional[_AnyMultiExecuteParams],
+    ) -> CursorResult[Any]:
+        """continue the _execute_context() method for a single DBAPI
+        cursor.execute() or cursor.executemany() call.
+    
+        """
+        if dialect.bind_typing is BindTyping.SETINPUTSIZES:
+            generic_setinputsizes = context._prepare_set_input_sizes()
+    
+            if generic_setinputsizes:
+                try:
+                    dialect.do_set_input_sizes(
+                        context.cursor, generic_setinputsizes, context
+                    )
+                except BaseException as e:
+                    self._handle_dbapi_exception(
+                        e, str(statement), parameters, None, context
+                    )
+    
+        cursor, str_statement, parameters = (
+            context.cursor,
+            context.statement,
+            context.parameters,
+        )
+    
+        effective_parameters: Optional[_AnyExecuteParams]
+    
+        if not context.executemany:
+            effective_parameters = parameters[0]
+        else:
+            effective_parameters = parameters
+    
+        if self._has_events or self.engine._has_events:
+            for fn in self.dispatch.before_cursor_execute:
+                str_statement, effective_parameters = fn(
+                    self,
+                    cursor,
+                    str_statement,
+                    effective_parameters,
+                    context,
+                    context.executemany,
+                )
+    
+        if self._echo:
+            self._log_info(str_statement)
+    
+            stats = context._get_cache_stats()
+    
+            if not self.engine.hide_parameters:
+                self._log_info(
+                    "[%s] %r",
+                    stats,
+                    sql_util._repr_params(
+                        effective_parameters,
+                        batches=10,
+                        ismulti=context.executemany,
+                    ),
+                )
+            else:
+                self._log_info(
+                    "[%s] [SQL parameters hidden due to hide_parameters=True]",
+                    stats,
+                )
+    
+        evt_handled: bool = False
+        try:
+            if context.execute_style is ExecuteStyle.EXECUTEMANY:
+                effective_parameters = cast(
+                    "_CoreMultiExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_executemany:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_executemany(
+                        cursor,
+                        str_statement,
+                        effective_parameters,
+                        context,
+                    )
+            elif not effective_parameters and context.no_parameters:
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute_no_params:
+                        if fn(cursor, str_statement, context):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_execute_no_params(
+                        cursor, str_statement, context
+                    )
+            else:
+                effective_parameters = cast(
+                    "_CoreSingleExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+>                   self.dialect.do_execute(
+                        cursor, str_statement, effective_parameters, context
+                    )
+
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1967: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x0000014ACC5B9370>
+cursor = <sqlite3.Cursor object at 0x0000014AD11E7940>
+statement = 'INSERT INTO users (id, username, password_hash, role, name, email, organization_id, employee_id, is_active, is_system_user, updated_at, created_by, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING created_at'
+parameters = ('inactive-1', 'inactive', '$2b$12$LA7rjPBKQE3znUIkBIJCSeEIRV6zfuUBbQmes0aIISgqTHmV65Oji', 'HRAdmin', 'Inactive User', 'inactive@example.com', ...)
+context = <sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext object at 0x0000014AD0800DD0>
+
+    def do_execute(self, cursor, statement, parameters, context=None):
+>       cursor.execute(statement, parameters)
+E       sqlite3.IntegrityError: FOREIGN KEY constraint failed
+
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: IntegrityError
+
+The above exception was the direct cause of the following exception:
+
+self = <test_auth_api.TestAuthEndpoints object at 0x0000014AD0588DD0>
+db_session = <sqlalchemy.orm.session.Session object at 0x0000014AD0803A40>
+
+    def test_login_inactive_user(self, db_session):
+        """Test login with inactive user"""
+        # Arrange
+        inactive_user = models.DBUser(
+            id="inactive-1",
+            username="inactive",
+            name="Inactive User",
+            email="inactive@example.com",
+            role="HRAdmin",
+            password_hash=TEST_USER_PASSWORD_HASH,
+            organization_id="org-1",
+            is_active=False
+        )
+        db_session.add(inactive_user)
+>       db_session.commit()
+
+backend\tests\test_auth_api.py:241: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:2030: in commit
+    trans.commit(_to_root=True)
+<string>:2: in commit
+    ???
+.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:1311: in commit
+    self._prepare_impl()
+<string>:2: in _prepare_impl
+    ???
+.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:1286: in _prepare_impl
+    self.session.flush()
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:4331: in flush
+    self._flush(objects)
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:4466: in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py:224: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:4427: in _flush
+    flush_context.execute()
+.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:466: in execute
+    rec.execute(self)
+.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:642: in execute
+    util.preloaded.orm_persistence.save_obj(
+.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:93: in save_obj
+    _emit_insert_statements(
+.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:1233: in _emit_insert_statements
+    result = connection.execute(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+.venv\Lib\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x0000014ACC5B9370>
+cursor = <sqlite3.Cursor object at 0x0000014AD11E7940>
+statement = 'INSERT INTO users (id, username, password_hash, role, name, email, organization_id, employee_id, is_active, is_system_user, updated_at, created_by, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING created_at'
+parameters = ('inactive-1', 'inactive', '$2b$12$LA7rjPBKQE3znUIkBIJCSeEIRV6zfuUBbQmes0aIISgqTHmV65Oji', 'HRAdmin', 'Inactive User', 'inactive@example.com', ...)
+context = <sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext object at 0x0000014AD0800DD0>
+
+    def do_execute(self, cursor, statement, parameters, context=None):
+>       cursor.execute(statement, parameters)
+E       sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) FOREIGN KEY constraint failed
+E       [SQL: INSERT INTO users (id, username, password_hash, role, name, email, organization_id, employee_id, is_active, is_system_user, updated_at, created_by, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING created_at]
+E       [parameters: ('inactive-1', 'inactive', '$2b$12$LA7rjPBKQE3znUIkBIJCSeEIRV6zfuUBbQmes0aIISgqTHmV65Oji', 'HRAdmin', 'Inactive User', 'inactive@example.com', 'org-1', None, 0, 0, None, None, None)]
+E       (Background on this error at: https://sqlalche.me/e/20/gkpj)
+
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: IntegrityError
+_______ TestProtectedEndpoints.test_protected_endpoint_with_valid_token _______
+
+self = <test_auth_api.TestProtectedEndpoints object at 0x0000014AD05895E0>
+test_user = <backend.models.DBUser object at 0x0000014AD0800FE0>
+db_session = <sqlalchemy.orm.session.Session object at 0x0000014AD122D370>
+
+    def test_protected_endpoint_with_valid_token(self, test_user, db_session):
+        """Test accessing protected endpoint with valid token"""
+        # First login to get token
+        def override_get_db():
+            try:
+                yield db_session
+            finally:
+                pass
+    
+        app.dependency_overrides[get_db] = override_get_db
+    
+>       login_response = client.post(
+            "/api/auth/login",
+            json={
+                "username": "testuser",
+                "password": TEST_USER_PASSWORD
+            }
+        )
+
+backend\tests\test_auth_api.py:301: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\starlette\testclient.py:590: in post
+    return super().post(
+.venv\Lib\site-packages\httpx\_client.py:1145: in post
+    return self.request(
+.venv\Lib\site-packages\starlette\testclient.py:465: in request
+    return super().request(
+.venv\Lib\site-packages\httpx\_client.py:827: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\httpx\_client.py:914: in send
+    response = self._send_handling_auth(
+.venv\Lib\site-packages\httpx\_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+.venv\Lib\site-packages\httpx\_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\httpx\_client.py:1015: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\testclient.py:342: in handle_request
+    raise exc
+.venv\Lib\site-packages\starlette\testclient.py:339: in handle_request
+    portal.call(self.app, scope, receive, send)
+.venv\Lib\site-packages\anyio\from_thread.py:277: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+C:\Python\Python312\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+.venv\Lib\site-packages\anyio\from_thread.py:217: in _call_func
+    retval = await retval
+             ^^^^^^^^^^^^
+.venv\Lib\site-packages\fastapi\applications.py:1106: in __call__
+    await super().__call__(scope, receive, send)
+.venv\Lib\site-packages\starlette\applications.py:122: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\errors.py:184: in __call__
+    raise exc
+.venv\Lib\site-packages\starlette\middleware\errors.py:162: in __call__
+    await self.app(scope, receive, _send)
+.venv\Lib\site-packages\starlette\middleware\cors.py:83: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\exceptions.py:79: in __call__
+    raise exc
+.venv\Lib\site-packages\starlette\middleware\exceptions.py:68: in __call__
+    await self.app(scope, receive, sender)
+.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:20: in __call__
+    raise e
+.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:17: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:718: in __call__
+    await route.handle(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:276: in handle
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:66: in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\fastapi\routing.py:274: in app
+    raw_response = await run_endpoint_function(
+.venv\Lib\site-packages\fastapi\routing.py:193: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\concurrency.py:41: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\anyio\to_thread.py:33: in run_sync
+    return await get_asynclib().run_sync_in_worker_thread(
+.venv\Lib\site-packages\anyio\_backends\_asyncio.py:877: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+.venv\Lib\site-packages\anyio\_backends\_asyncio.py:807: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\slowapi\extension.py:766: in sync_wrapper
+    response = func(*args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+login_data = LoginRequest(username='testuser', password='test-secure-password-123')
+request = <starlette.requests.Request object at 0x0000014AD122D910>
+db = <sqlalchemy.orm.session.Session object at 0x0000014AD122DC10>
+
+    @app.post("/api/auth/login", tags=["Authentication"])
+    @limiter.limit(auth_config.LOGIN_RATE_LIMIT)
+    def login(login_data: schemas.LoginRequest, request: Request, db: Session = Depends(get_db)):
+        logger.debug(f"Received login request for user: {login_data.username}")
+    
+        user = (
+            db.query(models.DBUser)
+            .filter(models.DBUser.username == login_data.username)
+            .first()
+        )
+    
+        if not user:
+            # Timing attack mitigation (verify fake hash)
+            # pwd_context.verify("fake", "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWrn3ILAWOiP0jo.z.g")
+            logger.warning(f"Login failed: User '{login_data.username}' not found.")
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+        # Verify Password (Bcrypt)
+        if not verify_password(login_data.password, user.password_hash):
+            logger.warning(f"Login failed: Password mismatch for '{login_data.username}'.")
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+        if not user.is_active:
+            logger.warning(f"Login failed: Account inactive for '{login_data.username}'.")
+            raise HTTPException(status_code=403, detail="Account is inactive")
+    
+        # Check for System-Wide MFA Enforcement
+>       flags = crud.get_system_flags(db, user.organization_id)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: get_system_flags() takes 1 positional argument but 2 were given
+
+backend\main.py:228: TypeError
+_____________ TestRBACEndpoints.test_admin_only_endpoint_as_admin _____________
+
+self = <sqlalchemy.engine.base.Connection object at 0x0000014AD122D4F0>
+dialect = <sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x0000014ACC5B9370>
+context = <sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext object at 0x0000014AD122E780>
+statement = <sqlalchemy.dialects.sqlite.base.SQLiteCompiler object at 0x0000014AD0777440>
+parameters = [('admin-1', 'admin', '$2b$12$LA7rjPBKQE3znUIkBIJCSeEIRV6zfuUBbQmes0aIISgqTHmV65Oji', 'SystemAdmin', 'Admin User', 'admin@example.com', ...)]
+
+    def _exec_single_context(
+        self,
+        dialect: Dialect,
+        context: ExecutionContext,
+        statement: Union[str, Compiled],
+        parameters: Optional[_AnyMultiExecuteParams],
+    ) -> CursorResult[Any]:
+        """continue the _execute_context() method for a single DBAPI
+        cursor.execute() or cursor.executemany() call.
+    
+        """
+        if dialect.bind_typing is BindTyping.SETINPUTSIZES:
+            generic_setinputsizes = context._prepare_set_input_sizes()
+    
+            if generic_setinputsizes:
+                try:
+                    dialect.do_set_input_sizes(
+                        context.cursor, generic_setinputsizes, context
+                    )
+                except BaseException as e:
+                    self._handle_dbapi_exception(
+                        e, str(statement), parameters, None, context
+                    )
+    
+        cursor, str_statement, parameters = (
+            context.cursor,
+            context.statement,
+            context.parameters,
+        )
+    
+        effective_parameters: Optional[_AnyExecuteParams]
+    
+        if not context.executemany:
+            effective_parameters = parameters[0]
+        else:
+            effective_parameters = parameters
+    
+        if self._has_events or self.engine._has_events:
+            for fn in self.dispatch.before_cursor_execute:
+                str_statement, effective_parameters = fn(
+                    self,
+                    cursor,
+                    str_statement,
+                    effective_parameters,
+                    context,
+                    context.executemany,
+                )
+    
+        if self._echo:
+            self._log_info(str_statement)
+    
+            stats = context._get_cache_stats()
+    
+            if not self.engine.hide_parameters:
+                self._log_info(
+                    "[%s] %r",
+                    stats,
+                    sql_util._repr_params(
+                        effective_parameters,
+                        batches=10,
+                        ismulti=context.executemany,
+                    ),
+                )
+            else:
+                self._log_info(
+                    "[%s] [SQL parameters hidden due to hide_parameters=True]",
+                    stats,
+                )
+    
+        evt_handled: bool = False
+        try:
+            if context.execute_style is ExecuteStyle.EXECUTEMANY:
+                effective_parameters = cast(
+                    "_CoreMultiExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_executemany:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_executemany(
+                        cursor,
+                        str_statement,
+                        effective_parameters,
+                        context,
+                    )
+            elif not effective_parameters and context.no_parameters:
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute_no_params:
+                        if fn(cursor, str_statement, context):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_execute_no_params(
+                        cursor, str_statement, context
+                    )
+            else:
+                effective_parameters = cast(
+                    "_CoreSingleExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+>                   self.dialect.do_execute(
+                        cursor, str_statement, effective_parameters, context
+                    )
+
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1967: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x0000014ACC5B9370>
+cursor = <sqlite3.Cursor object at 0x0000014AD1814340>
+statement = 'INSERT INTO users (id, username, password_hash, role, name, email, organization_id, employee_id, is_active, is_system_user, updated_at, created_by, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING created_at'
+parameters = ('admin-1', 'admin', '$2b$12$LA7rjPBKQE3znUIkBIJCSeEIRV6zfuUBbQmes0aIISgqTHmV65Oji', 'SystemAdmin', 'Admin User', 'admin@example.com', ...)
+context = <sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext object at 0x0000014AD122E780>
+
+    def do_execute(self, cursor, statement, parameters, context=None):
+>       cursor.execute(statement, parameters)
+E       sqlite3.IntegrityError: FOREIGN KEY constraint failed
+
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: IntegrityError
+
+The above exception was the direct cause of the following exception:
+
+self = <test_auth_api.TestRBACEndpoints object at 0x0000014AD0589970>
+db_session = <sqlalchemy.orm.session.Session object at 0x0000014AD122F140>
+
+    def test_admin_only_endpoint_as_admin(self, db_session):
+        """Test admin-only endpoint with SystemAdmin role"""
+        # Arrange - Create admin user
+        admin_user = models.DBUser(
+            id="admin-1",
+            username="admin",
+            name="Admin User",
+            email="admin@example.com",
+            role="SystemAdmin",
+            password_hash=TEST_USER_PASSWORD_HASH,
+            organization_id="org-1",
+            is_active=True
+        )
+        db_session.add(admin_user)
+>       db_session.commit()
+
+backend\tests\test_auth_api.py:340: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:2030: in commit
+    trans.commit(_to_root=True)
+<string>:2: in commit
+    ???
+.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:1311: in commit
+    self._prepare_impl()
+<string>:2: in _prepare_impl
+    ???
+.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:1286: in _prepare_impl
+    self.session.flush()
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:4331: in flush
+    self._flush(objects)
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:4466: in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py:224: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:4427: in _flush
+    flush_context.execute()
+.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:466: in execute
+    rec.execute(self)
+.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:642: in execute
+    util.preloaded.orm_persistence.save_obj(
+.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:93: in save_obj
+    _emit_insert_statements(
+.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:1233: in _emit_insert_statements
+    result = connection.execute(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+.venv\Lib\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x0000014ACC5B9370>
+cursor = <sqlite3.Cursor object at 0x0000014AD1814340>
+statement = 'INSERT INTO users (id, username, password_hash, role, name, email, organization_id, employee_id, is_active, is_system_user, updated_at, created_by, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING created_at'
+parameters = ('admin-1', 'admin', '$2b$12$LA7rjPBKQE3znUIkBIJCSeEIRV6zfuUBbQmes0aIISgqTHmV65Oji', 'SystemAdmin', 'Admin User', 'admin@example.com', ...)
+context = <sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext object at 0x0000014AD122E780>
+
+    def do_execute(self, cursor, statement, parameters, context=None):
+>       cursor.execute(statement, parameters)
+E       sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) FOREIGN KEY constraint failed
+E       [SQL: INSERT INTO users (id, username, password_hash, role, name, email, organization_id, employee_id, is_active, is_system_user, updated_at, created_by, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING created_at]
+E       [parameters: ('admin-1', 'admin', '$2b$12$LA7rjPBKQE3znUIkBIJCSeEIRV6zfuUBbQmes0aIISgqTHmV65Oji', 'SystemAdmin', 'Admin User', 'admin@example.com', 'org-1', None, 1, 0, None, None, None)]
+E       (Background on this error at: https://sqlalche.me/e/20/gkpj)
+
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: IntegrityError
+_________ TestRBACEndpoints.test_admin_only_endpoint_as_regular_user __________
+
+self = <sqlalchemy.engine.base.Connection object at 0x0000014AD121A990>
+dialect = <sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x0000014ACC5B9370>
+context = <sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext object at 0x0000014AD12191F0>
+statement = <sqlalchemy.dialects.sqlite.base.SQLiteCompiler object at 0x0000014AD0777440>
+parameters = [('regular-1', 'regular', '$2b$12$LA7rjPBKQE3znUIkBIJCSeEIRV6zfuUBbQmes0aIISgqTHmV65Oji', 'HRManager', 'Regular User', 'regular@example.com', ...)]
+
+    def _exec_single_context(
+        self,
+        dialect: Dialect,
+        context: ExecutionContext,
+        statement: Union[str, Compiled],
+        parameters: Optional[_AnyMultiExecuteParams],
+    ) -> CursorResult[Any]:
+        """continue the _execute_context() method for a single DBAPI
+        cursor.execute() or cursor.executemany() call.
+    
+        """
+        if dialect.bind_typing is BindTyping.SETINPUTSIZES:
+            generic_setinputsizes = context._prepare_set_input_sizes()
+    
+            if generic_setinputsizes:
+                try:
+                    dialect.do_set_input_sizes(
+                        context.cursor, generic_setinputsizes, context
+                    )
+                except BaseException as e:
+                    self._handle_dbapi_exception(
+                        e, str(statement), parameters, None, context
+                    )
+    
+        cursor, str_statement, parameters = (
+            context.cursor,
+            context.statement,
+            context.parameters,
+        )
+    
+        effective_parameters: Optional[_AnyExecuteParams]
+    
+        if not context.executemany:
+            effective_parameters = parameters[0]
+        else:
+            effective_parameters = parameters
+    
+        if self._has_events or self.engine._has_events:
+            for fn in self.dispatch.before_cursor_execute:
+                str_statement, effective_parameters = fn(
+                    self,
+                    cursor,
+                    str_statement,
+                    effective_parameters,
+                    context,
+                    context.executemany,
+                )
+    
+        if self._echo:
+            self._log_info(str_statement)
+    
+            stats = context._get_cache_stats()
+    
+            if not self.engine.hide_parameters:
+                self._log_info(
+                    "[%s] %r",
+                    stats,
+                    sql_util._repr_params(
+                        effective_parameters,
+                        batches=10,
+                        ismulti=context.executemany,
+                    ),
+                )
+            else:
+                self._log_info(
+                    "[%s] [SQL parameters hidden due to hide_parameters=True]",
+                    stats,
+                )
+    
+        evt_handled: bool = False
+        try:
+            if context.execute_style is ExecuteStyle.EXECUTEMANY:
+                effective_parameters = cast(
+                    "_CoreMultiExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_executemany:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_executemany(
+                        cursor,
+                        str_statement,
+                        effective_parameters,
+                        context,
+                    )
+            elif not effective_parameters and context.no_parameters:
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute_no_params:
+                        if fn(cursor, str_statement, context):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_execute_no_params(
+                        cursor, str_statement, context
+                    )
+            else:
+                effective_parameters = cast(
+                    "_CoreSingleExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+>                   self.dialect.do_execute(
+                        cursor, str_statement, effective_parameters, context
+                    )
+
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1967: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x0000014ACC5B9370>
+cursor = <sqlite3.Cursor object at 0x0000014AD2DFFC40>
+statement = 'INSERT INTO users (id, username, password_hash, role, name, email, organization_id, employee_id, is_active, is_system_user, updated_at, created_by, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING created_at'
+parameters = ('regular-1', 'regular', '$2b$12$LA7rjPBKQE3znUIkBIJCSeEIRV6zfuUBbQmes0aIISgqTHmV65Oji', 'HRManager', 'Regular User', 'regular@example.com', ...)
+context = <sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext object at 0x0000014AD12191F0>
+
+    def do_execute(self, cursor, statement, parameters, context=None):
+>       cursor.execute(statement, parameters)
+E       sqlite3.IntegrityError: FOREIGN KEY constraint failed
+
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: IntegrityError
+
+The above exception was the direct cause of the following exception:
+
+self = <test_auth_api.TestRBACEndpoints object at 0x0000014AD0589C70>
+db_session = <sqlalchemy.orm.session.Session object at 0x0000014AD1218CE0>
+
+    def test_admin_only_endpoint_as_regular_user(self, db_session):
+        """Test admin-only endpoint with HRManager role (should fail)"""
+        # Arrange
+        regular_user = models.DBUser(
+            id="regular-1",
+            username="regular",
+            name="Regular User",
+            email="regular@example.com",
+            role="HRManager",
+            password_hash=TEST_USER_PASSWORD_HASH,
+            organization_id="org-1",
+            is_active=True
+        )
+        db_session.add(regular_user)
+>       db_session.commit()
+
+backend\tests\test_auth_api.py:382: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:2030: in commit
+    trans.commit(_to_root=True)
+<string>:2: in commit
+    ???
+.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:1311: in commit
+    self._prepare_impl()
+<string>:2: in _prepare_impl
+    ???
+.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:1286: in _prepare_impl
+    self.session.flush()
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:4331: in flush
+    self._flush(objects)
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:4466: in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py:224: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:4427: in _flush
+    flush_context.execute()
+.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:466: in execute
+    rec.execute(self)
+.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:642: in execute
+    util.preloaded.orm_persistence.save_obj(
+.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:93: in save_obj
+    _emit_insert_statements(
+.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:1233: in _emit_insert_statements
+    result = connection.execute(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+.venv\Lib\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x0000014ACC5B9370>
+cursor = <sqlite3.Cursor object at 0x0000014AD2DFFC40>
+statement = 'INSERT INTO users (id, username, password_hash, role, name, email, organization_id, employee_id, is_active, is_system_user, updated_at, created_by, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING created_at'
+parameters = ('regular-1', 'regular', '$2b$12$LA7rjPBKQE3znUIkBIJCSeEIRV6zfuUBbQmes0aIISgqTHmV65Oji', 'HRManager', 'Regular User', 'regular@example.com', ...)
+context = <sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext object at 0x0000014AD12191F0>
+
+    def do_execute(self, cursor, statement, parameters, context=None):
+>       cursor.execute(statement, parameters)
+E       sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) FOREIGN KEY constraint failed
+E       [SQL: INSERT INTO users (id, username, password_hash, role, name, email, organization_id, employee_id, is_active, is_system_user, updated_at, created_by, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING created_at]
+E       [parameters: ('regular-1', 'regular', '$2b$12$LA7rjPBKQE3znUIkBIJCSeEIRV6zfuUBbQmes0aIISgqTHmV65Oji', 'HRManager', 'Regular User', 'regular@example.com', 'org-1', None, 1, 0, None, None, None)]
+E       (Background on this error at: https://sqlalche.me/e/20/gkpj)
+
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: IntegrityError
+============================== warnings summary ===============================
+backend\database.py:38
+  D:\Project\PEOPLE_OS\backend\database.py:38: MovedIn20Warning: The ``declarative_base()`` function is now available as sqlalchemy.orm.declarative_base(). (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    Base = declarative_base()
+
+.venv\Lib\site-packages\pydantic\_internal\_config.py:271: 65 warnings
+  D:\Project\PEOPLE_OS\.venv\Lib\site-packages\pydantic\_internal\_config.py:271: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
+    warnings.warn(DEPRECATION_MESSAGE, DeprecationWarning)
+
+backend\main.py:100
+  D:\Project\PEOPLE_OS\backend\main.py:100: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    @app.on_event("startup")
+
+.venv\Lib\site-packages\fastapi\applications.py:4547
+  D:\Project\PEOPLE_OS\.venv\Lib\site-packages\fastapi\applications.py:4547: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    return self.router.on_event(event_type)
+
+.venv\Lib\site-packages\httpx\_client.py:680
+  D:\Project\PEOPLE_OS\.venv\Lib\site-packages\httpx\_client.py:680: DeprecationWarning: The 'app' shortcut is now deprecated. Use the explicit style 'transport=WSGITransport(app=...)' instead.
+    warnings.warn(message, DeprecationWarning)
+
+backend/tests/test_auth_api.py::TestAuthEndpoints::test_login_inactive_user
+backend/tests/test_auth_api.py::TestRBACEndpoints::test_admin_only_endpoint_as_admin
+backend/tests/test_auth_api.py::TestRBACEndpoints::test_admin_only_endpoint_as_regular_user
+  D:\Project\PEOPLE_OS\backend\tests\test_auth_api.py:53: SAWarning: transaction already deassociated from connection
+    transaction.rollback()
+
+backend/tests/test_auth_api.py::TestHealthCheck::test_health_check
+  D:\Project\PEOPLE_OS\backend\tests\test_auth_api.py:40: SAWarning: Can't sort tables for DROP; an unresolvable foreign key dependency exists between tables: departments, employees; and backend does not support ALTER.  To restore at least a partial sort, apply use_alter=True to ForeignKey and ForeignKeyConstraint objects involved in the cycle to mark these as known cycles that will be ignored.
+    models.Base.metadata.drop_all(bind=engine)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED backend/tests/test_auth_api.py::TestAuthEndpoints::test_login_success - TypeError: get_system_flags() takes 1 positional argument but 2 were given
+FAILED backend/tests/test_auth_api.py::TestAuthEndpoints::test_login_inactive_user - sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) FOREIGN KEY constraint failed
+[SQL: INSERT INTO users (id, username, password_hash, role, name, email, organization_id, employee_id, is_active, is_system_user, updated_at, created_by, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING created_at]
+[parameters: ('inactive-1', 'inactive', '$2b$12$LA7rjPBKQE3znUIkBIJCSeEIRV6zfuUBbQmes0aIISgqTHmV65Oji', 'HRAdmin', 'Inactive User', 'inactive@example.com', 'org-1', None, 0, 0, None, None, None)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+FAILED backend/tests/test_auth_api.py::TestProtectedEndpoints::test_protected_endpoint_with_valid_token - TypeError: get_system_flags() takes 1 positional argument but 2 were given
+FAILED backend/tests/test_auth_api.py::TestRBACEndpoints::test_admin_only_endpoint_as_admin - sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) FOREIGN KEY constraint failed
+[SQL: INSERT INTO users (id, username, password_hash, role, name, email, organization_id, employee_id, is_active, is_system_user, updated_at, created_by, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING created_at]
+[parameters: ('admin-1', 'admin', '$2b$12$LA7rjPBKQE3znUIkBIJCSeEIRV6zfuUBbQmes0aIISgqTHmV65Oji', 'SystemAdmin', 'Admin User', 'admin@example.com', 'org-1', None, 1, 0, None, None, None)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+FAILED backend/tests/test_auth_api.py::TestRBACEndpoints::test_admin_only_endpoint_as_regular_user - sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) FOREIGN KEY constraint failed
+[SQL: INSERT INTO users (id, username, password_hash, role, name, email, organization_id, employee_id, is_active, is_system_user, updated_at, created_by, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING created_at]
+[parameters: ('regular-1', 'regular', '$2b$12$LA7rjPBKQE3znUIkBIJCSeEIRV6zfuUBbQmes0aIISgqTHmV65Oji', 'HRManager', 'Regular User', 'regular@example.com', 'org-1', None, 1, 0, None, None, None)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+================== 5 failed, 5 passed, 73 warnings in 4.51s ===================

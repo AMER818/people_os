@@ -191,12 +191,19 @@ class DBHRPlant(Base, PrismaAuditMixin):
     id = Column(String, primary_key=True, index=True)
     name = Column(String, unique=True)
     location = Column(String)
-    organization_id = Column(String, ForeignKey("organizations.id"), index=True)
+    organization_id = Column(
+        String, ForeignKey("organizations.id"), nullable=False, index=True
+    )
 
     # Legacy Fields (Standardized)
     code = Column(String, unique=True)
     current_sequence = Column(Integer, default=0)
     is_active = Column(Boolean, default=True)
+
+    # New Fields
+    head_of_plant = Column(String, nullable=True)
+    contact_number = Column(String, nullable=True)
+    
     # divisions column removed in favor of DBPlantDivision relation
 
     organization = relationship("DBOrganization", back_populates="plants")
@@ -221,6 +228,25 @@ class DBPlantDivision(Base, PrismaAuditMixin):
         return self.is_active
 
 
+
+
+class DBEmploymentLevel(Base, PrismaAuditMixin):
+    __tablename__ = "employment_levels"
+
+    id = Column(String, primary_key=True, index=True)
+    name = Column(String, unique=True, index=True)
+    code = Column(String, unique=True, index=True)
+    description = Column(String, nullable=True)
+    is_active = Column(Boolean, default=True)
+    organization_id = Column(
+        String, ForeignKey("organizations.id"), nullable=False, index=True
+    )
+
+    @property
+    def isActive(self):
+        return self.is_active
+
+
 class DBDepartment(Base, PrismaAuditMixin):
     __tablename__ = "departments"
 
@@ -229,9 +255,9 @@ class DBDepartment(Base, PrismaAuditMixin):
     name = Column(String, unique=True)
     isActive = Column(Boolean, default=True)
     organization_id = Column(
-        String, ForeignKey("organizations.id"), nullable=True, index=True
+        String, ForeignKey("organizations.id"), nullable=False, index=True
     )
-    plant_id = Column(String, ForeignKey("hr_plants.id"), nullable=True)
+    plant_id = Column(String, ForeignKey("hr_plants.id"), nullable=False)
     hod_id = Column(String, ForeignKey("employees.id"), nullable=True)
 
     # Relationships
@@ -257,11 +283,13 @@ class DBSubDepartment(Base, PrismaAuditMixin):
     name = Column(String, unique=True)
     is_active = Column(Boolean, default=True)
     organization_id = Column(
-        String, ForeignKey("organizations.id"), nullable=True, index=True
+        String, ForeignKey("organizations.id"), nullable=False, index=True
     )
 
     # Legacy Fields (Standardized)
-    parent_department_id = Column(String, ForeignKey("departments.id"))
+    parent_department_id = Column(
+        String, ForeignKey("departments.id"), nullable=False
+    )
     manager_id = Column(String, ForeignKey("employees.id"), nullable=True)
 
     @property
@@ -284,11 +312,11 @@ class DBGrade(Base, PrismaAuditMixin):
     name = Column(String, unique=True)
     level = Column(Integer)  # Keep for internal ordering
     employment_level_id = Column(
-        String, ForeignKey("employment_levels.id"), nullable=True
+        String, ForeignKey("employment_levels.id"), nullable=False
     )  # Linked to Employment Level
     is_active = Column(Boolean, default=True)
     organization_id = Column(
-        String, ForeignKey("organizations.id"), nullable=True, index=True
+        String, ForeignKey("organizations.id"), nullable=False, index=True
     )
 
     @property
@@ -304,10 +332,13 @@ class DBDesignation(Base, PrismaAuditMixin):
 
     id = Column(String, primary_key=True, index=True)
     name = Column(String, unique=True)
-    grade_id = Column(String, ForeignKey("grades.id"))
+    grade_id = Column(String, ForeignKey("grades.id"), nullable=False)
+    department_id = Column(
+        String, ForeignKey("departments.id"), nullable=False
+    )  # Linked to Structural Hierarchy
     is_active = Column(Boolean, default=True)
     organization_id = Column(
-        String, ForeignKey("organizations.id"), nullable=True, index=True
+        String, ForeignKey("organizations.id"), nullable=False, index=True
     )
 
     # Legacy Fields
@@ -332,7 +363,7 @@ class DBShift(Base, PrismaAuditMixin):
     work_days = Column(String)  # Stored as JSON string or comma-separated
     isActive = Column(Boolean, default=True)
     organization_id = Column(
-        String, ForeignKey("organizations.id"), nullable=True, index=True
+        String, ForeignKey("organizations.id"), nullable=False, index=True
     )
 
     @property
@@ -360,15 +391,6 @@ class DBShift(Base, PrismaAuditMixin):
         return self.work_days
 
 
-class DBEmploymentLevel(Base, PrismaAuditMixin):
-    __tablename__ = "employment_levels"
-
-    id = Column(String, primary_key=True, index=True)
-    name = Column(String, unique=True, nullable=False, index=True)
-    code = Column(String, unique=True, nullable=False)
-    description = Column(String)
-    is_active = Column(Boolean, default=True)
-    organization_id = Column(String, ForeignKey("organizations.id"), nullable=True)
 
 
 class DBPosition(Base, PrismaAuditMixin):
@@ -382,7 +404,9 @@ class DBPosition(Base, PrismaAuditMixin):
     reports_to = Column(String, nullable=True)
     description = Column(String)
     is_active = Column(Boolean, default=True)
-    organization_id = Column(String, ForeignKey("organizations.id"), nullable=True)
+    organization_id = Column(
+        String, ForeignKey("organizations.id"), nullable=False, index=True
+    )
 
     @property
     def reportsToPositionId(self):
@@ -398,7 +422,9 @@ class DBHoliday(Base, PrismaAuditMixin):
     type = Column(String)  # Public, Optional, Regional
     is_recurring = Column(Boolean, default=False)
     description = Column(String)
-    organization_id = Column(String, ForeignKey("organizations.id"), nullable=True)
+    organization_id = Column(
+        String, ForeignKey("organizations.id"), nullable=False, index=True
+    )
 
 
 class DBBank(Base, PrismaAuditMixin):
@@ -413,7 +439,9 @@ class DBBank(Base, PrismaAuditMixin):
     swift_code = Column(String)
     currency = Column(String, default="PKR")
     is_active = Column(Boolean, default=True)
-    organization_id = Column(String, ForeignKey("organizations.id"), nullable=True)
+    organization_id = Column(
+        String, ForeignKey("organizations.id"), nullable=False, index=True
+    )
 
 
 class DBEducation(Base, AuditMixin):

@@ -1294,7 +1294,7 @@ export const useOrgStore = create<OrgState>()(
       addEmploymentLevel: async (level) => {
         const { api } = await import('../services/api');
         try {
-          const saved = await api.addEmploymentLevel(level);
+          const saved = await api.createEmploymentLevel(level);
           set((state) => ({
             employmentLevels: [...state.employmentLevels, saved],
           }));
@@ -1306,7 +1306,7 @@ export const useOrgStore = create<OrgState>()(
       updateEmploymentLevel: async (id, level) => {
         const { api } = await import('../services/api');
         try {
-          const updated = await api.updateEmploymentLevel(id, level as EmploymentLevel);
+          const updated = await api.updateEmploymentLevel(id, level);
           set((state) => ({
             employmentLevels: state.employmentLevels.map((l) =>
               l.id === id ? { ...l, ...updated } : l

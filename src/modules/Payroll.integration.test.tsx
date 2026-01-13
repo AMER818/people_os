@@ -1,13 +1,32 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import PayrollEngine from './PayrollEngine';
+import { render, screen, fireEvent, waitFor } from '../test/test-utils';
+import PayrollEngine from './payroll/index';
 import React from 'react';
 import { api } from '../services/api';
 import { getWorkforceOptimization } from '../services/geminiService';
-import { ToastProvider } from '../components/ui/Toast';
+
 // Mocks inlined for stability
-const INITIAL_EMPLOYMENT_TYPES = [{ id: 'ET-1', name: 'Permanent', code: 'PERM' }];
+const INITIAL_EMPLOYMENT_LEVELS = [{ id: 'ET-1', name: 'Permanent', code: 'PERM' }];
 const INITIAL_SHIFTS = [{ id: 'SH-1', name: 'Morning', startTime: '09:00', endTime: '17:00' }];
+
+// Mock the services
+vi.mock('./payroll/constants', () => ({
+  INITIAL_LEDGER: [
+    {
+      id: 'TX-001',
+      name: 'Sarah Jenkins',
+      dept: 'Engineering',
+      gross: 150000,
+      status: 'Pending',
+      period: 'Oct 2023',
+      paymentMode: 'Bank Transfer',
+      bankName: 'Standard Chartered',
+      accountNumber: '123456789',
+    },
+  ],
+  CHART_DATA: [],
+  PAYROLL_STATS: [],
+}));
 
 // Mock the services
 vi.mock('../services/api', async (importOriginal) => {
@@ -26,7 +45,7 @@ vi.mock('../services/api', async (importOriginal) => {
     getDistricts: vi.fn().mockResolvedValue([]),
     getPayrollSettings: vi.fn().mockResolvedValue({}),
     getUsers: vi.fn().mockResolvedValue([]),
-    getEmploymentTypes: vi.fn().mockResolvedValue([]),
+    getEmploymentLevels: vi.fn().mockResolvedValue([]),
   };
   return {
     ...actual,
@@ -48,44 +67,36 @@ vi.mock('../services/geminiService', () => ({
 
 // Mock useOrgStore
 vi.mock('../store/orgStore', () => {
-  const updateAiSettings = vi.fn();
   const mockState = {
+    currentUser: { role: 'SystemAdmin' },
     shifts: [],
-    profile: {},
     departments: [],
-    grades: [],
-    holidays: [],
-    banks: [],
-    users: [],
-    systemFlags: {},
-    aiSettings: { apiKeys: {} },
-    rbacMatrix: [],
-    auditLogs: [],
-    complianceSettings: {},
-    updateAiSettings,
-    fetchMasterData: vi.fn(),
-    designations: [],
-    subDepartments: [],
     hrPlantsList: [],
-    shiftsList: [],
-    districtsList: [],
-    employmentTypesList: [],
+    profile: { name: 'Test Org' },
+    aiSettings: { apiKeys: {} },
+    fetchMasterData: vi.fn(),
+    fetchProfile: vi.fn(),
+    syncProfileStatus: vi.fn(),
   };
-
-  const mockOrgStore = () => mockState;
-  mockOrgStore.getState = () => mockState;
-  mockOrgStore.setState = vi.fn();
-  mockOrgStore.subscribe = vi.fn();
 
   return {
-    useOrgStore: mockOrgStore,
+    useOrgStore: Object.assign((selector?: any) => (selector ? selector(mockState) : mockState), {
+      getState: () => mockState,
+      setState: vi.fn(),
+      subscribe: vi.fn(),
+    }),
   };
 });
+
 // Mock lucide-react
-vi.mock('lucide-react', () => {
-  return new Proxy({}, {
-    get: (target, prop) => (props: any) => <span data-testid={`icon-${String(prop).toLowerCase()}`} {...props} />
-  });
+vi.mock('lucide-react', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('lucide-react')>();
+  return {
+    ...actual,
+    X: (props: any) => <div data-testid="icon-x" {...props} />,
+    Plus: (props: any) => <div data-testid="icon-plus" {...props} />,
+    Play: (props: any) => <div data-testid="icon-play" {...props} />,
+  };
 });
 
 // Mock Recharts
@@ -105,43 +116,34 @@ describe('Payroll Module Integration', () => {
   });
 
   it('renders the payroll dashboard structure', () => {
-    render(
-      <ToastProvider>
-        <PayrollEngine />
-      </ToastProvider>
-    );
+    render(<PayrollEngine />);
     expect(screen.getByText('Fiscal Terminal')).toBeDefined();
     expect(screen.getByText('Execute P-Cycle')).toBeDefined();
   });
 
   it('filters the payroll ledger based on search input', async () => {
-    render(
-      <ToastProvider>
-        <PayrollEngine />
-      </ToastProvider>
-    );
+    render(<PayrollEngine />);
     const searchInput = screen.getByPlaceholderText('Search Employees...');
 
     fireEvent.change(searchInput, { target: { value: 'Sarah' } });
 
-    // Assuming Sarah Jenkins is in the initial ledger
-    expect(screen.getByText('Sarah Jenkins')).toBeDefined();
+    // Wait specifically for Sarah Jenkins to appear in the filtered list
+    expect(await screen.findByText('Sarah Jenkins')).toBeDefined();
 
     fireEvent.change(searchInput, { target: { value: 'NonExistent' } });
     expect(screen.queryByText('Sarah Jenkins')).toBeNull();
   });
 
   it('executes the payroll cycle and updates status', async () => {
-    render(
-      <ToastProvider>
-        <PayrollEngine />
-      </ToastProvider>
-    );
+    render(<PayrollEngine />);
     const executeButton = screen.getByText('Execute P-Cycle');
 
     fireEvent.click(executeButton);
 
-    expect(screen.getByText('Processing: 0%')).toBeDefined();
+    // Click Confirm in the confirmation modal
+    fireEvent.click(screen.getByText('Confirm'));
+
+    expect(await screen.findByText('Processing: 0%')).toBeDefined();
 
     // Wait for processing to complete (simulated by progress bar reaching 100%)
     await waitFor(
@@ -156,18 +158,14 @@ describe('Payroll Module Integration', () => {
   });
 
   it('opens and closes the bonus allocation modal', () => {
-    render(
-      <ToastProvider>
-        <PayrollEngine />
-      </ToastProvider>
-    );
+    render(<PayrollEngine />);
     const bonusButton = screen.getByText('Variable Pay');
 
     fireEvent.click(bonusButton);
-    expect(screen.getByText('Log Variable Pay')).toBeDefined();
+    expect(screen.getByText('Assign Bonus')).toBeDefined();
 
     const closeButton = screen.getByTestId('icon-x');
     fireEvent.click(closeButton);
-    expect(screen.queryByText('Log Variable Pay')).toBeNull();
+    expect(screen.queryByText('Assign Bonus')).toBeNull();
   });
 });

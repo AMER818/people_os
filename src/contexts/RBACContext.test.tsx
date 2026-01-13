@@ -2,11 +2,11 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { RBACProvider, useRBAC } from './RBACContext';
-import { PermissionGate } from '../../components/auth/PermissionGate';
-import { useOrgStore } from '../../store/orgStore';
+import { PermissionGate } from '../components/auth/PermissionGate';
+import { useOrgStore } from '../store/orgStore';
 
 // Mock the org store to simulate logged-in user
-vi.mock('../../store/orgStore', () => ({
+vi.mock('../store/orgStore', () => ({
   useOrgStore: vi.fn(),
 }));
 
@@ -15,7 +15,7 @@ const TestComponent = () => {
   const { hasPermission, hasRole } = useRBAC();
   return (
     <div>
-      <span data-testid="perm-check">{hasPermission('manage_master_data') ? 'YES' : 'NO'}</span>
+      <span data-testid="perm-check">{hasPermission('system_config') ? 'YES' : 'NO'}</span>
       <span data-testid="role-check">{hasRole('Root') ? 'YES' : 'NO'}</span>
     </div>
   );

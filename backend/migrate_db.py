@@ -25,6 +25,7 @@ MIGRATIONS = {
     ],
     "designations": [
         ("grade_id", "TEXT"),
+        ("department_id", "TEXT"),
         ("is_active", "INTEGER DEFAULT 1"),
         ("code", "TEXT"),
         ("created_at", "TEXT"),

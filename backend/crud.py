@@ -24,36 +24,8 @@ def get_employees(db: Session, skip: int = 0, limit: int = 100):
 
 
 # --- RBAC Persistence CRUD ---
-def get_role_permissions(db: Session, role: str):
-    record = db.query(models.DBRolePermission).filter(models.DBRolePermission.role == role).first()
-    if record:
-        return json.loads(record.permissions)
-    return []
+# (Legacy JSON-based functions removed. See correct implementations at bottom of file)
 
-def get_all_role_permissions(db: Session):
-    records = db.query(models.DBRolePermission).all()
-    result = {}
-    for r in records:
-        result[r.role] = json.loads(r.permissions)
-    return result
-
-def update_role_permissions(db: Session, role: str, permissions: list):
-    # Check if exists
-    record = db.query(models.DBRolePermission).filter(models.DBRolePermission.role == role).first()
-    perms_json = json.dumps(permissions)
-    
-    if record:
-        record.permissions = perms_json
-    else:
-        new_record = models.DBRolePermission(
-            id=str(uuid.uuid4()),
-            role=role,
-            permissions=perms_json
-        )
-        db.add(new_record)
-    
-    db.commit()
-    return permissions
 
 
 def create_employee(db: Session, employee: schemas.EmployeeCreate, user_id: str):
@@ -92,10 +64,10 @@ def create_employee(db: Session, employee: schemas.EmployeeCreate, user_id: str)
         updated_by=user_id,
         organization_id=employee.organization_id,
         # Legacy Fields (Start)
-        employeeCode=generated_id,  # Fallback
-        eobiStatus=False,
-        socialSecurityStatus=False,
-        medicalStatus=False,
+        employee_code=generated_id,  # Fallback
+        eobi_status=False,
+        social_security_status=False,
+        medical_status=False,
         # Legacy Fields (End)
     )
     db.add(db_employee)
@@ -446,12 +418,12 @@ def create_job_vacancy(db: Session, job: schemas.JobVacancyCreate, user_id: str)
         department=job.department,
         location=job.location,
         type=job.type,
-        posted_date=format_to_db(job.postedDate),
+        posted_date=format_to_db(job.posted_date),
         status=job.status,
-        applicants_count=job.applicants,
+        applicants_count=job.applicants_count,
         description=job.description,
         requirements=req_str,
-        salary_range=job.salaryRange,
+        salary_range=job.salary_range,
         created_by=user_id,
         updated_by=user_id,
     )
@@ -459,6 +431,29 @@ def create_job_vacancy(db: Session, job: schemas.JobVacancyCreate, user_id: str)
     db.commit()
     db.refresh(db_job)
     return db_job
+
+
+# ... (Skipping irrelevant functions if any)
+
+
+
+
+def create_department(db: Session, dept: schemas.DepartmentCreate, user_id: str):
+    if isinstance(user_id, dict):
+        user_id = user_id.get("id", "UNKNOWN")
+    db_dept = models.DBDepartment(
+        id=dept.id or str(uuid.uuid4()),
+        code=dept.code,
+        name=dept.name,
+        is_active=dept.is_active,
+        organization_id=dept.organization_id,
+        created_by=user_id,
+        updated_by=user_id,
+    )
+    db.add(db_dept)
+    db.commit()
+    db.refresh(db_dept)
+    return db_dept
 
 
 def update_job_vacancy(
@@ -636,8 +631,10 @@ def create_plant(db: Session, plant: schemas.PlantCreate, user_id: str):
         name=plant.name,
         location=plant.location,
         organization_id=plant.organization_id,  # Using organization_id from schema
-        currentSequence=plant.currentSequence,
+        current_sequence=plant.current_sequence,
         is_active=plant.is_active,
+        head_of_plant=plant.head_of_plant,
+        contact_number=plant.contact_number,
         created_by=user_id,
         updated_by=user_id,
     )
@@ -675,8 +672,10 @@ def update_plant(db: Session, plant_id: str, plant: schemas.PlantCreate, user_id
         db_plant.location = plant.location
         db_plant.code = plant.code
         db_plant.organization_id = plant.organization_id
-        db_plant.currentSequence = plant.currentSequence
+        db_plant.current_sequence = plant.current_sequence
         db_plant.is_active = plant.is_active
+        db_plant.head_of_plant = plant.head_of_plant
+        db_plant.contact_number = plant.contact_number
 
         # Update Divisions (Full Replace)
         db.query(models.DBPlantDivision).filter(
@@ -710,6 +709,53 @@ def delete_plant(db: Session, plant_id: str):
         db.delete(db_plant)
         db.commit()
     return db_plant
+
+
+# --- Employment Levels ---
+
+def get_employment_levels(db: Session, org_id: str = None):
+    query = db.query(models.DBEmploymentLevel)
+    if org_id:
+        query = query.filter(models.DBEmploymentLevel.organization_id == org_id)
+    return query.all()
+
+
+def create_employment_level(db: Session, employment_level: schemas.EmploymentLevelCreate, user_id: str):
+    db_emp_level = models.DBEmploymentLevel(
+        id=employment_level.id or str(uuid.uuid4()),
+        name=employment_level.name,
+        code=employment_level.code,
+        description=employment_level.description,
+        is_active=employment_level.is_active,
+        organization_id=employment_level.organization_id,
+        created_by=user_id,
+        updated_by=user_id,
+    )
+    db.add(db_emp_level)
+    db.commit()
+    db.refresh(db_emp_level)
+    return db_emp_level
+
+
+def update_employment_level(db: Session, level_id: str, employment_level: schemas.EmploymentLevelCreate, user_id: str):
+    db_emp_level = db.query(models.DBEmploymentLevel).filter(models.DBEmploymentLevel.id == level_id).first()
+    if db_emp_level:
+        db_emp_level.name = employment_level.name
+        db_emp_level.code = employment_level.code
+        db_emp_level.description = employment_level.description
+        db_emp_level.is_active = employment_level.is_active
+        db_emp_level.updated_by = user_id
+        db.commit()
+        db.refresh(db_emp_level)
+    return db_emp_level
+
+
+def delete_employment_level(db: Session, level_id: str):
+    db_emp_level = db.query(models.DBEmploymentLevel).filter(models.DBEmploymentLevel.id == level_id).first()
+    if db_emp_level:
+        db.delete(db_emp_level)
+        db.commit()
+    return db_emp_level
 
 
 # --- RBAC Permissions CRUD ---
@@ -924,7 +970,8 @@ def create_designation(db: Session, desig: schemas.DesignationCreate, user_id: s
     db_desig = models.DBDesignation(
         id=generated_id,
         name=desig.name,
-        gradeId=desig.gradeId,
+        grade_id=desig.grade_id,
+        department_id=desig.department_id,
         is_active=desig.is_active,
         organization_id=desig.organization_id,
         created_by=user_id,
@@ -948,7 +995,8 @@ def update_designation(
     )
     if db_desig:
         db_desig.name = desig.name
-        db_desig.gradeId = desig.gradeId
+        db_desig.grade_id = desig.grade_id
+        db_desig.department_id = desig.department_id
         db_desig.is_active = desig.is_active
         db_desig.organization_id = desig.organization_id
         db_desig.updated_by = user_id
@@ -2397,88 +2445,52 @@ def update_notification_settings(db: Session, organization_id: str, settings: sc
     return db_settings
 
 # Compliance Settings
-def get_compliance_settings(db: Session, organization_id: str):
-    return db.query(models.DBComplianceSettings).filter(models.DBComplianceSettings.organization_id == organization_id).first()
 
-def update_compliance_settings(db: Session, organization_id: str, settings: schemas.ComplianceSettingsCreate, user_id: str):
-    db_settings = get_compliance_settings(db, organization_id)
-    if not db_settings:
-        db_settings = models.DBComplianceSettings(
-            id=str(uuid.uuid4()),
-            organization_id=organization_id,
-            tax_year_end=settings.tax_year_end,
-            min_wage=settings.min_wage,
-            eobi_rate=settings.eobi_rate,
-            social_security_rate=settings.social_security_rate,
-            created_by=user_id,
-            updated_by=user_id
-        )
-        db.add(db_settings)
-    else:
-        db_settings.tax_year_end = settings.tax_year_end
-        db_settings.min_wage = settings.min_wage
-        db_settings.eobi_rate = settings.eobi_rate
-        db_settings.social_security_rate = settings.social_security_rate
-        db_settings.updated_by = user_id
-
-    db.commit()
-    db.refresh(db_settings)
-    return db_settings
+# --- Employment Levels ---
+def get_employment_levels(db: Session, organization_id: Optional[str] = None):
+    query = db.query(models.DBEmploymentLevel)
+    if organization_id:
+        query = query.filter(models.DBEmploymentLevel.organization_id == organization_id)
+    return query.all()
 
 
-# ===== Audit Logs =====
-def create_audit_log(db: Session, log: schemas.AuditLogCreate):
-    db_log = models.DBAuditLog(
+def create_employment_level(db: Session, level: schemas.EmploymentLevelCreate, user_id: str):
+    db_level = models.DBEmploymentLevel(
         id=str(uuid.uuid4()),
-        organization_id=log.organization_id,
-        user=log.user,
-        action=log.action,
-        status=log.status,
-        time=log.time
+        name=level.name,
+        code=level.code,
+        description=level.description,
+        is_active=level.is_active,
+        organization_id=level.organization_id,
+        created_by=user_id,
+        updated_by=user_id
     )
-    db.add(db_log)
-    db.commit()
-    db.refresh(db_log)
-    return db_log
-
-def get_audit_logs(db: Session, organization_id: str, skip: int = 0, limit: int = 100):
-    return db.query(models.DBAuditLog).filter(models.DBAuditLog.organization_id == organization_id).order_by(models.DBAuditLog.time.desc()).offset(skip).limit(limit).all()
-
-def cleanup_audit_logs(db: Session, days: int = 90):
-    """Delete audit logs older than N days"""
-    from datetime import datetime, timedelta
-    cutoff_date = (datetime.now() - timedelta(days=days)).isoformat()
-    
-    # Assuming time is stored as ISO string
-    deleted_count = db.query(models.DBAuditLog).filter(models.DBAuditLog.time < cutoff_date).delete(synchronize_session=False)
-    db.commit()
-    return deleted_count
-
-
-# --- System Flags CRUD ---
-
-def get_system_flags(db: Session):
-    flags = db.query(models.DBSystemFlags).first()
-    if not flags:
-        flags = models.DBSystemFlags(
-            id=str(uuid.uuid4()),
-            organization_id="ORG-001",
-            mfa_enforced=False,
-            session_timeout="30",
-            password_complexity="Standard"
-        )
-        db.add(flags)
+    db.add(db_level)
+    try:
         db.commit()
-        db.refresh(flags)
-    return flags
+        db.refresh(db_level)
+        return db_level
+    except Exception as e:
+        db.rollback()
+        raise e
 
 
-def update_system_flags(db: Session, flags: schemas.SystemFlagsUpdate):
-    db_flags = get_system_flags(db)
-    update_data = flags.dict(exclude_unset=True)
-    for key, value in update_data.items():
-        setattr(db_flags, key, value)
-    
-    db.commit()
-    db.refresh(db_flags)
-    return db_flags
+def update_employment_level(db: Session, level_id: str, level: schemas.EmploymentLevelCreate, user_id: str):
+    db_level = db.query(models.DBEmploymentLevel).filter(models.DBEmploymentLevel.id == level_id).first()
+    if db_level:
+        db_level.name = level.name
+        db_level.code = level.code
+        db_level.description = level.description
+        db_level.is_active = level.is_active
+        db_level.updated_by = user_id
+        db.commit()
+        db.refresh(db_level)
+    return db_level
+
+
+def delete_employment_level(db: Session, level_id: str):
+    db_level = db.query(models.DBEmploymentLevel).filter(models.DBEmploymentLevel.id == level_id).first()
+    if db_level:
+        db.delete(db_level)
+        db.commit()
+    return db_level

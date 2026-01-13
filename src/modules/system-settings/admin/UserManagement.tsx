@@ -125,10 +125,15 @@ interface UserManagementProps {
  * @param {boolean} props.isSaving - Loading state for persistence operations
  */
 const UserManagement: React.FC<UserManagementProps> = ({ onSync: syncCallback }) => {
-  const { users, addUser, updateUser, deleteUser, addAuditLog } = useOrgStore();
+  const { users, addUser, updateUser, deleteUser, addAuditLog, fetchUsers } = useOrgStore();
   const { success, error } = useToast();
   const adminUserModal = useModal();
   const [userToDelete, setUserToDelete] = useState<any | null>(null);
+
+  // Initial Fetch
+  React.useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const handleDeleteConfirm = async () => {
     if (!userToDelete) {

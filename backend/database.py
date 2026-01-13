@@ -1,17 +1,27 @@
 from sqlalchemy import create_engine, event
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
 from .config import settings
 
 SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
+# SQLALCHEMY_DATABASE_URL = "postgresql://user:password@postgresserver/db"
 
 # Check argument for SQLite
 connect_args = {}
-if "sqlite" in SQLALCHEMY_DATABASE_URL:
-    connect_args = {"check_same_thread": False}
+pool_args = {}
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args=connect_args)
+if "sqlite" in SQLALCHEMY_DATABASE_URL:
+    connect_args["check_same_thread"] = False
+    if ":memory:" in SQLALCHEMY_DATABASE_URL:
+        pool_args["poolclass"] = StaticPool
+
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL,
+    connect_args=connect_args,
+    **pool_args
+)
 
 # Only attach SQLite pragma if using SQLite
 if "sqlite" in SQLALCHEMY_DATABASE_URL:

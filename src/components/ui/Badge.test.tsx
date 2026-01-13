@@ -1,7 +1,22 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import Badge from './Badge';
+import { Badge } from './Badge';
 import React from 'react';
+
+// Mock lucide-react
+vi.mock('lucide-react', () => {
+  const icons = [];
+  const mock: any = {};
+  const proxy = new Proxy(
+    {},
+    {
+      get: (target, prop) => (props: any) => (
+        <span data-testid={`icon-${String(prop).toLowerCase()}`} {...props} />
+      ),
+    }
+  );
+  return proxy;
+});
 
 describe('Badge Component', () => {
   it('renders correctly with children', () => {

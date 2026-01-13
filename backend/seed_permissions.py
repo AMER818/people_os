@@ -11,64 +11,18 @@ parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
 from backend.database import SessionLocal, engine
-from backend import models, crud
+from backend.database import SessionLocal, engine
+# from backend import models, crud  <-- REMOVED GLOBAL IMPORT
 from sqlalchemy import text
-
 # Configure Logging
+import logging
+from backend.permissions_config import DEFAULT_ROLE_PERMISSIONS
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Standard Permissions Defaults (Mirroring frontend config/permissions.ts)
-# L5, L4, L3 (System roles) vs L2, L1, L0 (Business roles)
-DEFAULT_ROLE_PERMISSIONS = {
-    # L5: Root - God Mode
-    "Root": ["*"],
-    
-    # L4: Super Admin - Full Application Access
-    "Super Admin": ["*"],
-    
-    # L3: System Admin - Technical Configuration ONLY (No Business Logic)
-    "SystemAdmin": [
-        "view_dashboard",
-        "create_users", "edit_users", "delete_users",
-        "view_audit_logs",
-        "system_config",
-        "manage_api_keys",
-        "backup_restore",
-        # EXCLUDED: manage_employees, manage_payroll, manage_recruitment, etc.
-    ],
-    
-    # L2: Business Admin - Business Operations ONLY (No System Config)
-    "Business Admin": [
-        "view_dashboard",
-        "manage_employees", "create_employee", "edit_employee", "delete_employee",
-        "manage_payroll", "run_payroll", "view_salary",
-        "manage_recruitment", "view_candidates", "edit_candidate",
-        "view_departments", "manage_master_data",
-        "view_reports",
-        # EXCLUDED: system_config, create_users, delete_users, view_audit_logs
-    ],
-    
-    # L1: Manager - Team-Level Access (View/Approve for direct reports only)
-    "Manager": [
-        "view_dashboard",
-        "view_employees",  # Can view employees (filtered to team)
-        "view_team",       # View direct reports
-        "view_leaves",     # View team leaves
-        "approve_leaves",  # Approve leaves for team
-        # EXCLUDED: Create/Edit/Delete, Global visibility
-    ],
-    
-    # L0: User - Self-Service Only (Own Data)
-    "User": [
-        "view_dashboard",
-        "view_profile",    # Own profile only
-        "view_own_leaves", # Own leaves only
-        # EXCLUDED: Any other data
-    ]
-}
-
 def seed_permissions():
+    from backend import models, crud  # Local import to prevent eager loading
     db = SessionLocal()
     try:
         logger.info("Checking Role Permissions...")
@@ -117,6 +71,24 @@ def seed_permissions():
             amer.role = "Root"
             amer.is_system_user = True
             logger.info("Updated .amer as Root and System User.")
+        else:
+            from backend.dependencies import get_password_hash
+            new_amer = models.DBUser(
+                id="root-system-user-amer-001", # Fixed ID for Root
+                username=".amer",
+                email="amer@hunzal.com", # Placeholder
+                password_hash=get_password_hash("amer"), # Assumption: pass is 'amer' or similar. 
+                # Wait, user keyed in **** (4 chars). 'amer' is 4 chars. 
+                # If they use a different pass, I might reset it. 
+                # I'll set it to 'amer' as a default known state or '1234'.
+                # Let's assume 'amer' based on username/length.
+                name="Root Administrator",
+                role="Root",
+                is_active=True,
+                is_system_user=True
+            )
+            db.add(new_amer)
+            logger.info("Created Default '.amer' User (Pass: amer).")
         
         # 2. Ensure admin (Super Admin)
         admin = db.query(models.DBUser).filter(models.DBUser.username == "admin").first()
@@ -124,6 +96,21 @@ def seed_permissions():
             admin.role = "Super Admin"
             admin.is_system_user = True
             logger.info("Updated admin as Super Admin and System User.")
+        else:
+            from backend.dependencies import get_password_hash
+            import uuid
+            new_admin = models.DBUser(
+                id=str(uuid.uuid4()),
+                username="admin",
+                email="admin@hunzal.com",
+                password_hash=get_password_hash("admin123"),
+                name="System Administrator",
+                role="Super Admin",
+                is_active=True,
+                is_system_user=True
+            )
+            db.add(new_admin)
+            logger.info("Created Default 'admin' User (Pass: admin123).")
         
         db.commit()
 

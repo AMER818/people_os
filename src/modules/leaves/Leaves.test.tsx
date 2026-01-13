@@ -15,29 +15,100 @@ vi.mock('../../services/api', () => ({
   },
 }));
 
-// Mock lucide-react
+// Mock lucide-react explicitly
 vi.mock('lucide-react', () => {
   const icons = [
-    'Plus',
-    'Coffee',
-    'FileText',
-    'Search',
-    'Filter',
-    'Send',
-    'X',
-    'AlertTriangle',
-    'Download',
-    'CalendarRange',
-    'Users',
-    'LayoutGrid',
-    'List',
-    'Sparkles',
-    'RefreshCw',
-    'History',
+    'User',
+    'Mail',
+    'Phone',
+    'CreditCard',
+    'MapPin',
+    'HeartPulse',
+    'Clock',
+    'Factory',
+    'Sun',
+    'UserPlus',
+    'UserX',
+    'Target',
+    'Settings',
+    'Eye',
+    'Edit3',
+    'AlertCircle',
+    'Building2',
+    'UserCircle',
+    'CheckCircle2',
     'ShieldCheck',
-    'Check',
+    'Edit',
+    'LogOut',
+    'Trash2',
+    'Plus',
+    'Search',
+    'SearchCode',
+    'Filter',
+    'Sparkles',
+    'FileText',
+    'FileSpreadsheet',
+    'PartyPopper',
+    'Cake',
+    'Users',
+    'UserCheck',
+    'UserMinus',
+    'Briefcase',
+    'Calendar',
+    'CalendarCheck',
+    'Fingerprint',
+    'CheckCircle',
+    'Info',
+    'AlertTriangle',
+    'X',
+    'Save',
+    'UserRoundPen',
+    'Wallet',
+    'Heart',
+    'GraduationCap',
+    'History',
+    'Gavel',
+    'Zap',
+    'Hash',
+    'Printer',
+    'Download',
+    'Send',
+    'Banknote',
+    'TrendingUp',
+    'ArrowUp',
+    'Building',
+    'ChevronRight',
+    'BrainCircuit',
+    'RefreshCw',
+    'Award',
+    'Star',
+    'LayoutDashboard',
+    'Bell',
+    'Menu',
+    'ChevronLeft',
+    'Moon',
+    'CalendarDays',
+    'Clock3',
+    'ClipboardCheck',
+    'Coins',
+    'Receipt',
+    'Landmark',
+    'PieChart',
+    'Activity',
+    'FileCheck',
+    'ScanFace',
+    'Globe',
+    'Camera',
+    'LayoutGrid',
+    'Layout',
+    'List',
+    'CalendarRange',
     'Ban',
     'Gauge',
+    'Loader2',
+    'Coffee',
+    'FileEdit',
+    'Check',
   ];
   const mock: any = {};
   icons.forEach((icon) => {
@@ -105,7 +176,7 @@ describe('Leaves Module', () => {
     });
 
     // Switch to Forecast
-    fireEvent.click(screen.getByText('AI Forecast'));
+    fireEvent.click(screen.getByRole('tab', { name: /Calendar Flux/i }));
     await waitFor(() => {
       expect(screen.getByText('AI Forecasting Active')).toBeDefined();
     });
@@ -118,12 +189,12 @@ describe('Leaves Module', () => {
       </ToastProvider>
     );
 
-    fireEvent.click(screen.getByText('New Request'));
-    expect(screen.getByText(/New Request/i)).toBeDefined();
+    fireEvent.click(screen.getByRole('button', { name: /New Request/i }));
+    expect(screen.getByRole('heading', { name: /New Request/i })).toBeDefined();
 
     fireEvent.click(screen.getByTestId('icon-x'));
     await waitFor(() => {
-      expect(screen.queryByText(/New Request/i)).toBeNull();
+      expect(screen.queryByRole('heading', { name: /New Request/i })).toBeNull();
     });
   });
 
@@ -134,7 +205,11 @@ describe('Leaves Module', () => {
       </ToastProvider>
     );
 
-    fireEvent.click(screen.getByText('New Request'));
+    const buttons = screen.getAllByText(/New Request/i);
+    const mainButton = buttons.find((b) => b.tagName === 'BUTTON');
+    if (mainButton) {
+      fireEvent.click(mainButton);
+    }
 
     fireEvent.change(screen.getByPlaceholderText('Select Employee...'), {
       target: { value: 'Jane Doe' },

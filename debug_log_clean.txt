@@ -1,0 +1,393 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.0.2, pluggy-1.6.0 -- D:\Project\PEOPLE_OS\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: D:\Project\PEOPLE_OS
+configfile: pytest.ini
+plugins: anyio-3.7.1, cov-7.0.0
+collecting ... collected 10 items
+
+backend/tests/test_auth_api.py::TestAuthEndpoints::test_login_success [DEBUG] client fixture: create_all
+2026-01-12 10:27:28 - hunzal_hcm - INFO - Starting Application Lifecycle...
+INFO:hunzal_hcm:Starting Application Lifecycle...
+--- [STARTUP] Verifying Database Configuration ---
+--- [STARTUP] Verifying Database Configuration ---
+[INFO] NOTE: Authorized database will be created at: D:\Project\PEOPLE_OS\:memory:
+--- [STARTUP] Environment clean (No conflicting files) ---
+2026-01-12 10:27:33 - hunzal_hcm - INFO - Database Schema Verified.
+INFO:hunzal_hcm:Database Schema Verified.
+INFO:apscheduler.scheduler:Scheduler started
+[INFO] Audit Scheduler Started
+2026-01-12 10:27:34 - hunzal_hcm - INFO - Application Startup Sequence Complete.
+INFO:hunzal_hcm:Application Startup Sequence Complete.
+INFO:httpx:HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+[DEBUG] client fixture: yield client
+[DEBUG] db fixture: create_all
+[DEBUG] db fixture: yield db
+[DEBUG] test_organization: start
+[DEBUG] test_organization: Created org org-1
+[DEBUG] client fixture: override_get_db yield
+[DEBUG] client fixture: override_get_db close
+PASSED[DEBUG] db fixture: close & drop_all
+[DEBUG] client fixture: drop_all
+
+backend/tests/test_auth_api.py::TestAuthEndpoints::test_login_invalid_credentials [DEBUG] client fixture: create_all
+2026-01-12 10:27:34 - hunzal_hcm - INFO - Starting Application Lifecycle...
+INFO:hunzal_hcm:Starting Application Lifecycle...
+--- [STARTUP] Verifying Database Configuration ---
+--- [STARTUP] Verifying Database Configuration ---
+[INFO] NOTE: Authorized database will be created at: D:\Project\PEOPLE_OS\:memory:
+--- [STARTUP] Environment clean (No conflicting files) ---
+2026-01-12 10:27:40 - hunzal_hcm - INFO - Database Schema Verified.
+INFO:hunzal_hcm:Database Schema Verified.
+2026-01-12 10:27:40 - hunzal_hcm - INFO - Application Startup Sequence Complete.
+INFO:hunzal_hcm:Application Startup Sequence Complete.
+[DEBUG] client fixture: yield client
+[DEBUG] db fixture: create_all
+[DEBUG] db fixture: yield db
+[DEBUG] test_organization: start
+[DEBUG] test_organization: Created org org-1
+[DEBUG] client fixture: override_get_db yield
+2026-01-12 10:27:40 - hunzal_hcm - WARNING - Login failed: Password mismatch for 'testuser'.
+WARNING:hunzal_hcm:Login failed: Password mismatch for 'testuser'.
+INFO:httpx:HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+[DEBUG] client fixture: override_get_db close
+PASSED[DEBUG] db fixture: close & drop_all
+[DEBUG] client fixture: drop_all
+
+backend/tests/test_auth_api.py::TestAuthEndpoints::test_login_nonexistent_user [DEBUG] client fixture: create_all
+2026-01-12 10:27:40 - hunzal_hcm - INFO - Starting Application Lifecycle...
+INFO:hunzal_hcm:Starting Application Lifecycle...
+--- [STARTUP] Verifying Database Configuration ---
+--- [STARTUP] Verifying Database Configuration ---
+[INFO] NOTE: Authorized database will be created at: D:\Project\PEOPLE_OS\:memory:
+--- [STARTUP] Environment clean (No conflicting files) ---
+2026-01-12 10:27:46 - hunzal_hcm - INFO - Database Schema Verified.
+INFO:hunzal_hcm:Database Schema Verified.
+2026-01-12 10:27:46 - hunzal_hcm - INFO - Application Startup Sequence Complete.
+INFO:hunzal_hcm:Application Startup Sequence Complete.
+[DEBUG] client fixture: yield client
+[DEBUG] client fixture: override_get_db yield
+2026-01-12 10:27:46 - hunzal_hcm - WARNING - Login failed: User 'nonexistent' not found.
+WARNING:hunzal_hcm:Login failed: User 'nonexistent' not found.
+INFO:httpx:HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 401 Unauthorized"
+[DEBUG] client fixture: override_get_db close
+PASSED[DEBUG] client fixture: drop_all
+
+backend/tests/test_auth_api.py::TestAuthEndpoints::test_login_inactive_user [DEBUG] client fixture: create_all
+2026-01-12 10:27:46 - hunzal_hcm - INFO - Starting Application Lifecycle...
+INFO:hunzal_hcm:Starting Application Lifecycle...
+--- [STARTUP] Verifying Database Configuration ---
+--- [STARTUP] Verifying Database Configuration ---
+[INFO] NOTE: Authorized database will be created at: D:\Project\PEOPLE_OS\:memory:
+--- [STARTUP] Environment clean (No conflicting files) ---
+2026-01-12 10:27:51 - hunzal_hcm - INFO - Database Schema Verified.
+INFO:hunzal_hcm:Database Schema Verified.
+2026-01-12 10:27:51 - hunzal_hcm - INFO - Application Startup Sequence Complete.
+INFO:hunzal_hcm:Application Startup Sequence Complete.
+[DEBUG] client fixture: yield client
+[DEBUG] db fixture: create_all
+[DEBUG] db fixture: yield db
+[DEBUG] test_organization: start
+[DEBUG] test_organization: Created org org-1
+[DEBUG] inactive_user: start
+[DEBUG] inactive_user: Trying commit for org org-1
+[DEBUG] client fixture: override_get_db yield
+2026-01-12 10:27:52 - hunzal_hcm - WARNING - Login failed: Account inactive for 'inactive'.
+WARNING:hunzal_hcm:Login failed: Account inactive for 'inactive'.
+INFO:httpx:HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 403 Forbidden"
+[DEBUG] client fixture: override_get_db close
+FAILED[DEBUG] db fixture: close & drop_all
+[DEBUG] client fixture: drop_all
+
+backend/tests/test_auth_api.py::TestProtectedEndpoints::test_protected_endpoint_without_token [DEBUG] client fixture: create_all
+2026-01-12 10:27:52 - hunzal_hcm - INFO - Starting Application Lifecycle...
+INFO:hunzal_hcm:Starting Application Lifecycle...
+--- [STARTUP] Verifying Database Configuration ---
+--- [STARTUP] Verifying Database Configuration ---
+[INFO] NOTE: Authorized database will be created at: D:\Project\PEOPLE_OS\:memory:
+--- [STARTUP] Environment clean (No conflicting files) ---
+2026-01-12 10:27:59 - hunzal_hcm - INFO - Database Schema Verified.
+INFO:hunzal_hcm:Database Schema Verified.
+2026-01-12 10:27:59 - hunzal_hcm - INFO - Application Startup Sequence Complete.
+INFO:hunzal_hcm:Application Startup Sequence Complete.
+INFO:httpx:HTTP Request: GET http://testserver/api/employees "HTTP/1.1 401 Unauthorized"
+[DEBUG] client fixture: yield client
+[DEBUG] client fixture: override_get_db yield
+[DEBUG] client fixture: override_get_db close
+PASSED[DEBUG] client fixture: drop_all
+
+backend/tests/test_auth_api.py::TestProtectedEndpoints::test_protected_endpoint_with_invalid_token [DEBUG] client fixture: create_all
+2026-01-12 10:27:59 - hunzal_hcm - INFO - Starting Application Lifecycle...
+INFO:hunzal_hcm:Starting Application Lifecycle...
+--- [STARTUP] Verifying Database Configuration ---
+--- [STARTUP] Verifying Database Configuration ---
+[INFO] NOTE: Authorized database will be created at: D:\Project\PEOPLE_OS\:memory:
+--- [STARTUP] Environment clean (No conflicting files) ---
+2026-01-12 10:28:05 - hunzal_hcm - INFO - Database Schema Verified.
+INFO:hunzal_hcm:Database Schema Verified.
+2026-01-12 10:28:05 - hunzal_hcm - INFO - Application Startup Sequence Complete.
+INFO:hunzal_hcm:Application Startup Sequence Complete.
+INFO:httpx:HTTP Request: GET http://testserver/api/employees "HTTP/1.1 401 Unauthorized"
+[DEBUG] client fixture: yield client
+[DEBUG] client fixture: override_get_db yield
+[DEBUG] client fixture: override_get_db close
+PASSED[DEBUG] client fixture: drop_all
+
+backend/tests/test_auth_api.py::TestProtectedEndpoints::test_protected_endpoint_with_valid_token [DEBUG] client fixture: create_all
+2026-01-12 10:28:05 - hunzal_hcm - INFO - Starting Application Lifecycle...
+INFO:hunzal_hcm:Starting Application Lifecycle...
+--- [STARTUP] Verifying Database Configuration ---
+--- [STARTUP] Verifying Database Configuration ---
+[INFO] NOTE: Authorized database will be created at: D:\Project\PEOPLE_OS\:memory:
+--- [STARTUP] Environment clean (No conflicting files) ---
+2026-01-12 10:28:11 - hunzal_hcm - INFO - Database Schema Verified.
+INFO:hunzal_hcm:Database Schema Verified.
+2026-01-12 10:28:11 - hunzal_hcm - INFO - Application Startup Sequence Complete.
+INFO:hunzal_hcm:Application Startup Sequence Complete.
+INFO:httpx:HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://testserver/api/employees "HTTP/1.1 403 Forbidden"
+[DEBUG] client fixture: yield client
+[DEBUG] db fixture: create_all
+[DEBUG] db fixture: yield db
+[DEBUG] test_organization: start
+[DEBUG] test_organization: Created org org-1
+[DEBUG] client fixture: override_get_db yield
+[DEBUG] client fixture: override_get_db close
+[DEBUG] client fixture: override_get_db yield
+[DEBUG] client fixture: override_get_db close
+FAILED[DEBUG] db fixture: close & drop_all
+[DEBUG] client fixture: drop_all
+
+backend/tests/test_auth_api.py::TestRBACEndpoints::test_admin_only_endpoint_as_admin [DEBUG] client fixture: create_all
+2026-01-12 10:28:12 - hunzal_hcm - INFO - Starting Application Lifecycle...
+INFO:hunzal_hcm:Starting Application Lifecycle...
+--- [STARTUP] Verifying Database Configuration ---
+--- [STARTUP] Verifying Database Configuration ---
+[INFO] NOTE: Authorized database will be created at: D:\Project\PEOPLE_OS\:memory:
+--- [STARTUP] Environment clean (No conflicting files) ---
+2026-01-12 10:28:17 - hunzal_hcm - INFO - Database Schema Verified.
+INFO:hunzal_hcm:Database Schema Verified.
+2026-01-12 10:28:17 - hunzal_hcm - INFO - Application Startup Sequence Complete.
+INFO:hunzal_hcm:Application Startup Sequence Complete.
+INFO:httpx:HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://testserver/api/users "HTTP/1.1 200 OK"
+[DEBUG] client fixture: yield client
+[DEBUG] db fixture: create_all
+[DEBUG] db fixture: yield db
+[DEBUG] test_organization: start
+[DEBUG] test_organization: Created org org-1
+[DEBUG] client fixture: override_get_db yield
+[DEBUG] client fixture: override_get_db close
+[DEBUG] client fixture: override_get_db yield
+[DEBUG] client fixture: override_get_db close
+PASSED[DEBUG] db fixture: close & drop_all
+[DEBUG] client fixture: drop_all
+
+backend/tests/test_auth_api.py::TestRBACEndpoints::test_admin_only_endpoint_as_regular_user [DEBUG] client fixture: create_all
+2026-01-12 10:28:18 - hunzal_hcm - INFO - Starting Application Lifecycle...
+INFO:hunzal_hcm:Starting Application Lifecycle...
+--- [STARTUP] Verifying Database Configuration ---
+INFO:hunzal_hcm:Database Schema Verified.
+--- [STARTUP] Verifying Database Configuration ---
+[INFO] NOTE: Authorized database will be created at: D:\Project\PEOPLE_OS\:memory:
+--- [STARTUP] Environment clean (No conflicting files) ---
+2026-01-12 10:28:23 - hunzal_hcm - INFO - Database Schema Verified.
+2026-01-12 10:28:23 - hunzal_hcm - INFO - Application Startup Sequence Complete.
+INFO:hunzal_hcm:Application Startup Sequence Complete.
+INFO:httpx:HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://testserver/api/users "HTTP/1.1 200 OK"
+[DEBUG] client fixture: yield client
+[DEBUG] db fixture: create_all
+[DEBUG] db fixture: yield db
+[DEBUG] test_organization: start
+[DEBUG] test_organization: Created org org-1
+[DEBUG] client fixture: override_get_db yield
+[DEBUG] client fixture: override_get_db close
+[DEBUG] client fixture: override_get_db yield
+[DEBUG] client fixture: override_get_db close
+FAILED[DEBUG] db fixture: close & drop_all
+[DEBUG] client fixture: drop_all
+
+backend/tests/test_auth_api.py::TestHealthCheck::test_health_check [DEBUG] client fixture: create_all
+2026-01-12 10:28:24 - hunzal_hcm - INFO - Starting Application Lifecycle...
+INFO:hunzal_hcm:Starting Application Lifecycle...
+--- [STARTUP] Verifying Database Configuration ---
+--- [STARTUP] Verifying Database Configuration ---
+[INFO] NOTE: Authorized database will be created at: D:\Project\PEOPLE_OS\:memory:
+--- [STARTUP] Environment clean (No conflicting files) ---
+2026-01-12 10:28:29 - hunzal_hcm - INFO - Database Schema Verified.
+INFO:hunzal_hcm:Database Schema Verified.
+2026-01-12 10:28:29 - hunzal_hcm - INFO - Application Startup Sequence Complete.
+INFO:hunzal_hcm:Application Startup Sequence Complete.
+INFO:httpx:HTTP Request: GET http://testserver/health "HTTP/1.1 200 OK"
+[DEBUG] client fixture: yield client
+PASSED[DEBUG] client fixture: drop_all
+
+
+================================== FAILURES ===================================
+_________________ TestAuthEndpoints.test_login_inactive_user __________________
+
+self = <test_auth_api.TestAuthEndpoints object at 0x0000028A640AC080>
+client = <starlette.testclient.TestClient object at 0x0000028A64379C10>
+inactive_user = <backend.models.DBUser object at 0x0000028A640EAC00>
+
+    def test_login_inactive_user(self, client, inactive_user):
+        """Test login with inactive user"""
+        # Act
+        response = client.post(
+            "/api/auth/login",
+            json={
+                "username": "inactive",
+                "password": TEST_USER_PASSWORD
+            }
+        )
+    
+        # Assert
+>       assert response.status_code == 401
+E       assert 403 == 401
+E        +  where 403 = <Response [403 Forbidden]>.status_code
+
+backend\tests\test_auth_api.py:188: AssertionError
+----------------------------- Captured log setup ------------------------------
+INFO     hunzal_hcm:main.py:103 Starting Application Lifecycle...
+INFO     hunzal_hcm:main.py:117 Database Schema Verified.
+INFO     hunzal_hcm:main.py:128 Application Startup Sequence Complete.
+------------------------------ Captured log call ------------------------------
+WARNING  hunzal_hcm:main.py:224 Login failed: Account inactive for 'inactive'.
+INFO     httpx:_client.py:1026 HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 403 Forbidden"
+_______ TestProtectedEndpoints.test_protected_endpoint_with_valid_token _______
+
+self = <test_auth_api.TestProtectedEndpoints object at 0x0000028A6407F7A0>
+client = <starlette.testclient.TestClient object at 0x0000028A641F7E00>
+test_user = <backend.models.DBUser object at 0x0000028A643C5B50>
+
+    def test_protected_endpoint_with_valid_token(self, client, test_user):
+        """Test accessing protected endpoint with valid token"""
+        # First login to get token
+        login_response = client.post(
+            "/api/auth/login",
+            json={
+                "username": "testuser",
+                "password": TEST_USER_PASSWORD
+            }
+        )
+    
+        token = login_response.json()["access_token"]
+    
+        # Act
+        response = client.get(
+            "/api/employees",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+    
+        # Assert
+        # 200 or 404 (if no employees) usually 200 with empty list
+>       assert response.status_code == 200
+E       assert 403 == 200
+E        +  where 403 = <Response [403 Forbidden]>.status_code
+
+backend\tests\test_auth_api.py:236: AssertionError
+----------------------------- Captured log setup ------------------------------
+INFO     hunzal_hcm:main.py:103 Starting Application Lifecycle...
+INFO     hunzal_hcm:main.py:117 Database Schema Verified.
+INFO     hunzal_hcm:main.py:128 Application Startup Sequence Complete.
+------------------------------ Captured log call ------------------------------
+INFO     httpx:_client.py:1026 HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1026 HTTP Request: GET http://testserver/api/employees "HTTP/1.1 403 Forbidden"
+_________ TestRBACEndpoints.test_admin_only_endpoint_as_regular_user __________
+
+self = <test_auth_api.TestRBACEndpoints object at 0x0000028A640AC650>
+client = <starlette.testclient.TestClient object at 0x0000028A641446B0>
+regular_user = <backend.models.DBUser object at 0x0000028A644622D0>
+
+    def test_admin_only_endpoint_as_regular_user(self, client, regular_user):
+        """Test admin-only endpoint with HRManager role (should fail)"""
+        # Login as regular user
+        login_response = client.post(
+            "/api/auth/login",
+            json={"username": "regular", "password": TEST_USER_PASSWORD}
+        )
+        token = login_response.json()["access_token"]
+    
+        # Act - Try to access admin-only endpoint
+        response = client.get(
+            "/api/users",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+    
+        # Assert
+>       assert response.status_code == 403
+E       assert 200 == 403
+E        +  where 200 = <Response [200 OK]>.status_code
+
+backend\tests\test_auth_api.py:276: AssertionError
+----------------------------- Captured log setup ------------------------------
+INFO     hunzal_hcm:main.py:103 Starting Application Lifecycle...
+INFO     hunzal_hcm:main.py:117 Database Schema Verified.
+INFO     hunzal_hcm:main.py:128 Application Startup Sequence Complete.
+------------------------------ Captured log call ------------------------------
+INFO     httpx:_client.py:1026 HTTP Request: POST http://testserver/api/auth/login "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1026 HTTP Request: GET http://testserver/api/users "HTTP/1.1 200 OK"
+============================== warnings summary ===============================
+backend\database.py:38
+  D:\Project\PEOPLE_OS\backend\database.py:38: MovedIn20Warning: The ``declarative_base()`` function is now available as sqlalchemy.orm.declarative_base(). (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    Base = declarative_base()
+
+.venv\Lib\site-packages\pydantic\_internal\_config.py:271: 65 warnings
+  D:\Project\PEOPLE_OS\.venv\Lib\site-packages\pydantic\_internal\_config.py:271: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
+    warnings.warn(DEPRECATION_MESSAGE, DeprecationWarning)
+
+backend\main.py:100
+  D:\Project\PEOPLE_OS\backend\main.py:100: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    @app.on_event("startup")
+
+.venv\Lib\site-packages\fastapi\applications.py:4547
+  D:\Project\PEOPLE_OS\.venv\Lib\site-packages\fastapi\applications.py:4547: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    return self.router.on_event(event_type)
+
+backend/tests/test_auth_api.py: 10 warnings
+  D:\Project\PEOPLE_OS\.venv\Lib\site-packages\httpx\_client.py:680: DeprecationWarning: The 'app' shortcut is now deprecated. Use the explicit style 'transport=WSGITransport(app=...)' instead.
+    warnings.warn(message, DeprecationWarning)
+
+backend/tests/test_auth_api.py::TestAuthEndpoints::test_login_success
+backend/tests/test_auth_api.py::TestProtectedEndpoints::test_protected_endpoint_with_valid_token
+backend/tests/test_auth_api.py::TestRBACEndpoints::test_admin_only_endpoint_as_admin
+backend/tests/test_auth_api.py::TestRBACEndpoints::test_admin_only_endpoint_as_regular_user
+  D:\Project\PEOPLE_OS\backend\dependencies.py:58: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    expire = datetime.datetime.utcnow() + expires_delta
+
+backend/tests/test_auth_api.py::TestAuthEndpoints::test_login_success
+backend/tests/test_auth_api.py::TestAuthEndpoints::test_login_invalid_credentials
+backend/tests/test_auth_api.py::TestAuthEndpoints::test_login_inactive_user
+backend/tests/test_auth_api.py::TestProtectedEndpoints::test_protected_endpoint_with_valid_token
+backend/tests/test_auth_api.py::TestRBACEndpoints::test_admin_only_endpoint_as_admin
+backend/tests/test_auth_api.py::TestRBACEndpoints::test_admin_only_endpoint_as_regular_user
+  D:\Project\PEOPLE_OS\backend\tests\conftest.py:42: SAWarning: Can't sort tables for DROP; an unresolvable foreign key dependency exists between tables: departments, employees; and backend does not support ALTER.  To restore at least a partial sort, apply use_alter=True to ForeignKey and ForeignKeyConstraint objects involved in the cycle to mark these as known cycles that will be ignored.
+    Base.metadata.drop_all(bind=engine)
+
+backend/tests/test_auth_api.py::TestAuthEndpoints::test_login_nonexistent_user
+backend/tests/test_auth_api.py::TestProtectedEndpoints::test_protected_endpoint_without_token
+backend/tests/test_auth_api.py::TestProtectedEndpoints::test_protected_endpoint_with_invalid_token
+backend/tests/test_auth_api.py::TestHealthCheck::test_health_check
+  D:\Project\PEOPLE_OS\backend\tests\conftest.py:66: SAWarning: Can't sort tables for DROP; an unresolvable foreign key dependency exists between tables: departments, employees; and backend does not support ALTER.  To restore at least a partial sort, apply use_alter=True to ForeignKey and ForeignKeyConstraint objects involved in the cycle to mark these as known cycles that will be ignored.
+    Base.metadata.drop_all(bind=engine)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED backend/tests/test_auth_api.py::TestAuthEndpoints::test_login_inactive_user - assert 403 == 401
+ +  where 403 = <Response [403 Forbidden]>.status_code
+FAILED backend/tests/test_auth_api.py::TestProtectedEndpoints::test_protected_endpoint_with_valid_token - assert 403 == 200
+ +  where 403 = <Response [403 Forbidden]>.status_code
+FAILED backend/tests/test_auth_api.py::TestRBACEndpoints::test_admin_only_endpoint_as_regular_user - assert 200 == 403
+ +  where 200 = <Response [200 OK]>.status_code
+============= 3 failed, 7 passed, 92 warnings in 60.96s (0:01:00) =============

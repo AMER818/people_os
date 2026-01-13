@@ -1,7 +1,17 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import Button from './Button';
+import { Button } from './Button';
 import React from 'react';
+
+// Mock lucide-react
+vi.mock('lucide-react', () => {
+  const icons = ['Loader2', 'RefreshCw'];
+  const mock: any = {};
+  icons.forEach((icon) => {
+    mock[icon] = (props: any) => <span data-testid={`icon-${icon.toLowerCase()}`} {...props} />;
+  });
+  return mock;
+});
 
 describe('Button Component', () => {
   it('renders correctly with children', () => {

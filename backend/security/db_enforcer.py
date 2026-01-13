@@ -37,7 +37,7 @@ def enforce_clean_db_state():
         print(f"SUCCESS: Authorized database found at: {auth_db_path}")
     else:
         # It's okay if it doesn't exist yet (first run), but we declare intention.
-        print(f"ℹ️  NOTE: Authorized database will be created at: {auth_db_path}")
+        print(f"[INFO] NOTE: Authorized database will be created at: {auth_db_path}")
 
     # 2. Scan and Ignore others
     found_others = False

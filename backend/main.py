@@ -15,33 +15,43 @@ from sqlalchemy.orm import Session
 
 
 
-try:
-    from .logging_config import logger
-except ImportError:
-    from logging_config import logger
+# Lazy Loading Proxy
+import importlib
 
+class LazyProxy:
+    def __init__(self, module_name):
+        self.module_name = module_name
+        self._module = None
+
+    def __getattr__(self, name):
+        if self._module is None:
+            self._module = importlib.import_module(self.module_name)
+        return getattr(self._module, name)
+
+# Lazy load heavy modules
+crud = LazyProxy("backend.crud")
+models = LazyProxy("backend.models")
+scanner = LazyProxy("backend.security.scanner")
+
+# Eager load schemas (Required for FastAPI/Pydantic)
 try:
-    from . import crud, models, schemas
+    from . import schemas
     from .config import settings, auth_config
     from .database import SessionLocal, engine
-    from .security.scanner import scanner
-    from .seed_permissions import DEFAULT_ROLE_PERMISSIONS
+    from .seed_permissions import DEFAULT_ROLE_PERMISSIONS  # Fallback? No, ideally config
+    # Actually, keep it simple for eager load block
+    from .permissions_config import DEFAULT_ROLE_PERMISSIONS
 except ImportError:
     # Fix ModuleNotFoundError when running via uvicorn
     import os
     import sys
-
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    from backend import crud, models, schemas
-    from backend.config import settings
-
+    from backend import schemas
+    from backend.config import settings, auth_config
     from backend.database import SessionLocal, engine
-    # Security Scanner Import
-    from backend.security.scanner import scanner
-    # Audit Module Imports
-    from backend.audit.audit_engine import run_system_audit
-    from backend.audit.persistence import get_persistence
-    from backend.seed_permissions import DEFAULT_ROLE_PERMISSIONS
+    from backend.permissions_config import DEFAULT_ROLE_PERMISSIONS
+
+# Audit & Security imports moved to usage sites
 
 # models.Base.metadata.create_all(bind=engine)  <-- Moved to startup_event
 
@@ -106,7 +116,13 @@ async def startup_event():
     try:
         from backend.security.db_enforcer import enforce_clean_db_state
     except ImportError:
-        from security.db_enforcer import enforce_clean_db_state
+        # Fallback for direct execution
+        import importlib
+        try:
+           security_module = importlib.import_module("security.db_enforcer")
+           enforce_clean_db_state = security_module.enforce_clean_db_state
+        except:
+             pass
 
     print("--- [STARTUP] Verifying Database Configuration ---")
     enforce_clean_db_state()
@@ -224,12 +240,9 @@ def login(login_data: schemas.LoginRequest, request: Request, db: Session = Depe
         logger.warning(f"Login failed: Account inactive for '{login_data.username}'.")
         raise HTTPException(status_code=403, detail="Account is inactive")
 
-    logger.info(f"User credentials verified: {login_data.username}")
-
     # Check for System-Wide MFA Enforcement
-    flags = crud.get_system_flags(db)
-    mfa_required = flags.mfa_enforced if flags else False
-    
+    flags = crud.get_system_flags(db, user.organization_id)
+    mfa_required = flags["mfa_enforced"] if flags else False    
     if mfa_required:
         logger.info(f"MFA Challenge issued for: {login_data.username}")
         # Return status without access token to trigger frontend MFA flow
@@ -272,9 +285,12 @@ def login(login_data: schemas.LoginRequest, request: Request, db: Session = Depe
     }
 
 
-@app.get("/api/users", tags=["Users"])
+@app.get("/api/users", response_model=List[schemas.User], tags=["Users"])
 def get_users(
-    current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)
+    skip: int = 0, 
+    limit: int = 100, 
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(requires_role("SystemAdmin", "Root", "Super Admin"))
 ):
     """
     Get all users - with visibility rules:
@@ -389,6 +405,10 @@ def delete_user(
     crud.delete_user(db, user_id)
     return {"status": "success"}
 
+
+@app.get("/health")
+def health_check():
+    return {"status": "ok", "database": "active", "timestamp": datetime.datetime.now()}
 
 @app.get("/")
 def read_root():
@@ -590,6 +610,46 @@ def delete_job_vacancy(
         raise HTTPException(status_code=404, detail="Job Vacancy not found")
     log_audit_event(db, current_user, f"Deleted job vacancy: {job_id}")
     return db_job
+
+
+
+# --- Employment Levels Endpoints ---
+
+@app.get("/api/employment-levels", response_model=List[schemas.EmploymentLevel], tags=["Organization Setup"])
+def get_employment_levels(
+    org_id: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(check_permission("view_org_setup"))
+):
+    return crud.get_employment_levels(db, org_id)
+
+
+@app.post("/api/employment-levels", response_model=schemas.EmploymentLevel, tags=["Organization Setup"])
+def create_employment_level(
+    level: schemas.EmploymentLevelCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(requires_role("SystemAdmin", "Business Admin"))
+):
+    return crud.create_employment_level(db, level, current_user["id"])
+
+
+@app.put("/api/employment-levels/{level_id}", response_model=schemas.EmploymentLevel, tags=["Organization Setup"])
+def update_employment_level(
+    level_id: str,
+    level: schemas.EmploymentLevelCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(requires_role("SystemAdmin", "Business Admin"))
+):
+    return crud.update_employment_level(db, level_id, level, current_user["id"])
+
+
+@app.delete("/api/employment-levels/{level_id}", response_model=schemas.EmploymentLevel, tags=["Organization Setup"])
+def delete_employment_level(
+    level_id: str,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(requires_role("SystemAdmin", "Business Admin"))
+):
+    return crud.delete_employment_level(db, level_id)
 
 
 # --- Organization & Plants API ---
@@ -1186,6 +1246,7 @@ async def run_audit_endpoint(
     Rate limited to 2 per hour to prevent abuse.
     Requires SystemAdmin role.
     """
+    from backend.audit.audit_engine import run_system_audit
     try:
         # Run audit
         report = run_system_audit(executed_by=current_user["id"])

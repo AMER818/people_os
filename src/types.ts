@@ -124,26 +124,26 @@ export type ModuleType =
   | 'system-health'
   | 'hunzal-chat';
 
-export interface Plant {
-  id: string;
-  name: string;
-  location: string;
-  code: string;
-  headOfPlant?: string;
-  contactNumber?: string;
-  capacity?: number;
-  organizationId?: string;
-  isActive?: boolean;
-  currentSequence?: number;
-  divisions?: PlantDivision[]; // Added for plant-specific divisions
-}
-
+// --- Plant/Location Management ---
 export interface PlantDivision {
-  id: string;
+  id?: string;
   name: string;
   code: string;
   isActive: boolean;
   plantId?: string;
+}
+
+export interface Plant {
+  id: string;
+  name: string;
+  code: string;
+  location: string;
+  headOfPlant?: string;
+  contactNumber?: string;
+  organizationId?: string;
+  divisions?: PlantDivision[];
+  isActive: boolean;
+  currentSequence?: number;
 }
 
 export interface MasterDepartment {
@@ -187,6 +187,7 @@ export interface Designation {
   id: string;
   name: string;
   gradeId: string;
+  departmentId?: string; // Link to Structural Hierarchy
   isActive?: boolean;
 }
 
@@ -201,6 +202,7 @@ export interface EmploymentLevel {
   code: string;
   description?: string;
   isActive?: boolean;
+  organizationId?: string;
 }
 
 export interface Holiday {
@@ -1029,4 +1031,4 @@ export interface SettingNode {
   impact?: string; // AI Analysis
 }
 
-// --- System Settings Interfaces ---
+// --- Plant/Location Management ---

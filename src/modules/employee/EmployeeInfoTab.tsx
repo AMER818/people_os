@@ -41,11 +41,15 @@ interface EmployeeInfoTabProps {
 const EmployeeInfoTab: React.FC<EmployeeInfoTabProps> = ({
   employee,
   updateField,
-  isAnalyzing: propIsAnalyzing,
-  aiSuggestions: propAiSuggestions,
+  isAnalyzing,
+  aiSuggestions,
 }) => {
-  const [isAnalyzing, setIsAnalyzing] = useState(propIsAnalyzing || false);
-  const [aiSuggestions, setAiSuggestions] = useState<any[]>(propAiSuggestions || []);
+  const [internalSuggestions, setInternalSuggestions] = useState<any[]>([]);
+  const [internalAnalyzing, setInternalAnalyzing] = useState(false);
+
+  const suggestions = aiSuggestions.length > 0 ? aiSuggestions : internalSuggestions;
+  const analyzing = isAnalyzing || internalAnalyzing;
+
   const {
     shifts,
     employmentLevels,
@@ -78,21 +82,21 @@ const EmployeeInfoTab: React.FC<EmployeeInfoTabProps> = ({
 
   // AI Analysis Handler
   const handleAIAnalysis = () => {
-    setIsAnalyzing(true);
+    setInternalAnalyzing(true);
     setTimeout(() => {
-      setAiSuggestions([
+      setInternalSuggestions([
         { icon: Award, message: 'High performance track record', type: 'success' },
         { icon: Star, message: 'Eligible for promotion review', type: 'info' },
         { icon: AlertCircle, message: 'CNIC expiring soon', type: 'warning' },
       ]);
-      setIsAnalyzing(false);
+      setInternalAnalyzing(false);
     }, 1500);
   };
 
   return (
     <div className="space-y-16 animate-in slide-in-from-bottom-8 duration-700">
       {/* AI Intelligence Hub */}
-      {(aiSuggestions.length > 0 || isAnalyzing) && (
+      {(suggestions.length > 0 || analyzing) && (
         <div className="bg-gradient-to-r from-blue-600/10 to-indigo-600/5 border border-blue-500/20 rounded-2xl p-8 space-y-6 shadow-2xl relative overflow-hidden group">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,rgba(59,130,246,0.1),transparent)] pointer-events-none"></div>
           <div className="flex items-center justify-between relative z-10">
@@ -114,14 +118,14 @@ const EmployeeInfoTab: React.FC<EmployeeInfoTabProps> = ({
               aria-label="Refresh AI analysis"
               className="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl flex items-center gap-3 transition-all border border-slate-700 shadow-lg group-active:scale-95"
             >
-              <RefreshCw className={`w-4 h-4 ${isAnalyzing ? 'animate-spin' : 'text-blue-400'}`} />
+              <RefreshCw className={`w-4 h-4 ${analyzing ? 'animate-spin' : 'text-blue-400'}`} />
               <span className="text-[0.65rem] font-black uppercase tracking-[0.15em]">
-                {isAnalyzing ? 'Processing...' : 'Sync Heuristics'}
+                {analyzing ? 'Processing...' : 'Sync Heuristics'}
               </span>
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
-            {aiSuggestions.map((suggestion, idx) => {
+            {suggestions.map((suggestion, idx) => {
               const Icon = suggestion.icon;
               return (
                 <div
@@ -371,7 +375,7 @@ const EmployeeInfoTab: React.FC<EmployeeInfoTabProps> = ({
               }
             >
               <option value="">Select Organization</option>
-              {profile.name && <option value={profile.name}>{profile.name}</option>}
+              {profile?.name && <option value={profile.name}>{profile.name}</option>}
             </select>
           </div>
 

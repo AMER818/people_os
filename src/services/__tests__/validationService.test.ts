@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { validate, sanitizePrompt } from '../services/validationService';
+import { validate, sanitizePrompt } from '../validationService';
 
 /**
  * Unit Tests: Validation Service

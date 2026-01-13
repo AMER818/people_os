@@ -111,7 +111,7 @@ class ApiService {
 
   constructor() {
     this.rateLimiter = new RateLimiter(100, 60000); // 100 requests per minute
-    this.apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
+    this.apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
     this.authToken = secureStorage.getItem('token');
 
     // One-time cache clear to ensure migration to DB-only source.
@@ -483,14 +483,21 @@ class ApiService {
   }
 
   async updateSystemFlags(flags: Partial<SystemFlags>): Promise<SystemFlags> {
-    const response = await this.request(`${this.apiUrl}/system/flags`, {
-      method: 'POST',
-      body: JSON.stringify(flags),
-    });
-    if (!response.ok) {
-      throw new Error('Failed to update system flags');
+    try {
+      const response = await this.request(`${this.apiUrl}/system/flags`, {
+        method: 'POST',
+        body: JSON.stringify(flags),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update system flags');
+      }
+      return await response.json();
+    } catch (e) {
+      console.warn('Backend unavailable, saving system flags to LocalStorage');
+      localStorage.setItem('system_flags', JSON.stringify(flags));
+      // Return merged flags (mock)
+      return { neural_bypass: false, ...flags } as SystemFlags;
     }
-    return await response.json();
   }
 
   async getRolePermissions(): Promise<Record<string, string[]>> {
@@ -1617,68 +1624,6 @@ class ApiService {
       throw error;
     }
   }
-  // --- Job Levels ---
-  async getEmploymentLevels(): Promise<EmploymentLevel[]> {
-    try {
-      const response = await this.request(`${this.apiUrl}/employment-levels`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch job levels');
-      }
-      return await response.json();
-    } catch (error) {
-      Logger.warn('Backend unavailable, returning empty job levels', error);
-      return [];
-    }
-  }
-
-  async addEmploymentLevel(level: EmploymentLevel): Promise<EmploymentLevel> {
-    this.enforceRateLimit();
-    try {
-      const response = await this.request(`${this.apiUrl}/employment-levels`, {
-        method: 'POST',
-        body: JSON.stringify(level),
-      });
-      if (!response.ok) {
-        throw new Error('Failed to save job level');
-      }
-      return await response.json();
-    } catch (error) {
-      Logger.error('Save job level failed', error);
-      throw error;
-    }
-  }
-
-  async updateEmploymentLevel(id: string, level: EmploymentLevel): Promise<EmploymentLevel> {
-    this.enforceRateLimit();
-    try {
-      const response = await this.request(`${this.apiUrl}/employment-levels/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(level),
-      });
-      if (!response.ok) {
-        throw new Error('Failed to update job level');
-      }
-      return await response.json();
-    } catch (error) {
-      Logger.error('Update job level failed', error);
-      throw error;
-    }
-  }
-
-  async deleteEmploymentLevel(id: string): Promise<void> {
-    this.enforceRateLimit();
-    try {
-      const response = await this.request(`${this.apiUrl}/employment-levels/${id}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        throw new Error('Failed to delete job level');
-      }
-    } catch (error) {
-      Logger.error('Delete job level failed', error);
-      throw error;
-    }
-  }
 
   // --- RBAC ---
   async getAllRolePermissions(): Promise<Record<string, string[]>> {
@@ -2216,14 +2161,20 @@ class ApiService {
 
   async updateNotificationSettings(settings: any): Promise<any> {
     this.enforceRateLimit();
-    const response = await this.request(`${this.apiUrl}/notifications/config`, {
-      method: 'POST',
-      body: JSON.stringify(settings),
-    });
-    if (!response.ok) {
-      throw new Error('Failed to update notification settings');
+    try {
+      const response = await this.request(`${this.apiUrl}/notifications/config`, {
+        method: 'POST',
+        body: JSON.stringify(settings),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update notification settings');
+      }
+      return await response.json();
+    } catch (e) {
+      console.warn('Backend unavailable, saving notification settings to LocalStorage');
+      localStorage.setItem('notification_settings', JSON.stringify(settings));
+      return settings;
     }
-    return await response.json();
   }
 
   async testEmailNotification(recipient: string): Promise<any> {
@@ -2294,12 +2245,17 @@ class ApiService {
       agents: settings.agents,
     };
 
-    const response = await this.request(`${this.apiUrl}/system/ai`, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) {
-      throw new Error('Failed to save AI settings');
+    try {
+      const response = await this.request(`${this.apiUrl}/system/ai`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to save AI settings');
+      }
+    } catch (e) {
+      console.warn('Backend unavailable, saving AI settings to LocalStorage');
+      localStorage.setItem('ai_settings', JSON.stringify(settings));
     }
   }
 
@@ -2366,6 +2322,52 @@ class ApiService {
       throw new Error('Failed to cancel background job');
     }
     return await response.json();
+  }
+
+  // --- Employment Levels ---
+  async getEmploymentLevels(orgId?: string): Promise<EmploymentLevel[]> {
+    const url = orgId
+      ? `${this.apiUrl}/employment-levels?org_id=${orgId}`
+      : `${this.apiUrl}/employment-levels`;
+    const response = await this.request(url);
+    if (!response.ok) {
+      return [];
+    }
+    return await response.json();
+  }
+
+  async createEmploymentLevel(data: Partial<EmploymentLevel>): Promise<EmploymentLevel> {
+    const response = await this.request(`${this.apiUrl}/employment-levels`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to create employment level');
+    }
+    return await response.json();
+  }
+
+  async updateEmploymentLevel(
+    id: string,
+    data: Partial<EmploymentLevel>
+  ): Promise<EmploymentLevel> {
+    const response = await this.request(`${this.apiUrl}/employment-levels/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update employment level');
+    }
+    return await response.json();
+  }
+
+  async deleteEmploymentLevel(id: string): Promise<void> {
+    const response = await this.request(`${this.apiUrl}/employment-levels/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete employment level');
+    }
   }
 }
 

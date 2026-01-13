@@ -1,0 +1,59 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.0.2, pluggy-1.6.0 -- D:\Project\PEOPLE_OS\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: D:\Project\PEOPLE_OS
+configfile: pytest.ini
+plugins: anyio-3.7.1, cov-7.0.0
+collecting ... collected 29 items / 1 error
+
+=================================== ERRORS ====================================
+_______________ ERROR collecting backend/tests/test_auth_api.py _______________
+ImportError while importing test module 'D:\Project\PEOPLE_OS\backend\tests\test_auth_api.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\test_auth_api.py:17: in <module>
+    from database import get_db, engine
+backend\database.py:5: in <module>
+    from .config import settings
+E   ImportError: attempted relative import with no known parent package
+============================== warnings summary ===============================
+backend\database.py:28
+  D:\Project\PEOPLE_OS\backend\database.py:28: MovedIn20Warning: The ``declarative_base()`` function is now available as sqlalchemy.orm.declarative_base(). (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    Base = declarative_base()
+
+.venv\Lib\site-packages\pydantic\_internal\_config.py:271: 65 warnings
+  D:\Project\PEOPLE_OS\.venv\Lib\site-packages\pydantic\_internal\_config.py:271: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
+    warnings.warn(DEPRECATION_MESSAGE, DeprecationWarning)
+
+backend\main.py:100
+backend\main.py:100
+  D:\Project\PEOPLE_OS\backend\main.py:100: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    @app.on_event("startup")
+
+.venv\Lib\site-packages\fastapi\applications.py:4547
+.venv\Lib\site-packages\fastapi\applications.py:4547
+  D:\Project\PEOPLE_OS\.venv\Lib\site-packages\fastapi\applications.py:4547: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    return self.router.on_event(event_type)
+
+.venv\Lib\site-packages\httpx\_client.py:680
+  D:\Project\PEOPLE_OS\.venv\Lib\site-packages\httpx\_client.py:680: DeprecationWarning: The 'app' shortcut is now deprecated. Use the explicit style 'transport=WSGITransport(app=...)' instead.
+    warnings.warn(message, DeprecationWarning)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+ERROR backend/tests/test_auth_api.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+======================== 71 warnings, 1 error in 3.59s ========================

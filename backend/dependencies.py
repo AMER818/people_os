@@ -9,9 +9,9 @@ from sqlalchemy.orm import Session
 import jwt  # Assumes PyJWT is installed as per main.py checks
 
 from backend.database import SessionLocal
-from backend import models, schemas, crud
+from backend import schemas
 from backend.config import settings, auth_config
-from backend.seed_permissions import DEFAULT_ROLE_PERMISSIONS
+from backend.permissions_config import DEFAULT_ROLE_PERMISSIONS
 
 # Logger
 import logging
@@ -83,6 +83,7 @@ def get_current_user(
     except Exception:
         raise credentials_exception
 
+    from backend import models
     user = db.query(models.DBUser).filter(models.DBUser.username == username).first()
     if user is None:
         raise credentials_exception
@@ -118,6 +119,7 @@ def log_audit_event(db: Session, user: dict, action: str, status: str = "Hashed"
             status=status,
             time=datetime.datetime.now().isoformat()
         )
+        from backend import crud
         crud.create_audit_log(db, log_data)
     except Exception as e:
         logger.error(f"Failed to log audit event: {e}")
@@ -150,6 +152,7 @@ def check_permission(permission: str):
             return current_user
             
         # 2. Check DB Permissions
+        from backend import crud
         role_perms = crud.get_role_permissions(db, user_role)
         
         # 3. Fallback to Default Permissions if DB is empty
