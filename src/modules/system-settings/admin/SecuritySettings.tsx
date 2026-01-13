@@ -11,7 +11,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { useOrgStore } from '@store/orgStore';
-import { useToast } from '@components/ui/toast';
+import { useToast } from '@components/ui/Toast';
 
 const SecuritySettings: React.FC = () => {
   const { systemFlags, updateSystemFlags } = useOrgStore();

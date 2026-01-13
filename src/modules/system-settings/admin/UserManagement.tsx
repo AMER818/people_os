@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { ShieldCheck, Users, Check, X, Plus, Trash2, Edit2 } from 'lucide-react';
 import { useOrgStore, Permission, ROLE_HIERARCHY } from '@store/orgStore';
-import { useToast } from '@components/ui/toast';
+import { useToast } from '@components/ui/Toast';
 import { useModal } from '@hooks/useModal';
 import { useSaveEntity } from '@hooks/useSaveEntity';
-import { Button } from '@components/ui/button';
+import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
 import { Modal } from '@components/ui/Modal';
 

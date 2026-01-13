@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { BrainCircuit, Sparkles, Bot, Wand2, Key, Layout, Activity, Zap, Save } from 'lucide-react';
 import { useOrgStore } from '@store/orgStore';
-import { useToast } from '@components/ui/toast';
-import { Button } from '@components/ui/button';
+import { useToast } from '@components/ui/Toast';
+import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
 import { SYSTEM_CONFIG } from './systemConfig';
 

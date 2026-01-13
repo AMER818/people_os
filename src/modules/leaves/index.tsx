@@ -25,8 +25,8 @@ import { HorizontalTabs } from '../../components/ui/HorizontalTabs';
 import { useModal } from '../../hooks/useModal';
 import { FormModal } from '../../components/ui/FormModal';
 import { Modal } from '../../components/ui/Modal';
-import { useToast } from '../../components/ui/toast';
-import { Button } from '../../components/ui/button';
+import { useToast } from '../../components/ui/Toast';
+import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { useSaveEntity } from '../../hooks/useSaveEntity';
 

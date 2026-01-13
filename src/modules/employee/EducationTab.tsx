@@ -1,7 +1,7 @@
 import React from 'react';
 import { GraduationCap, BookOpen, X } from 'lucide-react';
 import { Employee as EmployeeType } from '../../types';
-import { Button } from '../../components/ui/button';
+import { Button } from '../../components/ui/Button';
 
 interface EducationTabProps {
   employee: Partial<EmployeeType> | null;

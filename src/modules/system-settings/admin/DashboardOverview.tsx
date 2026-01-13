@@ -1,7 +1,7 @@
 import React from 'react';
 import { Activity, History, Zap, Database, RefreshCw } from 'lucide-react';
 import { useOrgStore } from '@store/orgStore';
-import { useToast } from '@components/ui/toast';
+import { useToast } from '@components/ui/Toast';
 import SystemHealth from '@modules/system-health';
 import { SYSTEM_CONFIG } from './systemConfig';
 

@@ -17,7 +17,7 @@ import { NewHireNode } from '../../types';
 import { api } from '../../services/api';
 import { useModal } from '../../hooks/useModal';
 import { FormModal } from '../../components/ui/FormModal';
-import { Button } from '../../components/ui/button';
+import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import RecruitmentFooter from '../recruitment/RecruitmentFooter';
 import { useSaveEntity } from '../../hooks/useSaveEntity';

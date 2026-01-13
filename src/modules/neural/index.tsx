@@ -44,7 +44,9 @@ const NeuralModule: React.FC = () => {
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const handleSend = async () => {
-    if (!prompt.trim()) { return; }
+    if (!prompt.trim()) {
+      return;
+    }
 
     const userMsg = prompt;
     // Update log immediately for UI responsiveness
@@ -62,8 +64,8 @@ const NeuralModule: React.FC = () => {
       let getChatResponse;
 
       if (aiSettings.provider === 'openai') {
-        const service = await import('../../services/openaiService');
-        getChatResponse = service.getChatResponse;
+        // Fallback or remove since service is deleted
+        throw new Error('OpenAI provider is currently not supported. Please switch to Gemini.');
       } else {
         const service = await import('../../services/geminiService');
         getChatResponse = service.getChatResponse;
@@ -108,10 +110,16 @@ const NeuralModule: React.FC = () => {
           </div>
         </div>
         <div className="flex gap-2">
-          <button aria-label="Open AI settings" className="p-4 hover:bg-secondary rounded-xl text-muted-foreground hover:text-foreground transition-colors">
+          <button
+            aria-label="Open AI settings"
+            className="p-4 hover:bg-secondary rounded-xl text-muted-foreground hover:text-foreground transition-colors"
+          >
             <Settings size={20} />
           </button>
-          <button aria-label="Maximize chat window" className="p-4 hover:bg-secondary rounded-xl text-muted-foreground hover:text-foreground transition-colors">
+          <button
+            aria-label="Maximize chat window"
+            className="p-4 hover:bg-secondary rounded-xl text-muted-foreground hover:text-foreground transition-colors"
+          >
             <Maximize2 size={20} />
           </button>
         </div>
@@ -125,15 +133,17 @@ const NeuralModule: React.FC = () => {
             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-4 duration-500`}
           >
             <div
-              className={`max-w-[80%] p-6 rounded-[2rem] ${msg.role === 'user'
-                ? 'bg-primary text-primary-foreground rounded-tr-none shadow-xl shadow-primary/20'
-                : 'bg-secondary text-foreground rounded-tl-none border border-border shadow-sm'
-                }`}
+              className={`max-w-[80%] p-6 rounded-[2rem] ${
+                msg.role === 'user'
+                  ? 'bg-primary text-primary-foreground rounded-tr-none shadow-xl shadow-primary/20'
+                  : 'bg-secondary text-foreground rounded-tl-none border border-border shadow-sm'
+              }`}
             >
               <p className="text-sm font-bold leading-relaxed">{msg.content}</p>
               <p
-                className={`text-[0.5625rem] font-black uppercase tracking-widest mt-3 ${msg.role === 'user' ? 'text-primary-foreground/60' : 'text-muted-foreground'
-                  }`}
+                className={`text-[0.5625rem] font-black uppercase tracking-widest mt-3 ${
+                  msg.role === 'user' ? 'text-primary-foreground/60' : 'text-muted-foreground'
+                }`}
               >
                 {msg.role === 'user' ? 'You' : 'Hunzal'} • Just now
               </p>
@@ -409,7 +419,10 @@ const NeuralModule: React.FC = () => {
             </div>
 
             <div className="mt-6 pt-6 border-t border-border">
-              <button aria-label="View system logs" className="w-full py-3 bg-primary text-primary-foreground rounded-xl text-[0.625rem] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-md shadow-primary/20">
+              <button
+                aria-label="View system logs"
+                className="w-full py-3 bg-primary text-primary-foreground rounded-xl text-[0.625rem] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-md shadow-primary/20"
+              >
                 View System Logs
               </button>
             </div>
@@ -448,7 +461,10 @@ const NeuralModule: React.FC = () => {
                 </div>
               ))}
             </div>
-            <button aria-label="View regional activity details" className="w-full mt-6 py-4 bg-foreground text-background rounded-xl font-black uppercase text-[0.625rem] tracking-widest shadow-lg hover:scale-105 transition-all">
+            <button
+              aria-label="View regional activity details"
+              className="w-full mt-6 py-4 bg-foreground text-background rounded-xl font-black uppercase text-[0.625rem] tracking-widest shadow-lg hover:scale-105 transition-all"
+            >
               View Details
             </button>
           </div>

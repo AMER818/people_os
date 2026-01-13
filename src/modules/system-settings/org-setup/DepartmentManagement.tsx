@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Network, Plus, Edit2, Trash2, FolderTree, Building } from 'lucide-react';
 import { useOrgStore } from '@store/orgStore';
 import { Department, SubDepartment, MasterDepartment } from '@/types';
-import { useToast } from '@components/ui/toast';
+import { useToast } from '@components/ui/Toast';
 import { useModal } from '@hooks/useModal';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';

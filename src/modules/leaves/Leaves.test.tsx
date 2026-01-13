@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import Leaves from '.';
 import { api } from '../../services/api';
-import { ToastProvider } from '../../components/ui/toast';
+import { ToastProvider } from '../../components/ui/Toast';
 
 // Mock API
 vi.mock('../../services/api', () => ({

@@ -32,7 +32,7 @@ vi.mock('../../components/ui/Card', () => ({
 }));
 
 // Mock Button component
-vi.mock('../../components/ui/button', () => ({
+vi.mock('../../components/ui/Button', () => ({
     Button: ({ children, onClick }: any) => <button onClick={onClick}>{children}</button>,
 }));
 

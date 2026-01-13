@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Database, RotateCcw, Download, ArrowUpRight, ShieldCheck } from 'lucide-react';
-import { useToast } from '@components/ui/toast';
+import { useToast } from '@components/ui/Toast';
 import { api } from '@services/api';
 
 interface DataManagementProps {

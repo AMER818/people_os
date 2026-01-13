@@ -12,7 +12,7 @@ vi.mock('@store/orgStore', () => ({
     }),
 }));
 
-vi.mock('@components/ui/toast', () => ({
+vi.mock('@components/ui/Toast', () => ({
     useToast: () => ({ success: vi.fn(), toastError: vi.fn(), error: vi.fn() }),
 }));
 

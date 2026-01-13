@@ -1,7 +1,7 @@
 import React from 'react';
 import { History as HistoryIcon, Building2, Trash2 } from 'lucide-react';
 import { Employee as EmployeeType } from '../../types';
-import { Button } from '../../components/ui/button';
+import { Button } from '../../components/ui/Button';
 
 interface ExperienceTabProps {
   employee: Partial<EmployeeType> | null;

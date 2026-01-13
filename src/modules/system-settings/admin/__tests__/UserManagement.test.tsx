@@ -21,7 +21,7 @@ vi.mock('@store/orgStore', () => ({
     },
 }));
 
-vi.mock('@components/ui/toast', () => ({
+vi.mock('@components/ui/Toast', () => ({
     useToast: () => ({ success: vi.fn(), error: vi.fn(), warning: vi.fn(), info: vi.fn() }),
 }));
 

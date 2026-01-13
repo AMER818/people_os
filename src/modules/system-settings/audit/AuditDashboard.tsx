@@ -18,7 +18,7 @@ import { TrendAnalysis } from './components/TrendAnalysis';
 import { FindingsExplorer } from './components/FindingsExplorer';
 import { ComplianceDashboard } from './components/ComplianceDashboard';
 import { api } from '../../../services/api';
-import { useToast } from '../../../components/ui/toast';
+import { useToast } from '../../../components/ui/Toast';
 import { HealthRadar } from './components/HealthRadar';
 import { SystemLogViewer } from './components/SystemLogViewer';
 

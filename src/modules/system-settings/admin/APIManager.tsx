@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Cloud, Plus, Trash2, Eye, EyeOff, Copy } from 'lucide-react';
 import { useOrgStore } from '@store/orgStore';
-import { useToast } from '@components/ui/toast';
+import { useToast } from '@components/ui/Toast';
 import { useModal } from '@hooks/useModal';
 import { useSaveEntity } from '@hooks/useSaveEntity';
-import { Button } from '@components/ui/button';
+import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
 import { Badge } from '@components/ui/Badge';
 

@@ -14,8 +14,8 @@ import {
 import { Employee as EmployeeType, Increment, PayrollRecord } from '../../types';
 import { useOrgStore } from '../../store/orgStore';
 import { Input } from '../../components/ui/Input';
-import { Card } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
+import { Card } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
 import { PAYMENT_MODES } from './constants';
 
 interface PayrollTabProps {

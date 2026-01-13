@@ -14,8 +14,8 @@ import {
   Lock,
 } from 'lucide-react';
 
-import { Button } from '../../components/ui/button';
-import { useToast } from '../../components/ui/toast';
+import { Button } from '../../components/ui/Button';
+import { useToast } from '../../components/ui/Toast';
 import { api } from '../../services/api';
 import { secureStorage } from '../../utils/secureStorage';
 import { HorizontalTabs } from '../../components/ui/HorizontalTabs';

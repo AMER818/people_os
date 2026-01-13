@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Briefcase, Plus, Edit2, Trash2, Award, Star, TrendingUp } from 'lucide-react';
 import { useOrgStore } from '@store/orgStore';
 import { Grade, Designation, EmploymentLevel } from '@/types';
-import { useToast } from '@components/ui/toast';
+import { useToast } from '@components/ui/Toast';
 import { useModal } from '@hooks/useModal';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';

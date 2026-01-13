@@ -28,7 +28,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { HorizontalTabs } from '../../components/ui/HorizontalTabs';
-import { Button } from '../../components/ui/button';
+import { Button } from '../../components/ui/Button';
 import { useSaveEntity } from '../../hooks/useSaveEntity';
 import { FormModal } from '../../components/ui/FormModal';
 import { useModal } from '../../hooks/useModal';

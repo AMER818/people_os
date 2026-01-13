@@ -15,7 +15,7 @@ import {
   UserCheck,
   ChevronRight,
 } from 'lucide-react';
-import { Card } from '../../components/ui/card';
+import { Card } from '../../components/ui/Card';
 
 import { PALETTE } from '@/theme/palette';
 import { useUIStore } from '../../store/uiStore';

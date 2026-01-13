@@ -15,7 +15,7 @@ vi.mock('lucide-react', () => {
 });
 
 // Mock Button component
-vi.mock('../../components/ui/button', () => ({
+vi.mock('../../components/ui/Button', () => ({
     Button: ({ onClick, children, icon: Icon }: any) => (
         <button onClick={onClick}>
             {Icon && <Icon />}

@@ -5,12 +5,12 @@ import { api } from '../../services/api';
 import { LEAVING_TYPES } from './constants';
 
 // UI Components
-import { Button } from '../../components/ui/button';
+import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { useModal } from '../../hooks/useModal';
 import { FormModal } from '../../components/ui/FormModal';
 import Modal from '../../components/ui/Modal';
-import { useToast } from '../../components/ui/toast';
+import { useToast } from '../../components/ui/Toast';
 
 // Constants
 import { EMPLOYEE_CODE } from '../../config/constants';

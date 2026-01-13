@@ -1,9 +1,9 @@
 import React from 'react';
 import { Server, Activity, RefreshCw, History, Zap } from 'lucide-react';
 import { useOrgStore } from '@store/orgStore';
-import { useToast } from '@components/ui/toast';
-import { Button } from '@components/ui/button';
-import { Checkbox } from '@components/ui/checkbox';
+import { useToast } from '@components/ui/Toast';
+import { Button } from '@components/ui/Button';
+import { Checkbox } from '@components/ui/Checkbox';
 
 interface InfrastructureMonitorProps {
   systemHealth: any[];

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Plus, Trash2, Calendar } from 'lucide-react';
 import { Employee as EmployeeType } from '../../types';
-import { Button } from '../../components/ui/button';
+import { Button } from '../../components/ui/Button';
 import { RELATIONSHIPS } from './constants';
 
 interface FamilyTabProps {

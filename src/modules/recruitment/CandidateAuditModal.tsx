@@ -35,8 +35,7 @@ const CandidateAuditModal: React.FC<CandidateAuditModalProps> = ({ candidate, on
 
       let analyzeCandidateProfile;
       if (aiSettings.provider === 'openai') {
-        const service = await import('../../services/openaiService');
-        analyzeCandidateProfile = service.analyzeCandidateProfile;
+        throw new Error('OpenAI provider is disabled.');
       } else {
         const service = await import('../../services/geminiService');
         analyzeCandidateProfile = service.analyzeCandidateProfile;

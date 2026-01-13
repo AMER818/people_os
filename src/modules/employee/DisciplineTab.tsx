@@ -1,7 +1,7 @@
 import React from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { Employee as EmployeeType } from '../../types';
-import { Button } from '../../components/ui/button';
+import { Button } from '../../components/ui/Button';
 
 interface DisciplineTabProps {
   employee: Partial<EmployeeType> | null;

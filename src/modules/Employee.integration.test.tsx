@@ -4,7 +4,7 @@ import Employee from './Employee';
 import React from 'react';
 import { api } from '../services/api';
 import { getWorkforceOptimization } from '../services/geminiService';
-import { ToastProvider } from '../components/ui/toast';
+import { ToastProvider } from '../components/ui/Toast';
 // Mocks inlined for stability
 const INITIAL_EMPLOYMENT_TYPES = [{ id: 'ET-1', name: 'Permanent', code: 'PERM' }];
 const INITIAL_SHIFTS = [{ id: 'SH-1', name: 'Morning', startTime: '09:00', endTime: '17:00' }];

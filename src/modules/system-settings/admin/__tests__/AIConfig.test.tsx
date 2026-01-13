@@ -16,7 +16,7 @@ vi.mock('@store/orgStore', () => ({
     }),
 }));
 
-vi.mock('@components/ui/toast', () => ({
+vi.mock('@components/ui/Toast', () => ({
     useToast: () => ({ success: vi.fn(), toastError: vi.fn(), error: vi.fn() }),
 }));
 
@@ -36,7 +36,7 @@ vi.mock('@components/ui/Input', () => ({
     ),
 }));
 
-vi.mock('@components/ui/button', () => ({
+vi.mock('@components/ui/Button', () => ({
     Button: (props: any) => <button {...props}>{props.children}</button>,
     default: (props: any) => <button {...props}>{props.children}</button>,
 }));

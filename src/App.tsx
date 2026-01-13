@@ -38,7 +38,7 @@ import {
 import { ModuleType } from './types';
 
 // Static Imports (Critical Path)
-import { ToastProvider } from '@/components/ui/toast';
+import { ToastProvider } from '@/components/ui/Toast';
 import { RBACProvider, useRBAC } from '@/contexts/RBACContext';
 import { RoleGuard } from '@/components/auth/RoleGuard';
 

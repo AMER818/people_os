@@ -24,7 +24,7 @@ import { useModal } from '../../hooks/useModal';
 import { FormModal } from '../../components/ui/FormModal';
 
 // UI Components
-import { Button } from '../../components/ui/button';
+import { Button } from '../../components/ui/Button';
 import { HorizontalTabs } from '../../components/ui/HorizontalTabs';
 import {
   Select,
@@ -32,9 +32,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../../components/ui/select';
+} from '../../components/ui/Select';
 import { Input } from '../../components/ui/Input';
-import { Label } from '../../components/ui/label';
+import { Label } from '../../components/ui/Label';
 
 // Sub-components
 import ExpenseStats from './ExpenseStats';

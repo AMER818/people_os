@@ -1,9 +1,9 @@
 import React from 'react';
 import { useOrgStore } from '@store/orgStore';
-import { Button } from '@components/ui/button';
+import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
 import { Save, Scale } from 'lucide-react';
-import { useToast } from '@components/ui/toast';
+import { useToast } from '@components/ui/Toast';
 
 const ComplianceSettings: React.FC = () => {
   const { complianceSettings, updateCompliance } = useOrgStore();

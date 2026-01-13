@@ -18,8 +18,8 @@ import RecruitmentFooter from '../recruitment/RecruitmentFooter';
 import { useModal } from '../../hooks/useModal';
 import { FormModal } from '../../components/ui/FormModal';
 import { Modal } from '../../components/ui/Modal';
-import { useToast } from '../../components/ui/toast';
-import { Button } from '../../components/ui/button';
+import { useToast } from '../../components/ui/Toast';
+import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Download, Printer, Send, Zap } from 'lucide-react';
 

@@ -9,7 +9,7 @@ import {
   ExternalLink,
   RefreshCw,
 } from 'lucide-react';
-import { useToast } from '@components/ui/toast';
+import { useToast } from '@components/ui/Toast';
 
 export const ComplianceDashboard: React.FC = () => {
   const [standard, setStandard] = useState<'SOC2' | 'ISO27001'>('SOC2');
