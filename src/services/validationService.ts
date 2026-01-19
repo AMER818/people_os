@@ -33,7 +33,7 @@ export const validate = (prompt: string, data?: any) => {
 };
 
 export const sanitizePrompt = (prompt: string): string => {
-  if (!prompt) return '';
+  if (!prompt) {return '';}
 
   return prompt
     .trim()

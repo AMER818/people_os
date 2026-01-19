@@ -12,6 +12,7 @@ import {
   History,
 } from 'lucide-react';
 import { useSystemStore } from '@/system/systemStore';
+import { formatTime } from '../../utils/formatting';
 import API from '../../services/api';
 import { EthicalKernel } from '@/system/EthicalKernel';
 
@@ -171,7 +172,7 @@ const SystemHealth: React.FC = () => {
 
         <div className="p-8 bg-white/5 border border-white/10 rounded-[2.5rem] backdrop-blur-xl hover:bg-white/10 transition-all group relative overflow-hidden">
           <div className="relative z-10">
-            <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
               <RefreshCw size={24} className={pressure === 'critical' ? 'animate-spin' : ''} />
             </div>
             <p className="text-[0.625rem] font-black text-muted-foreground uppercase tracking-widest mb-2">
@@ -346,7 +347,7 @@ const SystemHealth: React.FC = () => {
                       Domain: {d.domain}
                     </span>
                     <span className="text-[0.5625rem] font-bold text-white/40">
-                      {new Date(d.timestamp).toLocaleTimeString()}
+                      {formatTime(d.timestamp)}
                     </span>
                   </div>
                 </div>

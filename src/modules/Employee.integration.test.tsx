@@ -25,7 +25,7 @@ vi.mock('../services/api', async (importOriginal) => {
     getDistricts: vi.fn().mockResolvedValue([]),
     getPayrollSettings: vi.fn().mockResolvedValue({}),
     getUsers: vi.fn().mockResolvedValue([]),
-    getEmploymentLevels: vi.fn().mockResolvedValue([]),
+    getJobLevels: vi.fn().mockResolvedValue([]),
   };
   return {
     ...actual,

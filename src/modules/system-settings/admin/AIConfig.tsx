@@ -94,11 +94,9 @@ const AIConfig: React.FC = () => {
           </div>
           <div>
             <h3 className="text-lg font-black text-text-primary uppercase tracking-tight">
-              AI & Intelligence
+              AI Settings
             </h3>
-            <p className="text-xs text-text-muted font-bold">
-              Configure neural engines and automated intelligence agents.
-            </p>
+            <p className="text-xs text-text-muted font-bold">Manage AI integration.</p>
           </div>
         </div>
 
@@ -106,7 +104,7 @@ const AIConfig: React.FC = () => {
           <div className="space-y-6">
             <div className="space-y-3">
               <label className="text-[0.6rem] font-black text-text-muted uppercase tracking-[0.2em]">
-                Primary AI Provider
+                AI Provider
               </label>
               <div className="grid grid-cols-3 gap-3">
                 {providers.map((p) => (
@@ -157,7 +155,7 @@ const AIConfig: React.FC = () => {
                       className={`w-1.5 h-1.5 rounded-full ${localSettings.status === 'online' ? 'bg-success' : 'bg-danger'}`}
                     />
                     <span className="text-xs font-bold text-text-primary uppercase tracking-tight">
-                      Engine Status: {localSettings.status}
+                      Status: {localSettings.status}
                     </span>
                   </div>
                   <Button
@@ -171,7 +169,7 @@ const AIConfig: React.FC = () => {
                       }))
                     }
                   >
-                    {localSettings.status === 'online' ? 'Disable' : 'Enable'}
+                    {localSettings.status === 'online' ? 'Turn Off' : 'Turn On'}
                   </Button>
                 </div>
               </div>
@@ -197,7 +195,7 @@ const AIConfig: React.FC = () => {
                         {agent.title}
                       </h4>
                       <p className="text-[0.65rem] text-text-muted font-bold mt-0.5">
-                        {agent.desc} (Node Latency: {SYSTEM_CONFIG.LATENCY.ENGINE})
+                        {agent.desc} (Latency: {SYSTEM_CONFIG.LATENCY.ENGINE})
                       </p>
                     </div>
                   </div>
@@ -225,7 +223,7 @@ const AIConfig: React.FC = () => {
             <div className="p-4 bg-primary-soft/30 rounded-xl border border-primary/10">
               <p className="text-[0.65rem] font-bold text-primary leading-relaxed text-center">
                 <Zap size={12} className="inline mr-2 mb-0.5" />
-                Intelligence agents require a valid API key and active engine status to function.
+                Intelligence agents require a valid API key and active status to function.
               </p>
             </div>
 
@@ -235,7 +233,7 @@ const AIConfig: React.FC = () => {
                 isLoading={isSaving}
                 className="w-full font-black uppercase tracking-widest text-xs h-10"
               >
-                <Save size={14} className="mr-2" /> Save AI Configuration
+                <Save size={14} className="mr-2" /> Save Settings
               </Button>
             </div>
           </div>

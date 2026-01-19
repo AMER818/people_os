@@ -21,9 +21,9 @@ logger = logging.getLogger(__name__)
 SECRET_KEY = os.getenv("SECRET_KEY", "change_this_in_production_9s8d7f98s7d9f8s7")
 ALGORITHM = "HS256"
 
-# Role Hierarchy
-SUPER_ROLES = {"SystemAdmin", "Root", "Super Admin"}
-ORG_SETUP_ROLES = {"SystemAdmin", "Root", "Super Admin", "Business Admin"}
+# Role Hierarchy - Import from single source of truth
+from backend.permissions_config import SUPER_ROLES
+ORG_SETUP_ROLES = SUPER_ROLES | {"Business Admin"}  # Union with Business Admin
 
 # OAuth2 Scheme
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
@@ -83,8 +83,8 @@ def get_current_user(
     except Exception:
         raise credentials_exception
 
-    from backend import models
-    user = db.query(models.DBUser).filter(models.DBUser.username == username).first()
+    from backend.domains.core.models import DBUser
+    user = db.query(DBUser).filter(DBUser.username == username).first()
     if user is None:
         raise credentials_exception
 

@@ -49,7 +49,7 @@ const PredictiveWorkforce: React.FC = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-12 shadow-2xl border border-slate-100 dark:border-white/5 relative overflow-hidden group">
+    <div className="bg-card rounded-[2rem] p-12 shadow-2xl border border-border relative overflow-hidden group">
       <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 blur-[7.5rem] rounded-full -mr-48 -mt-48 group-hover:bg-primary/10 transition-all duration-1000"></div>
 
       <div className="relative z-10">
@@ -58,7 +58,7 @@ const PredictiveWorkforce: React.FC = () => {
             <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter uppercase">
               Predictive Workforce Growth
             </h3>
-            <p className="text-[0.625rem] font-black text-slate-400 uppercase tracking-widest mt-2 flex items-center gap-2">
+            <p className="text-[0.625rem] font-black text-muted-foreground uppercase tracking-widest mt-2 flex items-center gap-2">
               <span
                 className={`w-2 h-2 rounded-full ${loading ? 'bg-yellow-500 animate-ping' : 'bg-primary animate-pulse'}`}
               ></span>
@@ -74,7 +74,7 @@ const PredictiveWorkforce: React.FC = () => {
             >
               {loading ? 'Analyzing...' : 'Run Projection'}
             </button>
-            <div className="px-6 py-3 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5">
+            <div className="px-6 py-3 bg-muted rounded-2xl border border-border">
               <p className="text-[0.5625rem] font-black text-slate-400 uppercase tracking-widest mb-1">
                 Confidence Score
               </p>
@@ -159,9 +159,9 @@ const PredictiveWorkforce: React.FC = () => {
           <div
             role="status"
             aria-label="Projected Headcount"
-            className="p-8 bg-slate-50 dark:bg-white/5 rounded-[2rem] border border-slate-100 dark:border-white/5 group/card hover:bg-primary transition-all duration-500"
+            className="p-8 bg-muted rounded-[2rem] border border-border group/card hover:bg-primary transition-all duration-500"
           >
-            <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center mb-6 shadow-xl group-hover/card:scale-110 transition-transform">
+            <div className="w-12 h-12 bg-card rounded-2xl flex items-center justify-center mb-6 shadow-xl group-hover/card:scale-110 transition-transform">
               <Users className="text-primary" size={24} />
             </div>
             <p className="text-[0.625rem] font-black text-slate-400 uppercase tracking-widest mb-2 group-hover/card:text-blue-100">
@@ -178,9 +178,9 @@ const PredictiveWorkforce: React.FC = () => {
           <div
             role="status"
             aria-label="Retention Probability"
-            className="p-8 bg-slate-50 dark:bg-white/5 rounded-[2rem] border border-slate-100 dark:border-white/5 group/card hover:bg-primary-soft transition-all duration-500"
+            className="p-8 bg-muted rounded-[2rem] border border-border group/card hover:bg-primary-soft transition-all duration-500"
           >
-            <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center mb-6 shadow-xl group-hover/card:scale-110 transition-transform">
+            <div className="w-12 h-12 bg-card rounded-2xl flex items-center justify-center mb-6 shadow-xl group-hover/card:scale-110 transition-transform">
               <Target className="text-primary-soft" size={24} />
             </div>
             <p className="text-[0.625rem] font-black text-slate-400 uppercase tracking-widest mb-2 group-hover/card:text-indigo-100">
@@ -197,12 +197,12 @@ const PredictiveWorkforce: React.FC = () => {
           <div
             role="status"
             aria-label="Efficiency Delta"
-            className="p-8 bg-slate-50 dark:bg-white/5 rounded-[2rem] border border-slate-100 dark:border-white/5 group/card hover:bg-success transition-all duration-500"
+            className="p-8 bg-muted rounded-[2rem] border border-border group/card hover:bg-success transition-all duration-500"
           >
-            <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center mb-6 shadow-xl group-hover/card:scale-110 transition-transform">
+            <div className="w-12 h-12 bg-card rounded-2xl flex items-center justify-center mb-6 shadow-xl group-hover/card:scale-110 transition-transform">
               <Zap className="text-emerald-600" size={24} />
             </div>
-            <p className="text-[0.625rem] font-black text-slate-400 uppercase tracking-widest mb-2 group-hover/card:text-emerald-100">
+            <p className="text-[0.625rem] font-black text-muted-foreground uppercase tracking-widest mb-2 group-hover/card:text-emerald-200">
               Efficiency Delta
             </p>
             <p className="text-3xl font-black text-slate-900 dark:text-white group-hover/card:text-white">

@@ -2,6 +2,8 @@ import React from 'react';
 import { History as HistoryIcon, Building2, Trash2 } from 'lucide-react';
 import { Employee as EmployeeType } from '../../types';
 import { Button } from '../../components/ui/Button';
+import { Card } from '../../components/ui/Card';
+import { DateInput } from '../../components/ui/DateInput';
 
 interface ExperienceTabProps {
   employee: Partial<EmployeeType> | null;
@@ -30,11 +32,9 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ employee, updateField }) 
   };
 
   return (
-    <div className="space-y-8 animate-in slide-in-from-bottom-8 duration-700">
+    <Card className="space-y-8 animate-in slide-in-from-bottom-8 duration-700 p-8">
       <div className="flex items-center justify-between">
-        <h4 className="text-2xl font-black text-text-primary antialiased">
-          Professional Chronology
-        </h4>
+        <h4 className="text-2xl font-black text-text-primary antialiased">Work Experience</h4>
         <Button onClick={addExp} icon={HistoryIcon} size="sm">
           Add Org
         </Button>
@@ -80,18 +80,16 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ employee, updateField }) 
                     Tenure
                   </p>
                   <div className="flex items-center gap-2">
-                    <input
-                      type="date"
+                    <DateInput
                       value={exp.from}
                       onChange={(e) => updateExp(i, 'from', e.target.value)}
-                      className="bg-transparent border-none text-xs font-bold text-text-secondary outline-none"
+                      className="bg-transparent border-none text-xs font-bold text-text-secondary outline-none w-32 p-0 h-auto"
                     />
                     <span className="text-text-muted">to</span>
-                    <input
-                      type="date"
+                    <DateInput
                       value={exp.to}
                       onChange={(e) => updateExp(i, 'to', e.target.value)}
-                      className="bg-transparent border-none text-xs font-bold text-text-secondary outline-none"
+                      className="bg-transparent border-none text-xs font-bold text-text-secondary outline-none w-32 p-0 h-auto"
                     />
                   </div>
                 </div>
@@ -110,7 +108,9 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ employee, updateField }) 
               </div>
 
               <div className="col-span-1 md:col-span-2 space-y-2 pt-4 border-t border-border/50">
-                <p className="text-[0.5625rem] font-black text-text-muted uppercase tracking-widest">Remarks</p>
+                <p className="text-[0.5625rem] font-black text-text-muted uppercase tracking-widest">
+                  Remarks
+                </p>
                 <input
                   value={exp.remarks}
                   onChange={(e) => updateExp(i, 'remarks', e.target.value)}
@@ -129,7 +129,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ employee, updateField }) 
           </div>
         ))}
       </div>
-    </div>
+    </Card>
   );
 };
 

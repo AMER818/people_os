@@ -15,10 +15,10 @@ def enforce_clean_db_state():
     )
 
     # Authorized database
-    auth_db = settings.DB_FILE
+    auth_db = getattr(settings, "DB_FILE", "people_os.db")
 
     # Legacy patterns to check (and ignore)
-    patterns = ["hunzal_hrms.db", "sql_app.db", "**/hunzal_hrms.db", "**/sql_app.db"]
+    patterns = ["hunzal_hrms.db", "hunzal_hcm.db", "sql_app.db"]
 
     print("--- [STARTUP] Verifying Database Configuration ---")
 
@@ -39,29 +39,39 @@ def enforce_clean_db_state():
         # It's okay if it doesn't exist yet (first run), but we declare intention.
         print(f"[INFO] NOTE: Authorized database will be created at: {auth_db_path}")
 
-    # 2. Scan and Ignore others
+    # 2. Scan and Ignore others (Optimized)
     found_others = False
-    for pattern in patterns:
-        path_pattern = os.path.join(project_root, pattern)
-        files = glob.glob(path_pattern, recursive=True)
-        for f in files:
-            # Skip if it happens to be the authorized one
-            if os.path.basename(f) == auth_db:
-                continue
+    target_filenames = {"hunzal_hrms.db", "sql_app.db"}
+    
+    # Use os.walk with extensive pruning to avoid scanning node_modules, .git, etc.
+    for root, dirs, files in os.walk(project_root, topdown=True):
+        # Prune heavy directories in-place
+        dirs[:] = [d for d in dirs if d not in {"node_modules", ".git", "venv", "__pycache__", ".idea", ".vscode"}]
+        
+        for name in files:
+            if name in target_filenames:
+                f = os.path.join(root, name)
+                
+                # Skip if it happens to be the authorized one
+                if os.path.basename(f) == auth_db:
+                    continue
 
-            # Check if this "other" file is actually the authorized path (just in case pattern matched it)
-            if os.path.abspath(f) == auth_db_path:
-                continue
+                # Check if this "other" file is actually the authorized path
+                if os.path.abspath(f) == auth_db_path:
+                    continue
 
-            # POLICY: STRICT DELETE
-            try:
-                os.remove(f)
-                print(f"🚫 [SECURITY] DELETED UNAUTHORIZED DB: {f}")
-                found_others = True
-            except Exception as e:
-                print(f"⚠️ [SECURITY] ERROR deleting {f}: {e}")
+                # POLICY: STRICT DELETE
+                try:
+                    os.remove(f)
+                    print(f"🚫 [SECURITY] DELETED UNAUTHORIZED DB: {f}")
+                    found_others = True
+                except Exception as e:
+                    print(f"⚠️ [SECURITY] ERROR deleting {f}: {e}")
 
     if not found_others:
         print("--- [STARTUP] Environment clean (No conflicting files) ---")
     else:
         print("--- [STARTUP] Cleanup Complete. Unauthorized files destroyed. ---")
+
+if __name__ == "__main__":
+    enforce_clean_db_state()

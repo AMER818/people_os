@@ -21,6 +21,8 @@ Login Experience Upgraded
 
 I have successfully fine-tuned the login screen with a premium, glassmorphic design.
 
+make central theme premium, apply it to project and verify.
+
 Enhancements:
 
 Visuals: Added a dynamic background with subtle animations and a "frosted glass" card effect.

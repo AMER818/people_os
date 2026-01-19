@@ -27,7 +27,7 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = React.memo(
       try {
         const res = await actionFn();
         success(res.message || successMsg);
-      } catch (e) {
+      } catch {
         error('Action failed. Core cluster may be unstable.');
       }
     };
@@ -90,7 +90,7 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = React.memo(
             >
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-secondary to-primary animate-pulse" />
               <h3 className="text-sm font-black text-text-primary uppercase tracking-tight mb-4 flex items-center gap-2">
-                <Activity size={16} className="text-primary animate-pulse" /> System Load Monitor
+                <Activity size={16} className="text-primary animate-pulse" /> System Load
               </h3>
               <div className="space-y-4">
                 {[
@@ -131,7 +131,7 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = React.memo(
               aria-label="Recent System Activity"
             >
               <h3 className="text-sm font-black text-text-primary uppercase tracking-tight mb-4 flex items-center gap-2">
-                <History size={16} className="text-primary" /> Neural Signal Stream
+                <History size={16} className="text-primary" /> Recent Activity
               </h3>
               <div className="space-y-3">
                 {(auditLogs || []).slice(0, 5).map((log, i) => (
@@ -162,7 +162,7 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = React.memo(
                       <History size={24} />
                     </div>
                     <p className="text-[0.6rem] font-bold text-text-muted uppercase tracking-widest">
-                      No spectral traces found
+                      No recent activity found
                     </p>
                   </div>
                 )}
@@ -182,19 +182,19 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = React.memo(
               />
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-lg font-black uppercase tracking-tighter">Neural Guard</h3>
+                  <h3 className="text-lg font-black uppercase tracking-tighter">Security Status</h3>
                   <div className="w-2 h-2 rounded-full bg-white animate-ping" />
                 </div>
                 <p className="text-white/80 text-[0.7rem] font-bold leading-relaxed">
                   {systemFlags.neural_bypass
-                    ? 'WARNING: Neural bypass active. Manual overrides allowed.'
-                    : 'Quantum-encrypted threat detection is active across all nodes.'}
+                    ? 'WARNING: Security bypass active. Manual overrides allowed.'
+                    : 'Enhanced security monitoring is active.'}
                 </p>
               </div>
               <div className="relative z-10 flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-xl w-fit border border-white/20">
                 <div className="flex -space-x-1">
-                  <div className="w-2 h-2 rounded-full bg-green-400 border border-white/20" />
-                  <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse border border-white/20" />
+                  <div className="w-2 h-2 rounded-full bg-success border border-white/20" />
+                  <div className="w-2 h-2 rounded-full bg-success animate-pulse border border-white/20" />
                 </div>
                 <span className="text-[0.6rem] font-black uppercase tracking-[0.2em]">
                   {systemFlags.neural_bypass ? 'Restricted Mode' : 'Maximum Security'}
@@ -212,7 +212,7 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = React.memo(
               </h3>
               <div className="grid grid-cols-1 gap-2">
                 <button
-                  onClick={() => handleAction(flushCache, 'Neural cache purged.')}
+                  onClick={() => handleAction(flushCache, 'System cache purged.')}
                   className="w-full p-3 bg-muted-bg hover:bg-primary hover:text-white rounded-xl text-left transition-all group flex items-center gap-4"
                   aria-label="Flush System Cache"
                 >
@@ -221,14 +221,14 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = React.memo(
                   </div>
                   <div>
                     <p className="text-[0.65rem] font-black uppercase tracking-widest">
-                      Flush Cache
+                      Clear Cache
                     </p>
-                    <p className="text-[0.6rem] opacity-60 font-bold">Purge neural buffers</p>
+                    <p className="text-[0.6rem] opacity-60 font-bold">Clear temporary data</p>
                   </div>
                 </button>
 
                 <button
-                  onClick={() => handleAction(optimizeDatabase, 'Database structure solidified.')}
+                  onClick={() => handleAction(optimizeDatabase, 'Database optimized.')}
                   className="w-full p-3 bg-muted-bg hover:bg-primary hover:text-white rounded-xl text-left transition-all group flex items-center gap-4"
                   aria-label="Optimize DB"
                 >
@@ -239,12 +239,14 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = React.memo(
                     <p className="text-[0.65rem] font-black uppercase tracking-widest">
                       Optimize DB
                     </p>
-                    <p className="text-[0.6rem] opacity-60 font-bold">Defragment core storage</p>
+                    <p className="text-[0.6rem] opacity-60 font-bold">
+                      Improve database performance
+                    </p>
                   </div>
                 </button>
 
                 <button
-                  onClick={() => handleAction(rotateLogs, 'Log clusters rotated.')}
+                  onClick={() => handleAction(rotateLogs, 'Logs archived.')}
                   className="w-full p-3 bg-muted-bg hover:bg-primary hover:text-white rounded-xl text-left transition-all group flex items-center gap-4"
                   aria-label="Restart Core Nodes"
                 >
@@ -253,9 +255,9 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = React.memo(
                   </div>
                   <div>
                     <p className="text-[0.65rem] font-black uppercase tracking-widest">
-                      Rotate Logs
+                      Archive Logs
                     </p>
-                    <p className="text-[0.6rem] opacity-60 font-bold">Archive audit history</p>
+                    <p className="text-[0.6rem] opacity-60 font-bold">Move old logs to archive</p>
                   </div>
                 </button>
               </div>

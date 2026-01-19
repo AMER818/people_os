@@ -8,8 +8,12 @@ interface ClusterDensityProps {
 
 const ClusterDensity: React.FC<ClusterDensityProps> = ({ data, colors }) => {
   return (
-    <div role="img" aria-label="Department Distribution Chart" className="bg-white dark:bg-slate-900 rounded-[4rem] border border-slate-100 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col">
-      <div className="p-14 border-b border-slate-100 dark:border-slate-800 text-center bg-slate-50/50 dark:bg-slate-950/20">
+    <div
+      role="img"
+      aria-label="Department Distribution Chart"
+      className="bg-card rounded-[4rem] border border-border shadow-2xl overflow-hidden flex flex-col"
+    >
+      <div className="p-14 border-b border-border text-center bg-muted/50">
         <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight uppercase leading-none">
           Department Distribution
         </h3>
@@ -65,7 +69,10 @@ const ClusterDensity: React.FC<ClusterDensityProps> = ({ data, colors }) => {
           ))}
         </div>
       </div>
-      <button aria-label="View detailed distribution" className="w-full py-8 bg-slate-50 dark:bg-slate-950 text-[0.6875rem] font-black uppercase tracking-[0.3em] text-slate-400 hover:text-primary border-t border-slate-100 dark:border-slate-800 transition-all">
+      <button
+        aria-label="View detailed distribution"
+        className="w-full py-8 bg-muted text-[0.6875rem] font-black uppercase tracking-[0.3em] text-slate-400 hover:text-primary border-t border-border transition-all"
+      >
         View Details
       </button>
     </div>

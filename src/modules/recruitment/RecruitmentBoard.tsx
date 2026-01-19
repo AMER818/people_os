@@ -18,7 +18,7 @@ const RecruitmentBoard: React.FC<RecruitmentBoardProps> = ({
       {stages.map((stage) => (
         <div
           key={stage}
-          className="min-w-[21.25rem] flex-1 flex flex-col gap-8 bg-slate-50/50 dark:bg-slate-900/30 p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800"
+          className="min-w-[21.25rem] flex-1 flex flex-col gap-8 bg-muted/50 dark:bg-card/30 p-8 rounded-[2rem] border border-border"
         >
           <div className="flex items-center justify-between px-4">
             <div className="flex items-center gap-3">
@@ -29,7 +29,10 @@ const RecruitmentBoard: React.FC<RecruitmentBoardProps> = ({
                 {candidates.filter((c) => c.currentStage === stage).length}
               </span>
             </div>
-            <button aria-label={`Add candidate to ${stage}`} className="p-2 text-slate-300 hover:text-slate-600 transition-colors">
+            <button
+              aria-label={`Add candidate to ${stage}`}
+              className="p-2 text-slate-300 hover:text-slate-600 transition-colors"
+            >
               <Plus size={18} />
             </button>
           </div>
@@ -49,7 +52,7 @@ const RecruitmentBoard: React.FC<RecruitmentBoardProps> = ({
                         className="w-14 h-14 rounded-2xl object-cover border-2 border-slate-50 dark:border-slate-700 shadow-lg group-hover:rotate-3 transition-transform"
                       />
                       <div
-                        className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-lg border-2 border-white dark:border-slate-800 flex items-center justify-center text-white text-[0.5rem] font-black shadow-lg ${candidate.score > 90 ? 'bg-success' : candidate.score > 80 ? 'bg-blue-500' : 'bg-warning'}`}
+                        className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-lg border-2 border-white dark:border-card flex items-center justify-center text-white text-[0.5rem] font-black shadow-lg ${candidate.score > 90 ? 'bg-success' : candidate.score > 80 ? 'bg-primary' : 'bg-warning'}`}
                       >
                         {candidate.score}
                       </div>
@@ -71,7 +74,7 @@ const RecruitmentBoard: React.FC<RecruitmentBoardProps> = ({
                     {candidate.skills.slice(0, 2).map((s) => (
                       <span
                         key={s}
-                        className="px-2.5 py-1 bg-slate-50 dark:bg-slate-900 rounded-lg text-[0.5rem] font-black text-slate-400 uppercase border border-slate-100 dark:border-slate-800"
+                        className="px-2.5 py-1 bg-muted dark:bg-card rounded-lg text-[0.5rem] font-black text-muted-foreground uppercase border border-border"
                       >
                         {s}
                       </span>

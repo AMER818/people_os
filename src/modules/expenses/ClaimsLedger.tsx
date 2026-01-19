@@ -1,6 +1,8 @@
 import React from 'react';
 import { Search, Filter, Landmark, ArrowUpRight, FileText, FileSpreadsheet } from 'lucide-react';
+import { VibrantBadge } from '../../components/ui/VibrantBadge';
 import { Expense } from '../../types';
+import { formatCurrency } from '../../utils/formatting';
 // import { exportToExcel, exportToPDF } from '../../utils/exportUtils'; // Lazy loaded
 
 interface ClaimsLedgerProps {
@@ -18,8 +20,8 @@ const ClaimsLedger: React.FC<ClaimsLedgerProps> = ({
 }) => {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 shadow-xl overflow-hidden min-h-[31.25rem] flex flex-col">
-        <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-slate-50/50 dark:bg-slate-950/20 backdrop-blur-3xl">
+      <div className="bg-card rounded-xl border border-border shadow-xl overflow-hidden min-h-[31.25rem] flex flex-col">
+        <div className="p-4 border-b border-border flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-muted/50 backdrop-blur-3xl">
           <div>
             <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight leading-none uppercase">
               Claims Registry
@@ -32,30 +34,30 @@ const ClaimsLedger: React.FC<ClaimsLedgerProps> = ({
             <div className="relative group">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400 group-focus-within:text-success transition-colors" />
               <input
-                className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 pl-10 pr-4 py-2 rounded-lg text-xs font-black outline-none w-48 shadow-sm"
+                className="bg-card border border-border pl-10 pr-4 py-2 rounded-lg text-xs font-black outline-none w-48 shadow-sm"
                 placeholder="Query Node UID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <button className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-500 hover:text-emerald-600 transition-all shadow-sm">
+            <button className="p-2 bg-muted rounded-lg text-slate-500 hover:text-emerald-600 transition-all shadow-sm">
               <Filter size={16} />
             </button>
             <button
               onClick={async () => {
                 const { exportToPDF } = await import('../../utils/exportUtils');
                 const headers = ['ID', 'Employee', 'Category', 'Amount', 'Date', 'Status'];
-                const data = expenses.map(e => ({
+                const data = expenses.map((e) => ({
                   ID: e.id,
                   Employee: e.employeeName,
                   Category: e.category,
                   Amount: e.amount,
                   Date: e.date,
-                  Status: e.status
+                  Status: e.status,
                 }));
                 exportToPDF(data, headers, 'Claims_Registry');
               }}
-              className="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl text-slate-500 hover:text-danger transition-all shadow-sm"
+              className="p-2.5 bg-muted rounded-xl text-slate-500 hover:text-danger transition-all shadow-sm"
               title="Export PDF"
             >
               <FileText size={16} />
@@ -63,18 +65,18 @@ const ClaimsLedger: React.FC<ClaimsLedgerProps> = ({
             <button
               onClick={async () => {
                 const { exportToExcel } = await import('../../utils/exportUtils');
-                const data = expenses.map(e => ({
+                const data = expenses.map((e) => ({
                   ID: e.id,
                   Employee: e.employeeName,
                   Category: e.category,
                   Amount: e.amount,
                   Date: e.date,
                   Status: e.status,
-                  Currency: e.currency
+                  Currency: e.currency,
                 }));
                 exportToExcel(data, 'Claims_Registry');
               }}
-              className="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl text-slate-500 hover:text-success transition-all shadow-sm"
+              className="p-2.5 bg-muted rounded-xl text-slate-500 hover:text-success transition-all shadow-sm"
               title="Export Excel"
             >
               <FileSpreadsheet size={16} />
@@ -84,7 +86,7 @@ const ClaimsLedger: React.FC<ClaimsLedgerProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full text-left font-mono text-sm">
             <thead>
-              <tr className="bg-slate-50 dark:bg-slate-950/30 text-[0.625rem] font-black uppercase text-slate-400 tracking-[0.2em] font-sans">
+              <tr className="bg-muted text-[0.625rem] font-black uppercase text-slate-400 tracking-[0.2em] font-sans">
                 <th className="px-6 py-3">Personnel Node</th>
                 <th className="px-6 py-3">Category Cluster</th>
                 <th className="px-6 py-3">Amount Vector</th>
@@ -92,7 +94,7 @@ const ClaimsLedger: React.FC<ClaimsLedgerProps> = ({
                 <th className="px-6 py-3 text-right">Audit</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50 font-sans">
+            <tbody className="divide-y divide-border font-sans">
               {expenses.map((exp) => (
                 <tr
                   key={exp.id}
@@ -108,29 +110,19 @@ const ClaimsLedger: React.FC<ClaimsLedgerProps> = ({
                     </p>
                   </td>
                   <td className="px-6 py-3">
-                    <span className="text-[0.625rem] font-black text-slate-500 uppercase tracking-widest bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-md border border-slate-200 dark:border-slate-700">
-                      {exp.category}
-                    </span>
+                    <VibrantBadge>{exp.category}</VibrantBadge>
                   </td>
                   <td className="px-6 py-3 text-sm font-black text-slate-900 dark:text-white antialiased font-mono">
-                    ${exp.amount.toLocaleString()}
+                    {formatCurrency(exp.amount)}
                   </td>
                   <td className="px-6 py-3">
-                    <span
-                      className={`px-3 py-1 rounded-md text-[0.5625rem] font-black uppercase tracking-widest border transition-all ${exp.status === 'Approved'
-                        ? 'bg-success/10 text-success border-success/20 shadow-sm'
-                        : exp.status === 'Paid'
-                          ? 'bg-info/10 text-info border-info/20'
-                          : exp.status === 'Flagged'
-                            ? 'bg-danger/10 text-danger border-danger/20 animate-pulse'
-                            : 'bg-warning/10 text-warning border-warning/20'
-                        }`}
-                    >
-                      {exp.status}
-                    </span>
+                    <VibrantBadge>{exp.status}</VibrantBadge>
                   </td>
                   <td className="px-6 py-3 text-right">
-                    <button aria-label="View claim details" className="p-1.5 bg-white dark:bg-slate-800 text-slate-400 hover:text-emerald-600 rounded-md shadow-sm border border-slate-100 dark:border-slate-700 transition-all">
+                    <button
+                      aria-label="View claim details"
+                      className="p-1.5 bg-card text-slate-400 hover:text-emerald-600 rounded-md shadow-sm border border-border transition-all"
+                    >
                       <ArrowUpRight size={14} />
                     </button>
                   </td>

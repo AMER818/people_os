@@ -1,8 +1,5 @@
 {
-  "name": "Hunzal People OS",
+  "name": "PeopleOS",
   "description": "Human Capital Management System - A comprehensive, AI-powered HCM platform featuring automated payroll, advanced talent acquisition, real-time analytics, and modular policy engines.",
-  "requestFramePermissions": [
-    "camera",
-    "geolocation"
-  ]
+  "requestFramePermissions": ["camera", "geolocation"]
 }

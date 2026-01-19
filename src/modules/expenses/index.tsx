@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Expense, ExpenseStatus, ExpenseCategory } from '../../types';
 import { api } from '../../services/api';
+import { formatCurrency } from '../../utils/formatting';
 // Mock data removed
 const TRAVEL_NODES: any[] = [];
 import { useSaveEntity } from '../../hooks/useSaveEntity';
@@ -35,6 +36,7 @@ import {
 } from '../../components/ui/Select';
 import { Input } from '../../components/ui/Input';
 import { Label } from '../../components/ui/Label';
+import { DateInput } from '../../components/ui/DateInput';
 
 // Sub-components
 import ExpenseStats from './ExpenseStats';
@@ -264,7 +266,7 @@ const ExpensesTravel: React.FC = () => {
               <p className="text-muted-foreground mt-3 text-sm leading-relaxed antialiased">
                 The{' '}
                 <span className="text-success underline underline-offset-4 decoration-2">
-                  Hunzal Fiscal Engine
+                  PeopleOS Fiscal Engine
                 </span>{' '}
                 synchronizes travel claims with payroll cycles automatically. Cryptographic receipt
                 hashing ensures 100% audit accuracy.
@@ -369,8 +371,7 @@ const ExpensesTravel: React.FC = () => {
               <Label className="text-[0.625rem] font-black text-muted-foreground uppercase tracking-widest ml-1">
                 Departure Point
               </Label>
-              <Input
-                type="date"
+              <DateInput
                 value={newTravel.departureDate}
                 onChange={(e) => updateTravelField('departureDate', e.target.value)}
                 className="bg-secondary border-none h-12 rounded-xl"
@@ -381,8 +382,7 @@ const ExpensesTravel: React.FC = () => {
               <Label className="text-[0.625rem] font-black text-muted-foreground uppercase tracking-widest ml-1">
                 Return Point
               </Label>
-              <Input
-                type="date"
+              <DateInput
                 value={newTravel.returnDate}
                 onChange={(e) => updateTravelField('returnDate', e.target.value)}
                 className="bg-secondary border-none h-12 rounded-xl"
@@ -441,7 +441,7 @@ const ExpensesTravel: React.FC = () => {
                       Disbursement Vector
                     </p>
                     <p className="text-3xl font-black text-foreground font-mono">
-                      {selectedClaim.amount.toLocaleString()}
+                      {formatCurrency(selectedClaim.amount, selectedClaim.currency)}
                     </p>
                   </div>
                   <div className="space-y-2">

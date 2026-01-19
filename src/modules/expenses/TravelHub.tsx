@@ -16,8 +16,8 @@ interface TravelHubProps {
 const TravelHub: React.FC<TravelHubProps> = ({ travelNodes, onPlanRoute }) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 animate-in slide-in-from-bottom-8 duration-700">
-      <div className="lg:col-span-8 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-2xl overflow-hidden min-h-[37.5rem] flex flex-col">
-        <div className="p-12 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between mb-12">
+      <div className="lg:col-span-8 bg-card rounded-[2rem] border border-border shadow-2xl overflow-hidden min-h-[37.5rem] flex flex-col">
+        <div className="p-12 border-b border-border flex items-center justify-between mb-12">
           <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight uppercase leading-none">
             Global Mobility Ledger
           </h3>
@@ -32,10 +32,10 @@ const TravelHub: React.FC<TravelHubProps> = ({ travelNodes, onPlanRoute }) => {
           {travelNodes.map((trip) => (
             <div
               key={trip.id}
-              className="p-10 bg-slate-50 dark:bg-slate-950 rounded-[3rem] border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between group hover:border-indigo-500/30 transition-all gap-8"
+              className="p-10 bg-muted rounded-[3rem] border border-border flex flex-col md:flex-row items-center justify-between group hover:border-indigo-500/30 transition-all gap-8"
             >
               <div className="flex items-center gap-8">
-                <div className="w-20 h-20 bg-white dark:bg-slate-800 rounded-[2rem] flex items-center justify-center text-primary-soft shadow-inner group-hover:scale-110 transition-transform">
+                <div className="w-20 h-20 bg-card rounded-[2rem] flex items-center justify-center text-primary-soft shadow-inner group-hover:scale-110 transition-transform">
                   <Map size={32} />
                 </div>
                 <div>
@@ -92,7 +92,10 @@ const TravelHub: React.FC<TravelHubProps> = ({ travelNodes, onPlanRoute }) => {
               <ShieldCheck className="text-success" />
             </div>
           </div>
-          <button aria-label="Audit Environmental Impact" className="w-full mt-10 py-5 bg-surface border border-border text-text-primary rounded-[1.375rem] font-black uppercase text-[0.625rem] tracking-widest shadow-2xl hover:scale-105 transition-all">
+          <button
+            aria-label="Audit Environmental Impact"
+            className="w-full mt-10 py-5 bg-surface border border-border text-text-primary rounded-[1.375rem] font-black uppercase text-[0.625rem] tracking-widest shadow-2xl hover:scale-105 transition-all"
+          >
             Audit Environmental Impact
           </button>
         </div>

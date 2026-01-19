@@ -57,4 +57,8 @@ export const BLOOD_GROUPS = ['A+', 'A-', 'AB+', 'AB-', 'B+', 'B-', 'O+', 'O-'];
 
 export const RELATIONSHIPS = ['Brother', 'Child', 'Other', 'Parent', 'Sister', 'Spouse'];
 
-export const PAYMENT_MODES = ['Bank Transfer', 'Cash', 'Cheque'];
+export const PAYMENT_MODES = ['Bank Transfer', 'Cash Payment', 'Cheque'];
+
+export const GENDERS = ['Male', 'Female', 'Other'];
+
+export const MARITAL_STATUSES = ['Single', 'Married', 'Divorced'];

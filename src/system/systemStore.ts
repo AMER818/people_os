@@ -1,3 +1,4 @@
+import Logger from '@/utils/logger';
 import { create } from 'zustand';
 import { SystemSignal, SystemDecision, EvolutionProposal, SystemBrain } from './index';
 
@@ -60,7 +61,7 @@ export const useSystemStore = create<SystemState>((set, get) => ({
     import('@/services/api').then(({ default: API }) => {
       try {
         API.setRateLimit(newLimit);
-      } catch (e) {
+      } catch (_e) {
         // Ignore in test environments or if API mock not available yet
         // Console suppressed to avoid noisy test output
       }
@@ -78,7 +79,7 @@ export const useSystemStore = create<SystemState>((set, get) => ({
   },
 
   applyRemediation: (id: string) => {
-    console.log(`[REMEDIATION] Applying fix for ${id}`);
+    Logger.info(`[REMEDIATION] Applying fix for ${id}`);
     set((state) => ({
       decisions: state.decisions.filter((d) => d.id !== id),
       proposals: state.proposals.filter((p) => p.id !== id),

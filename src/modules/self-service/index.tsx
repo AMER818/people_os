@@ -162,7 +162,7 @@ const SelfService: React.FC = () => {
                 <Briefcase size={18} />
               </div>
               <span className="text-sm font-bold antialiased">
-                Hunzal Industries Ltd • Lahore HQ
+                PeopleOS Industries Ltd • Lahore HQ
               </span>
             </div>
             <div className="flex items-center gap-4 text-muted-foreground">
@@ -261,7 +261,7 @@ const SelfService: React.FC = () => {
                 { label: 'Personal Mobile', value: '+92 300 1234567', icon: Phone },
                 { label: 'Official Mobile', value: '+92 321 7654321', icon: Phone },
                 { label: 'Personal Email', value: 'sarah.j@gmail.com', icon: Mail },
-                { label: 'Official Email', value: 's.jenkins@Hunzal-os.io', icon: Mail },
+                { label: 'Official Email', value: 's.jenkins@people-os.io', icon: Mail },
               ].map((item, i) => (
                 <div
                   key={i}
@@ -433,7 +433,7 @@ const SelfService: React.FC = () => {
     <div className="space-y-12 animate-in slide-in-from-left-8 duration-700">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
         {[
-          { title: 'Hunzal Payslips', count: 12, icon: FileText, color: 'primary' },
+          { title: 'PeopleOS Payslips', count: 12, icon: FileText, color: 'primary' },
           { title: 'Fiscal Records', count: 3, icon: ShieldCheck, color: 'success' },
           { title: 'Governance Handbook', count: 1, icon: Bookmark, color: 'primary' },
         ].map((item, i) => (

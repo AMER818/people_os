@@ -21,14 +21,18 @@ const RecruitmentFooter: React.FC = () => {
             </div>
           </div>
           <p className="text-slate-400 text-xl leading-relaxed mb-12 antialiased">
-            The Hunzal ATS integrates with global job clusters and internal referral nodes. AI-driven{' '}
+            The PeopleOS ATS integrates with global job clusters and internal referral nodes.
+            AI-driven{' '}
             <span className="text-info underline decoration-blue-500/30 underline-offset-8">
               semantic matching
             </span>{' '}
             ensures every candidate profile is indexed based on its unique merit-signature.
           </p>
           <div className="flex gap-6">
-            <button aria-label="Author Pipeline Logic" className="bg-primary text-white px-14 py-5 rounded-[1.5rem] font-black uppercase text-[0.6875rem] tracking-widest shadow-2xl shadow-primary/30 hover:-translate-y-1 transition-all active:scale-95">
+            <button
+              aria-label="Author Pipeline Logic"
+              className="bg-primary text-white px-14 py-5 rounded-[1.5rem] font-black uppercase text-[0.6875rem] tracking-widest shadow-2xl shadow-primary/30 hover:-translate-y-1 transition-all active:scale-95"
+            >
               Author Pipeline Logic
             </button>
           </div>

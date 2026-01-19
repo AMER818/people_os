@@ -249,14 +249,15 @@ class PlantBase(BaseModel):
 
 class PlantCreate(PlantBase):
     id: Optional[str] = None
-    organization_id: str = Field(..., alias="organizationId")
+    organization_id: Optional[str] = Field(None, alias="organizationId")
     divisions: list[PlantDivisionCreate] = []
 
 
 class Plant(PlantBase, AuditBase):
     id: str
     organization_id: str = Field(..., alias="organizationId")
-    divisions: list[PlantDivision] = Field(default=[], alias="plant_divisions")
+    divisions: list[PlantDivision] = Field(default=[])
+    plant_id: Optional[str] = Field(None, alias="plantId")  # Fix for validation error
 
     class Config:
         from_attributes = True
@@ -264,22 +265,22 @@ class Plant(PlantBase, AuditBase):
 
 
 
-class EmploymentLevelBase(BaseModel):
+class JobLevelBase(BaseModel):
     name: str
     code: str
     description: Optional[str] = None
     is_active: bool = Field(True, alias="isActive")
-    organization_id: str = Field(..., alias="organizationId")
+    organization_id: Optional[str] = Field(None, alias="organizationId")
 
     class Config:
         populate_by_name = True
 
 
-class EmploymentLevelCreate(EmploymentLevelBase):
+class JobLevelCreate(JobLevelBase):
     id: Optional[str] = None
 
 
-class EmploymentLevel(EmploymentLevelBase, AuditBase):
+class JobLevel(JobLevelBase, AuditBase):
     id: str
 
     class Config:
@@ -292,6 +293,7 @@ class OrganizationBase(BaseModel):
     code: Optional[str] = "ORG001"
     name: str = "My Organization"
     is_active: bool = Field(True, alias="isActive")
+    head_id: Optional[str] = Field(None, alias="headId")
 
     # Modern fields (matching OrganizationProfile interface in frontend)
     industry: Optional[str] = None
@@ -343,6 +345,23 @@ class Organization(OrganizationBase, AuditBase):
         from_attributes = True
 
 
+class OrganizationList(OrganizationBase, AuditBase):
+    """Schema for organization list without nested plants to avoid lazy loading."""
+    id: str
+
+    @field_validator("social_links", mode="before")
+    def parse_social_links(cls, v):
+        if isinstance(v, str):
+            try:
+                return json.loads(v)
+            except:
+                return v
+        return v
+
+    class Config:
+        from_attributes = True
+
+
 # --- Org Settings Schemas ---
 
 
@@ -351,9 +370,14 @@ class DepartmentCreate(BaseModel):
     code: str
     name: str
     is_active: bool = Field(True, alias="isActive")
-    organization_id: str = Field(..., alias="organizationId")
-    plant_id: str = Field(..., alias="plantId")  # Added for Plant hierarchy
+    organization_id: Optional[str] = Field(None, alias="organizationId")
+    # plant_id removed
     hod_id: Optional[str] = Field(None, alias="hodId")
+
+    @field_validator("code")
+    @classmethod
+    def capitalize_code(cls, v: str) -> str:
+        return v.upper() if v else v
 
     class Config:
         populate_by_name = True
@@ -369,11 +393,16 @@ class Department(DepartmentCreate, AuditBase):
 
 class SubDepartmentCreate(BaseModel):
     id: Optional[str] = None
-    code: str
+    code: Optional[str] = None # Optional now, will be auto-generated in CRUD if missing
     name: str
     parent_department_id: str = Field(..., alias="parentDepartmentId")
     is_active: bool = Field(True, alias="isActive")
-    organization_id: str = Field(..., alias="organizationId")
+    organization_id: Optional[str] = Field(None, alias="organizationId")
+
+    @field_validator("code")
+    @classmethod
+    def capitalize_code(cls, v: Optional[str]) -> Optional[str]:
+        return v.upper() if v else v
 
     class Config:
         populate_by_name = True
@@ -391,27 +420,33 @@ class GradeCreate(BaseModel):
     name: str
     level: int = 0
     is_active: bool = Field(True, alias="isActive")
-    organization_id: str = Field(..., alias="organizationId")
-    employment_level_id: str = Field(..., alias="employmentLevelId")
+    organization_id: Optional[str] = Field(None, alias="organizationId")
+    job_level_id: str = Field(..., alias="jobLevelId")
 
     class Config:
         populate_by_name = True
 
 
-class Grade(GradeCreate, AuditBase):
+class Grade(AuditBase):
     id: str
+    name: str
+    level: int
+    is_active: bool = Field(True, alias="isActive")
+    organization_id: Optional[str] = Field(None, alias="organizationId")
+    jobLevelId: str = Field(..., validation_alias="job_level_id")
 
     class Config:
         from_attributes = True
+        populate_by_name = True
 
 
 class DesignationCreate(BaseModel):
     id: Optional[str] = None
     name: str
     grade_id: str = Field(..., alias="gradeId")
-    department_id: str = Field(..., alias="departmentId")
+    department_id: Optional[str] = Field(None, alias="departmentId")
     is_active: bool = Field(True, alias="isActive")
-    organization_id: str = Field(..., alias="organizationId")
+    organization_id: Optional[str] = Field(None, alias="organizationId")
 
     class Config:
         populate_by_name = True
@@ -435,7 +470,9 @@ class ShiftCreate(BaseModel):
     break_duration: Optional[int] = Field(0, alias="breakDuration")
     work_days: Optional[list[str]] = Field([], alias="workDays")
     is_active: bool = Field(True, alias="isActive")
-    organization_id: str = Field(..., alias="organizationId")
+    organization_id: Optional[str] = Field(None, alias="organizationId")
+    color: Optional[str] = None
+    description: Optional[str] = None
 
     class Config:
         populate_by_name = True
@@ -444,7 +481,7 @@ class ShiftCreate(BaseModel):
 class Shift(AuditBase):
     id: str
     name: str
-    code: str
+    code: Optional[str] = None
     type: Optional[str] = None
     start_time: Optional[str] = Field(None, alias="startTime")
     end_time: Optional[str] = Field(None, alias="endTime")
@@ -453,10 +490,13 @@ class Shift(AuditBase):
     work_days: Optional[str] = Field(None, alias="workDays")
     is_active: bool = Field(True, alias="isActive")
     organization_id: Optional[str] = None
+    color: Optional[str] = None
+    description: Optional[str] = None
 
     class Config:
         from_attributes = True
         populate_by_name = True
+        by_alias = True
 
 
 # --- Employment Level Schemas ---
@@ -466,7 +506,7 @@ class EmploymentLevelCreate(BaseModel):
     code: str
     description: Optional[str] = None
     is_active: bool = Field(True, alias="isActive")
-    organization_id: str = Field(..., alias="organizationId")
+    organization_id: Optional[str] = Field(None, alias="organizationId")
 
     class Config:
         populate_by_name = True
@@ -493,7 +533,7 @@ class PositionCreate(BaseModel):
     reports_to: Optional[str] = Field(None, alias="reportsTo")
     description: Optional[str] = None
     is_active: bool = True
-    organization_id: str = Field(..., alias="organizationId")
+    organization_id: Optional[str] = Field(None, alias="organizationId")
 
     class Config:
         populate_by_name = True
@@ -522,7 +562,7 @@ class HolidayCreate(BaseModel):
     type: Optional[str] = None
     is_recurring: bool = False
     description: Optional[str] = None
-    organization_id: str = Field(..., alias="organizationId")
+    organization_id: Optional[str] = Field(None, alias="organizationId")
 
     class Config:
         populate_by_name = True
@@ -552,7 +592,7 @@ class BankCreate(BaseModel):
     swift_code: Optional[str] = Field(None, alias="swiftCode")
     currency: str = "PKR"
     is_active: bool = True
-    organization_id: str = Field(..., alias="organizationId")
+    organization_id: Optional[str] = Field(None, alias="organizationId")
 
     class Config:
         populate_by_name = True
@@ -683,7 +723,7 @@ class UserBase(BaseModel):
     role: str
     name: Optional[str] = None  # Full name for display
     email: Optional[str] = None  # Email for account recovery
-    organization_id: str = Field(..., alias="organizationId")
+    organization_id: Optional[str] = Field(None, alias="organizationId")
     employee_id: Optional[str] = Field(None, alias="employeeId")
     status: Optional[str] = "Active"  # string status
     is_system_user: Optional[bool] = Field(
@@ -1189,3 +1229,101 @@ class BackgroundJobList(BaseModel):
 
 class AttritionPredictionRequest(BaseModel):
     employee_id: str
+
+
+# --- Attendance Schemas ---
+class AttendanceCreate(BaseModel):
+    employee_id: str = Field(..., alias="employeeId")
+    date: str
+    clock_in: Optional[str] = Field(None, alias="clockIn")
+    clock_out: Optional[str] = Field(None, alias="clockOut")
+    status: Optional[str] = "Absent"
+    shift_id: Optional[str] = Field(None, alias="shiftId")
+
+    class Config:
+        populate_by_name = True
+
+class Attendance(AttendanceCreate, AuditBase):
+    id: int
+    
+    class Config:
+        from_attributes = True
+
+# --- Payroll Schemas ---
+class PayrollLedgerCreate(BaseModel):
+    employee_id: str = Field(..., alias="employeeId")
+    period_month: str = Field(..., alias="periodMonth")
+    period_year: str = Field(..., alias="periodYear")
+    basic_salary: float = Field(0.0, alias="basicSalary")
+    gross_salary: float = Field(0.0, alias="grossSalary")
+    net_salary: float = Field(0.0, alias="netSalary")
+    additions: float = 0.0
+    deductions: float = 0.0
+    status: str = "Draft"
+    payment_mode: Optional[str] = Field(None, alias="paymentMode")
+
+    class Config:
+        populate_by_name = True
+
+class PayrollLedger(PayrollLedgerCreate, AuditBase):
+    id: int
+    
+    class Config:
+        from_attributes = True
+
+# --- Leave Schemas ---
+class LeaveRequestCreate(BaseModel):
+    employee_id: str = Field(..., alias="employeeId")
+    type: str = "Annual" # Annual, Sick, Casual, Unpaid
+    start_date: str = Field(..., alias="startDate")
+    end_date: str = Field(..., alias="endDate")
+    days: float = 1.0
+    reason: str
+    status: str = "Pending"
+
+    class Config:
+        populate_by_name = True
+
+class LeaveRequest(LeaveRequestCreate, AuditBase):
+    id: str
+    employee_name: Optional[str] = Field(None, alias="employeeName")
+
+    class Config:
+        from_attributes = True
+
+class LeaveBalanceCreate(BaseModel):
+    employee_id: str = Field(..., alias="employeeId")
+    year: int
+    annual_total: float = 14.0
+    annual_used: float = 0.0
+    sick_total: float = 10.0
+    sick_used: float = 0.0
+    casual_total: float = 10.0
+    casual_used: float = 0.0
+    unpaid_used: float = 0.0
+
+    class Config:
+        populate_by_name = True
+
+class LeaveBalance(LeaveBalanceCreate, AuditBase):
+    id: int
+    name: Optional[str] = None # Employee Name for UI
+    total: Optional[float] = None
+    used: Optional[float] = None
+    
+    annual: Optional[str] = None # "Used/Total" string for UI? Or just let frontend calculate?
+    # Frontend expects: anual="0/14", sick="0/10" etc based on `renderMatrix`? 
+    # Let's check api.ts again. types.ts says annual: number. 
+    # But src/modules/leaves/index.tsx line 284 `{node.annual}` renders it directly.
+    # We should return what frontend expects. 
+    # However, types.ts says `annual: number`. Line 284 in index.tsx treats it as renderable child.
+    # If the frontend renders "2/14", then `annual` in types should be string?
+    # types.ts:582 `annual: number`.
+    # Wait, looking at index.tsx line 299: `style={{ width: ${(node.used / node.total) * 100}% }}`.
+    # This implies `node.used` and `node.total` are numbers.
+    # BUT line 284 `{node.annual}` displays it. If it's a number, it displays "2".
+    # I'll stick to returning numbers in the base schema, but maybe add computed fields if needed.
+    # For now, simplistic approach: Return numbers.
+
+    class Config:
+        from_attributes = True

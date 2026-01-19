@@ -28,7 +28,7 @@ const ForecastingMatrix: React.FC = () => {
     <div
       role="region"
       aria-label="Predictive Growth Matrix"
-      className="bg-white dark:bg-slate-900 rounded-[2rem] p-8 border border-slate-100 dark:border-slate-800 shadow-2xl space-y-8"
+      className="bg-card rounded-[2rem] p-8 border border-border shadow-2xl space-y-8"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-6">

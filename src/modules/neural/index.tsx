@@ -101,7 +101,7 @@ const NeuralModule: React.FC = () => {
           </div>
           <div>
             <h3 className="text-2xl font-black text-foreground tracking-tight uppercase leading-none">
-              Hunzal AI
+              PeopleOS AI
             </h3>
             <p className="text-[0.625rem] font-black text-muted-foreground uppercase tracking-widest mt-2 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-success-500 animate-ping"></span>
@@ -145,7 +145,7 @@ const NeuralModule: React.FC = () => {
                   msg.role === 'user' ? 'text-primary-foreground/60' : 'text-muted-foreground'
                 }`}
               >
-                {msg.role === 'user' ? 'You' : 'Hunzal'} • Just now
+                {msg.role === 'user' ? 'You' : 'PeopleOS'} • Just now
               </p>
             </div>
           </div>

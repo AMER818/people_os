@@ -1,3 +1,13 @@
+import { LucideIcon } from 'lucide-react';
+
+export type ConfigValue =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | Record<string, unknown>
+  | unknown[];
 export interface OrganizationProfile {
   id: string;
   name: string;
@@ -11,7 +21,9 @@ export interface OrganizationProfile {
   email?: string;
   website?: string;
   phone?: string;
+
   description?: string;
+  headId?: string; // ID of the Organization Head
 
   // New Legal & Address Fields
   taxId?: string;
@@ -80,7 +92,7 @@ export interface OrgPolicy {
   type: 'Leave' | 'Attendance' | 'Approval' | 'Payroll' | 'Recruitment';
   name: string;
   description?: string;
-  config: Record<string, any>; // JSON configuration
+  config: Record<string, ConfigValue>; // JSON configuration
   isActive: boolean;
   version: string;
 }
@@ -122,7 +134,7 @@ export type ModuleType =
   | 'visitors'
   | 'assistance'
   | 'system-health'
-  | 'hunzal-chat';
+  | 'people-os-chat';
 
 // --- Plant/Location Management ---
 export interface PlantDivision {
@@ -146,20 +158,13 @@ export interface Plant {
   currentSequence?: number;
 }
 
-export interface MasterDepartment {
-  id: string;
-  name: string;
-  code: string;
-  isActive: boolean;
-}
-
 export interface Department {
   id: string;
   name: string;
   subDepartments: string[];
   headOfDept?: string;
   budgetCode?: string;
-  code?: string;
+  code: string;
   parentDepartmentId?: string;
   isActive?: boolean;
   plantId?: string; // Link to Plant
@@ -175,12 +180,23 @@ export interface SubDepartment {
   organizationId?: string;
 }
 
+export interface JobLevel {
+  id: string;
+  name: string;
+  code: string; // e.g. "EL-1", "EL-2"
+  description?: string;
+  isActive: boolean;
+  organizationId: string;
+}
+
 export interface Grade {
   id: string;
   name: string;
-  level: number;
-  isActive?: boolean;
-  employmentLevelId?: string; // Link to Employment Type/Level
+  level: number; // e.g. 1 (Highest), 10 (Lowest)
+  jobLevelId: string; // Link to JobLevel
+  isActive: boolean;
+  code?: string;
+  organizationId: string;
 }
 
 export interface Designation {
@@ -194,15 +210,6 @@ export interface Designation {
 export interface DesignationGrade {
   grade: string;
   designations: string[];
-}
-
-export interface EmploymentLevel {
-  id: string;
-  name: string;
-  code: string;
-  description?: string;
-  isActive?: boolean;
-  organizationId?: string;
 }
 
 export interface Holiday {
@@ -233,6 +240,8 @@ export interface Shift {
   gracePeriod: number; // minutes
   breakDuration: number; // minutes
   workDays: string[]; // e.g., ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
+  color?: string;
+  description?: string;
 }
 
 export interface PayrollSettings {
@@ -483,7 +492,7 @@ export interface Employee {
 
   // Benefits / Financials
   grossSalary: number;
-  paymentMode: 'Cash' | 'Cheque' | 'Bank Transfer';
+  paymentMode: 'Cash Payment' | 'Cheque' | 'Bank Transfer';
   bankId?: string; // For bank transfer
   bankAccount?: string;
 
@@ -599,7 +608,7 @@ export interface Course {
   score: number;
   status: 'Completed' | 'In Progress' | 'Enrolled' | 'Recommended';
   progress?: number;
-  icon?: any; // Keeping as any for now as it stores Lucide icon components in mock data, but in real app this might be a string identifier
+  icon?: LucideIcon | string; // Keeping as any for now as it stores Lucide icon components in mock data, but in real app this might be a string identifier
   color: string;
 }
 
@@ -844,105 +853,20 @@ export type Permission =
   | 'view_own_leaves'; // Added
 
 /**
- * Role permission matrix - defines what each role can do
- * Order matters: Root > Super Admin > System Admin > Business Admin
+ * RBAC Permissions - Re-exported from single source of truth
+ * See src/config/permissions.ts for the canonical definitions.
+ * DO NOT define permissions here - use config/permissions.ts
  */
-export const ROLE_PERMISSIONS: Record<SystemRole, Permission[]> = {
-  Root: [
-    'view_users',
-    'create_users',
-    'edit_users',
-    'delete_users',
-    'manage_master_data',
-    'system_config',
-    'view_audit_logs',
-    'employee_management',
-    'payroll_access',
-  ],
-  'Super Admin': [
-    'view_users',
-    'create_users',
-    'edit_users',
-    'delete_users',
-    'manage_master_data',
-    'system_config',
-    'view_audit_logs',
-    'employee_management',
-    'payroll_access',
-  ],
-  SystemAdmin: [
-    'view_users',
-    'create_users',
-    'edit_users',
-    'delete_users',
-    'manage_master_data',
-    'system_config',
-    'view_audit_logs',
-    // Removed: employee_management, payroll_access (Strict SoD)
-  ],
-  'Business Admin': [
-    'view_users',
-    'create_users',
-    'edit_users',
-    'delete_users',
-    'manage_master_data',
-    'system_config',
-    'view_audit_logs',
-    'employee_management',
-    'payroll_access',
-  ],
-  Manager: ['view_users', 'employee_management'],
-  User: [],
-};
-
-/**
- * Role hierarchy for inheritance checks
- * Higher index = higher authority
- */
-export const ROLE_HIERARCHY: SystemRole[] = [
-  'User', // Level 0 (End User)
-  'Manager', // Level 1 (Team Access)
-  'Business Admin', // Level 2 (Specific Modules: Payroll/Employees) - formerly HR Admin
-  'SystemAdmin', // Level 3 (Tech Config)
-  'Super Admin', // Level 4 (Full App Access)
-  'Root', // Level 5 (God Mode)
-];
-
-/**
- * Check if a role has a specific permission
- */
-export function hasPermission(role: UserRole | undefined, permission: Permission): boolean {
-  if (!role) {
-    return false;
-  }
-
-  const permissions = ROLE_PERMISSIONS[role as SystemRole];
-  return permissions?.includes(permission) ?? false;
-}
-
-/**
- * Check if roleA has equal or higher authority than roleB
- */
-export function hasAuthorityOver(
-  roleA: UserRole | undefined,
-  roleB: UserRole | undefined
-): boolean {
-  if (!roleA) {
-    return false;
-  }
-
-  // Root supersedes all
-  if (roleA === 'Root') {
-    return true;
-  }
-
-  if (!roleB) {
-    return true;
-  }
-  const indexA = ROLE_HIERARCHY.indexOf(roleA as SystemRole);
-  const indexB = ROLE_HIERARCHY.indexOf(roleB as SystemRole);
-  return indexA >= indexB;
-}
+export {
+  DEFAULT_ROLE_PERMISSIONS as ROLE_PERMISSIONS,
+  ROLE_HIERARCHY,
+  SUPER_ROLES,
+  hasPermission,
+  getRoleLevel,
+  isHigherRole,
+  isSystemRole,
+  hasAuthorityOver,
+} from './config/permissions';
 
 export type TabId = string; // Generic tab ID type
 
@@ -1017,7 +941,7 @@ export interface SettingNode {
   key: string; // e.g., 'security.mfa_enforced'
   label: string;
   category: string; // e.g., 'security'
-  value: any;
+  value: ConfigValue;
   defaultValue: any;
   type: SettingType;
   options?: string[];

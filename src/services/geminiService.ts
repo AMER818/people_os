@@ -237,7 +237,7 @@ export const getChatResponse = async (
             role: 'user',
             parts: [
               {
-                text: 'System: You are Hunzal AI, an advanced Enterprise OS Assistant. Be concise and professional.',
+                text: 'System: You are PeopleOS AI, an advanced Enterprise OS Assistant. Be concise and professional.',
               },
             ],
           },

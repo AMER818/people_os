@@ -300,13 +300,13 @@ const AssistanceModule: React.FC = () => {
                   Policy Autopilot
                 </h3>
                 <p className="text-primary-foreground/80 text-lg leading-relaxed mb-10 antialiased opacity-80">
-                  Query the Hunzal intelligence kernel for immediate guidance on enterprise
+                  Query the PeopleOS intelligence kernel for immediate guidance on enterprise
                   protocols and organizational logistics.
                 </p>
                 <div className="flex gap-4">
                   <input
                     className="flex-1 bg-background/10 border border-background/20 rounded-2xl px-6 py-4 font-black placeholder:text-background/30 outline-none focus:bg-background/20 transition-all"
-                    placeholder="Ask Hunzal Intelligence..."
+                    placeholder="Ask PeopleOS Intelligence..."
                     aria-label="Ask AI assistant"
                   />
                   <button

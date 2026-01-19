@@ -18,6 +18,7 @@ import {
 import { Card } from '../../components/ui/Card';
 
 import { PALETTE } from '@/theme/palette';
+import { formatTime } from '../../utils/formatting';
 import { useUIStore } from '../../store/uiStore';
 import {
   AreaChart,
@@ -48,53 +49,82 @@ interface KPICardProps {
   label: string;
   value: string | number;
   icon: React.ComponentType<{ size: number; className?: string }>;
-  color: string;
+  variant: 'primary' | 'success' | 'warning' | 'info';
   action: string;
   onClick: (action: string) => void;
 }
 
-const KPICard = React.memo<KPICardProps>(({ label, value, icon: Icon, color, action, onClick }) => (
-  <div
-    onClick={() => onClick(action)}
-    className="p-8 bg-white/5 border border-white/10 rounded-[2.5rem] backdrop-blur-xl hover:bg-white/20 hover:border-white/30 hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 ease-out cursor-pointer group relative overflow-hidden hover:-translate-y-2"
-    role="button"
-    tabIndex={0}
-    aria-label={`${label}: ${value}`}
-    onKeyDown={(e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        onClick(action);
-      }
-    }}
-  >
-    <div
-      className={`absolute -right-12 -top-12 w-32 h-32 ${color} opacity-5 rounded-full blur-3xl group-hover:opacity-20 transition-all duration-500 group-hover:scale-150`}
-    ></div>
-    <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-[2.5rem]"></div>
-    <div className="relative z-10">
+const KPICard = React.memo<KPICardProps>(
+  ({ label, value, icon: Icon, variant, action, onClick }) => {
+    const variants = {
+      primary: {
+        bg: 'bg-primary',
+        text: 'text-primary',
+        blur: 'bg-primary',
+      },
+      success: {
+        bg: 'bg-success',
+        text: 'text-success',
+        blur: 'bg-success',
+      },
+      warning: {
+        bg: 'bg-warning',
+        text: 'text-warning',
+        blur: 'bg-warning',
+      },
+      info: {
+        bg: 'bg-info',
+        text: 'text-info',
+        blur: 'bg-info',
+      },
+    };
+
+    const colors = variants[variant] || variants.primary;
+
+    return (
       <div
-        className={`w-12 h-12 rounded-xl ${color} ${color === 'bg-blue-500' ? 'text-blue-500' : color === 'bg-emerald-500' ? 'text-emerald-500' : color === 'bg-amber-500' ? 'text-amber-500' : 'text-orange-500'} bg-opacity-10 flex items-center justify-center mb-4 group-hover:scale-125 group-hover:bg-opacity-20 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-current/30`}
+        onClick={() => onClick(action)}
+        className="p-8 card-vibrant rounded-[2.5rem] hover:border-primary/50 hover:shadow-[0_0_30px_rgba(37,99,235,0.3)] transition-all duration-300 ease-out cursor-pointer group relative overflow-hidden hover:-translate-y-2"
+        role="button"
+        tabIndex={0}
+        aria-label={`${label}: ${value}`}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            onClick(action);
+          }
+        }}
       >
-        <Icon
-          size={24}
-          aria-hidden="true"
-          className="group-hover:rotate-12 transition-transform duration-300"
-        />
+        <div
+          className={`absolute -right-12 -top-12 w-32 h-32 ${colors.blur} opacity-5 rounded-full blur-3xl group-hover:opacity-20 transition-all duration-500 group-hover:scale-150`}
+        ></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-surface/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-[2.5rem]"></div>
+        <div className="relative z-10">
+          <div
+            className={`w-12 h-12 rounded-xl ${colors.bg} ${colors.text} bg-opacity-10 flex items-center justify-center mb-4 group-hover:scale-125 group-hover:bg-opacity-20 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-current/30`}
+          >
+            <Icon
+              size={24}
+              aria-hidden="true"
+              className="group-hover:rotate-12 transition-transform duration-300"
+            />
+          </div>
+          <p className="text-[0.625rem] font-black text-muted-foreground uppercase tracking-widest mb-2 group-hover:text-foreground transition-colors duration-300">
+            {label}
+          </p>
+          <p className="text-4xl font-black text-foreground tracking-tighter mb-4 group-hover:text-primary transition-colors duration-300">
+            {value}
+          </p>
+          <div className="flex items-center gap-2 group-hover:gap-3 transition-all duration-300">
+            <div className="w-6 h-1 bg-gradient-to-r from-primary to-primary/30 rounded-full group-hover:w-8 group-hover:shadow-lg group-hover:shadow-primary/50 transition-all duration-300"></div>
+            <span className="text-[0.5625rem] font-black text-success uppercase tracking-widest group-hover:text-emerald-300 transition-colors duration-300">
+              +12%
+            </span>
+          </div>
+        </div>
       </div>
-      <p className="text-[0.625rem] font-black text-muted-foreground uppercase tracking-widest mb-2 group-hover:text-white transition-colors duration-300">
-        {label}
-      </p>
-      <p className="text-4xl font-black text-foreground tracking-tighter mb-4 group-hover:text-primary transition-colors duration-300">
-        {value}
-      </p>
-      <div className="flex items-center gap-2 group-hover:gap-3 transition-all duration-300">
-        <div className="w-6 h-1 bg-gradient-to-r from-primary to-primary/30 rounded-full group-hover:w-8 group-hover:shadow-lg group-hover:shadow-primary/50 transition-all duration-300"></div>
-        <span className="text-[0.5625rem] font-black text-success uppercase tracking-widest group-hover:text-emerald-300 transition-colors duration-300">
-          +12%
-        </span>
-      </div>
-    </div>
-  </div>
-));
+    );
+  }
+);
 
 KPICard.displayName = 'KPICard';
 
@@ -244,45 +274,45 @@ const Dashboard: React.FC = () => {
     <div
       className="space-y-12 animate-in fade-in duration-700 pb-20"
       role="main"
-      aria-label="Executive Dashboard"
+      aria-label="Dashboard"
     >
       {/* Executive Command Header */}
       <div>
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-8">
           <div>
-            <h1 className="text-5xl font-black text-slate-100 tracking-tighter leading-none uppercase">
-              Command Center
+            <h1 className="text-5xl font-black text-vibrant tracking-tighter leading-none uppercase">
+              Dashboard
             </h1>
             <p className="text-blue-400 mt-4 font-black uppercase tracking-[0.4em] text-[0.6rem] flex items-center gap-3">
               <span className="w-10 h-[2px] bg-blue-500/50"></span>
-              Workforce Intelligence & Global Orchestration
+              Overview of your organization
             </p>
           </div>
           <div className="flex flex-col items-end gap-3">
-            <div className="text-[0.625rem] font-bold text-slate-400 uppercase tracking-wider">
-              Last Updated: {lastUpdate.toLocaleTimeString()}
+            <div className="text-[0.625rem] font-bold text-muted-foreground uppercase tracking-wider">
+              Last Updated: {formatTime(lastUpdate)}
             </div>
             <div className="flex items-center gap-4">
               <button
                 onClick={() => window.location.reload()}
-                className="p-3 bg-slate-900/50 border border-slate-700/50 rounded-2xl hover:bg-slate-800 transition-all group backdrop-blur-xl shadow-lg disabled:opacity-50"
-                title="Refresh Neural Feed"
-                aria-label="Refresh neural feed"
+                className="p-3 bg-card border border-border rounded-2xl hover:bg-muted-bg transition-all group backdrop-blur-xl shadow-lg disabled:opacity-50"
+                title="Refresh Data"
+                aria-label="Refresh data"
                 disabled={loading}
               >
                 <RefreshCw
                   size={18}
-                  className={`text-blue-400 group-hover:rotate-180 transition-transform duration-700 ${loading ? 'animate-spin' : ''}`}
+                  className={`text-primary group-hover:rotate-180 transition-transform duration-700 ${loading ? 'animate-spin' : ''}`}
                 />
               </button>
               <button
                 onClick={handleExportData}
-                className="p-3 bg-slate-900/50 border border-slate-700/50 rounded-2xl hover:bg-slate-700 hover:border-blue-500/50 transition-all duration-300 group backdrop-blur-xl shadow-lg hover:shadow-xl hover:shadow-blue-500/30 hover:scale-110 hover:-translate-y-1"
+                className="p-3 bg-card border border-border rounded-2xl hover:bg-muted-bg hover:border-border transition-all duration-300 group backdrop-blur-xl shadow-lg hover:shadow-xl hover:shadow-primary/30 hover:scale-110 hover:-translate-y-1"
                 title="Export Dashboard Data"
                 aria-label="Export dashboard data as CSV"
               >
                 <svg
-                  className="w-5 h-5 text-blue-400 group-hover:scale-125 group-hover:text-blue-300 transition-all duration-300"
+                  className="w-5 h-5 text-primary group-hover:scale-125 group-hover:text-primary transition-all duration-300"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -296,7 +326,7 @@ const Dashboard: React.FC = () => {
                   />
                 </svg>
               </button>
-              <div className="bg-[#0f172a] backdrop-blur-xl px-6 py-3 rounded-2xl shadow-2xl border border-blue-500/20 flex items-center gap-4">
+              <div className="bg-card backdrop-blur-xl px-6 py-3 rounded-2xl shadow-2xl border border-border flex items-center gap-4">
                 <div className="relative">
                   <div
                     className={`w-3 h-3 ${systemStatus === 'Optimal' ? 'bg-emerald-500' : systemStatus === 'Degraded' ? 'bg-amber-500' : 'bg-rose-500'} rounded-full animate-ping absolute opacity-75`}
@@ -305,8 +335,8 @@ const Dashboard: React.FC = () => {
                     className={`w-3 h-3 ${systemStatus === 'Optimal' ? 'bg-emerald-500' : systemStatus === 'Degraded' ? 'bg-amber-500' : 'bg-rose-500'} rounded-full relative shadow-[0_0_15px_rgba(16,185,129,0.3)]`}
                   ></div>
                 </div>
-                <span className="text-[0.6rem] font-black text-slate-300 uppercase tracking-widest">
-                  System Registry:{' '}
+                <span className="text-[0.6rem] font-black text-muted-foreground uppercase tracking-widest">
+                  System Status:{' '}
                   <span
                     className={systemStatus === 'Optimal' ? 'text-emerald-400' : 'text-amber-400'}
                   >
@@ -339,7 +369,7 @@ const Dashboard: React.FC = () => {
         ].map((stat, idx) => (
           <div
             key={idx}
-            className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl hover:bg-white/10 transition-all group"
+            className="card-vibrant border-border/50 rounded-2xl p-6 hover:bg-surface/50 transition-all group hover:border-primary/50"
           >
             <div className="flex items-start justify-between mb-4">
               <stat.icon
@@ -350,10 +380,10 @@ const Dashboard: React.FC = () => {
                 {stat.trend === 'up' ? '↗' : '→'} Positive
               </span>
             </div>
-            <p className="text-[0.625rem] font-black text-white/60 uppercase tracking-widest mb-2">
+            <p className="text-[0.625rem] font-black text-muted-foreground uppercase tracking-widest mb-2">
               {stat.label}
             </p>
-            <p className="text-3xl font-black text-white tracking-tight">{stat.value}</p>
+            <p className="text-3xl font-black text-foreground tracking-tight">{stat.value}</p>
           </div>
         ))}
       </div>
@@ -369,28 +399,28 @@ const Dashboard: React.FC = () => {
             label: 'Total Employees',
             value: totalEmployees,
             icon: Users,
-            color: 'bg-blue-500',
+            variant: 'primary',
             action: 'employees',
           },
           {
             label: 'Active Employees',
             value: activeEmployees.length,
             icon: UserCheck,
-            color: 'bg-emerald-500',
+            variant: 'success',
             action: 'employees',
           },
           {
             label: 'Engagement',
             value: `${engagementRate}%`,
             icon: Zap,
-            color: 'bg-amber-500',
+            variant: 'warning',
             action: 'engagement',
           },
           {
             label: 'Open Vacancies',
             value: openVacancies,
             icon: Briefcase,
-            color: 'bg-orange-500',
+            variant: 'info',
             action: 'recruitment',
           },
         ].map((card, idx) => (
@@ -399,7 +429,7 @@ const Dashboard: React.FC = () => {
             label={card.label}
             value={card.value}
             icon={card.icon}
-            color={card.color}
+            variant={card.variant as any}
             action={card.action}
             onClick={handleQuickAction}
           />
@@ -407,25 +437,24 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Premium AI Features Section */}
-      <div className="bg-slate-900 dark:bg-black p-10 rounded-[3rem] text-white shadow-2xl relative overflow-hidden group border border-white/5">
+      <div className="card-vibrant p-10 rounded-[3rem] text-card-foreground shadow-2xl relative overflow-hidden group border border-blue-500/30">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent pointer-events-none"></div>
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
           <div>
             <div className="flex items-center gap-3 mb-6">
               <Sparkles className="w-6 h-6 text-primary" />
               <span className="text-[0.625rem] font-black uppercase tracking-[0.4em] text-primary">
-                AI Workforce Intelligence
+                AI Insights
               </span>
             </div>
-            <h2 className="text-4xl font-black tracking-tighter leading-none mb-6">
-              Intelligent Workforce Analytics
+            <h2 className="text-4xl font-black tracking-tighter leading-none mb-6 text-white drop-shadow-[0_0_10px_rgba(37,99,235,0.5)]">
+              Workforce Analytics
             </h2>
-            <p className="text-white/70 text-lg leading-relaxed mb-8">
-              Hunzal AI analyzes workforce patterns and automatically generates actionable insights
-              for workforce optimization, talent retention, and engagement improvements.
+            <p className="text-muted-foreground text-lg leading-relaxed mb-8">
+              AI analyzes patterns and gives insights.
             </p>
             <div className="flex gap-4">
-              <div className="px-6 py-3 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-3">
+              <div className="px-6 py-3 bg-surface border border-border rounded-2xl flex items-center gap-3">
                 <Activity className="text-primary" size={18} />
                 <span className="text-[0.625rem] font-black uppercase tracking-widest">
                   Real-Time Analytics
@@ -442,7 +471,7 @@ const Dashboard: React.FC = () => {
             ].map((item, i) => (
               <div
                 key={i}
-                className="p-6 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-xl hover:bg-white/10 transition-all text-center group/card"
+                className="p-6 bg-surface/40 border border-border/50 rounded-2xl backdrop-blur-xl hover:bg-primary/10 hover:border-primary/50 transition-all text-center group/card shadow-sm"
               >
                 <item.icon className="w-8 h-8 mx-auto mb-3 text-primary group-hover/card:scale-110 transition-transform" />
                 <p className="text-[0.6875rem] font-black uppercase tracking-[0.2em]">
@@ -458,7 +487,7 @@ const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
         {/* Main Growth Chart - Premium Glass Card */}
         <div
-          className="xl:col-span-2 p-10 bg-white/5 border border-white/10 rounded-[3rem] backdrop-blur-xl hover:bg-white/10 transition-all flex flex-col min-h-[28.125rem] group relative overflow-hidden"
+          className="xl:col-span-2 p-10 card-vibrant border-border/50 rounded-[3rem] hover:bg-surface/50 transition-all flex flex-col min-h-[28.125rem] group relative overflow-hidden hover:shadow-[0_0_30px_rgba(37,99,235,0.2)]"
           role="region"
           aria-label="Growth Trends - Headcount Analytics"
         >
@@ -469,14 +498,16 @@ const Dashboard: React.FC = () => {
                 <TrendingUp size={24} className="text-primary" aria-hidden="true" />
               </div>
               <div>
-                <h3 className="font-black text-2xl text-white tracking-tight">Growth Trends</h3>
-                <p className="text-[0.625rem] font-black uppercase text-white/60 tracking-widest mt-1">
-                  Headcount Analytics
+                <h3 className="font-black text-2xl text-foreground tracking-tight">
+                  Growth Trends
+                </h3>
+                <p className="text-[0.625rem] font-black uppercase text-muted-foreground tracking-widest mt-1">
+                  Employee Count over time
                 </p>
               </div>
             </div>
             <select
-              className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-xl text-[0.625rem] font-black uppercase tracking-wider px-4 py-2.5 outline-none text-white hover:bg-white/20 hover:border-white/30 hover:shadow-lg hover:shadow-primary/30 transition-all duration-300 focus:ring-2 focus:ring-primary/50 cursor-pointer"
+              className="bg-surface border border-border backdrop-blur-xl rounded-xl text-[0.625rem] font-black uppercase tracking-wider px-4 py-2.5 outline-none text-foreground hover:bg-muted-bg hover:border-border hover:shadow-lg hover:shadow-primary/30 transition-all duration-300 focus:ring-2 focus:ring-primary/50 cursor-pointer"
               aria-label="Select time period for growth trends"
               value={filterPeriod}
               onChange={(e) => setFilterPeriod(e.target.value as '1w' | '1m' | '3m' | '1y')}
@@ -553,7 +584,7 @@ const Dashboard: React.FC = () => {
 
         {/* Milestone Radar */}
         <Card
-          className="flex flex-col relative overflow-hidden group hover:shadow-md transition-all duration-300 p-8"
+          className="flex flex-col relative overflow-hidden group hover:shadow-md transition-all duration-300 p-8 card-vibrant border-border/50"
           role="region"
           aria-label="Celebrations - Upcoming Milestones"
         >
@@ -619,7 +650,7 @@ const Dashboard: React.FC = () => {
                   className={`w-full py-2.5 rounded-lg text-[0.625rem] font-black uppercase tracking-[0.2em] transition-all duration-300 flex items-center justify-center gap-2 ${
                     wishesSent.includes(m.id)
                       ? 'bg-success text-white shadow-inner opacity-90'
-                      : 'bg-white dark:bg-black/20 text-text-secondary hover:bg-purple-600 hover:text-white dark:hover:text-white shadow-sm hover:shadow-2xl hover:shadow-purple-500/40 hover:scale-105 hover:-translate-y-1'
+                      : 'bg-card text-text-secondary border border-border hover:bg-purple-600 hover:text-white dark:hover:text-white shadow-sm hover:shadow-2xl hover:shadow-purple-500/40 hover:scale-105 hover:-translate-y-1'
                   }`}
                   aria-label={
                     wishesSent.includes(m.id)
@@ -648,7 +679,7 @@ const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
         {/* Department Distribution */}
         <Card
-          className="flex flex-col group hover:shadow-md transition-all duration-300 p-8"
+          className="flex flex-col group hover:shadow-md transition-all duration-300 p-8 card-vibrant border-border/50"
           role="region"
           aria-label="Department Distribution - Headcount by Department"
         >
@@ -736,7 +767,7 @@ const Dashboard: React.FC = () => {
 
         {/* Attendance Overview */}
         <Card
-          className="flex flex-col group hover:shadow-md transition-all duration-300 p-8"
+          className="flex flex-col group hover:shadow-md transition-all duration-300 p-8 card-vibrant border-border/50"
           role="region"
           aria-label="Today's Attendance - Live Status"
         >

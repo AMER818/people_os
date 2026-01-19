@@ -26,7 +26,7 @@ const AssetAuditModal: React.FC<AssetAuditModalProps> = ({
 }) => {
   return (
     <div className="fixed inset-0 z-[130] flex items-center justify-center p-8 bg-slate-950/80 backdrop-blur-2xl animate-in fade-in duration-300">
-      <div className="bg-white dark:bg-slate-900 w-full max-w-5xl rounded-[5rem] shadow-[0_0_9.375rem_rgba(0,0,0,0.7)] border border-white/5 overflow-hidden animate-in slide-in-from-bottom-24 duration-700 flex flex-col max-h-[90vh]">
+      <div className="bg-card w-full max-w-5xl rounded-[5rem] shadow-[0_0_9.375rem_rgba(0,0,0,0.7)] border border-white/5 overflow-hidden animate-in slide-in-from-bottom-24 duration-700 flex flex-col max-h-[90vh]">
         <div className="p-20 flex items-center justify-between bg-slate-950 text-white relative overflow-hidden shrink-0">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-transparent"></div>
           <div className="flex items-center gap-10 relative z-10">
@@ -58,19 +58,23 @@ const AssetAuditModal: React.FC<AssetAuditModalProps> = ({
               </h5>
               <div className="grid grid-cols-2 gap-10">
                 <div className="space-y-2">
-                  <p className="text-[0.5625rem] font-black text-slate-400 uppercase">Serial Identity</p>
+                  <p className="text-[0.5625rem] font-black text-slate-400 uppercase">
+                    Serial Identity
+                  </p>
                   <p className="text-2xl font-black text-slate-900 dark:text-white font-mono">
                     {asset.serialNumber}
                   </p>
                 </div>
                 <div className="space-y-2">
-                  <p className="text-[0.5625rem] font-black text-slate-400 uppercase">Procurement Date</p>
+                  <p className="text-[0.5625rem] font-black text-slate-400 uppercase">
+                    Procurement Date
+                  </p>
                   <p className="text-2xl font-black text-slate-900 dark:text-white">
                     {asset.assignedDate}
                   </p>
                 </div>
               </div>
-              <div className="p-10 bg-slate-50 dark:bg-slate-950 rounded-[3rem] border border-slate-100 dark:border-slate-800">
+              <div className="p-10 bg-muted rounded-[3rem] border border-border">
                 <p className="text-[0.625rem] font-black text-slate-400 uppercase tracking-widest mb-4">
                   Technical Specifications
                 </p>
@@ -101,10 +105,10 @@ const AssetAuditModal: React.FC<AssetAuditModalProps> = ({
                 ].map((h, i) => (
                   <div
                     key={i}
-                    className={`flex items-center justify-between p-6 rounded-[2rem] border ${h.status === 'Active' ? 'bg-blue-600/5 border-blue-600/20' : 'bg-slate-50 dark:bg-slate-800 border-transparent opacity-60'}`}
+                    className={`flex items-center justify-between p-6 rounded-[2rem] border ${h.status === 'Active' ? 'bg-blue-600/5 border-blue-600/20' : 'bg-muted border-transparent opacity-60'}`}
                   >
                     <div className="flex items-center gap-5">
-                      <div className="w-12 h-12 bg-white dark:bg-slate-700 rounded-2xl flex items-center justify-center text-slate-400 shadow-sm">
+                      <div className="w-12 h-12 bg-card rounded-2xl flex items-center justify-center text-slate-400 shadow-sm">
                         <UserCheck size={20} />
                       </div>
                       <div>
@@ -126,7 +130,7 @@ const AssetAuditModal: React.FC<AssetAuditModalProps> = ({
           </div>
 
           <div className="space-y-12">
-            <div className="bg-slate-50 dark:bg-slate-800/50 p-10 rounded-[3.5rem] border border-slate-100 dark:border-slate-800 shadow-inner">
+            <div className="bg-muted p-10 rounded-[3.5rem] border border-border shadow-inner">
               <h5 className="text-[0.625rem] font-black uppercase tracking-[0.4em] text-slate-400 mb-8">
                 Governance Phase
               </h5>
@@ -140,7 +144,7 @@ const AssetAuditModal: React.FC<AssetAuditModalProps> = ({
                   <button
                     key={s.label}
                     onClick={() => onStatusChange(asset.id, s.label as any)}
-                    className={`w-full flex items-center justify-between p-6 rounded-[1.75rem] border transition-all ${asset.status === s.label ? `bg-${s.color}-500 text-white border-${s.color}-600 shadow-lg scale-105` : 'bg-white dark:bg-slate-900 border-transparent text-slate-400 hover:border-slate-200'}`}
+                    className={`w-full flex items-center justify-between p-6 rounded-[1.75rem] border transition-all ${asset.status === s.label ? `bg-${s.color}-500 text-white border-${s.color}-600 shadow-lg scale-105` : 'bg-card border-transparent text-slate-400 hover:border-slate-200'}`}
                   >
                     <span className="text-[0.6875rem] font-black uppercase tracking-widest">
                       {s.label}
@@ -159,7 +163,7 @@ const AssetAuditModal: React.FC<AssetAuditModalProps> = ({
               </button>
               <button
                 aria-label="Log maintenance activity"
-                className="w-full py-6 bg-white dark:bg-slate-800 text-slate-400 rounded-[1.75rem] font-black uppercase text-[0.6875rem] tracking-widest shadow-sm flex items-center justify-center gap-4 border border-slate-100 dark:border-slate-700"
+                className="w-full py-6 bg-card text-slate-400 rounded-[1.75rem] font-black uppercase text-[0.6875rem] tracking-widest shadow-sm flex items-center justify-center gap-4 border border-border"
               >
                 <Wrench size={18} /> Log Maintenance
               </button>

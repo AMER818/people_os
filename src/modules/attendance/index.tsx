@@ -14,15 +14,18 @@ import {
   Globe,
   MapPin,
   RefreshCw,
-  Plus,
   Check,
   X,
 } from 'lucide-react';
 import { api } from '../../services/api';
 import { AttendanceRecord } from '../../types';
 import { HorizontalTabs } from '../../components/ui/HorizontalTabs';
+import { VibrantBadge } from '../../components/ui/VibrantBadge';
 
-type AttendanceTab = 'daily' | 'matrix' | 'roster' | 'corrections';
+import { useOrgStore } from '../../store/orgStore';
+import ShiftManagement from './ShiftManagement';
+
+type AttendanceTab = 'daily' | 'matrix' | 'corrections' | 'shifts';
 
 const Attendance: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AttendanceTab>('daily');
@@ -31,15 +34,57 @@ const Attendance: React.FC = () => {
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const { plants } = useOrgStore();
+  const [selectedPlantId, setSelectedPlantId] = useState<string>('');
+  const [correctionRequests, setCorrectionRequests] = useState([
+    {
+      id: '1',
+      name: 'Alex Rivera',
+      date: 'Jul 18, 2024',
+      type: 'Missing Punch',
+      reason: 'Biometric hardware failure at Site-B gate.',
+      status: 'Pending',
+    },
+    {
+      id: '2',
+      name: 'Maria Garcia',
+      date: 'Jul 20, 2024',
+      type: 'Shift Swap',
+      reason: 'Emergency family medical protocol.',
+      status: 'Pending',
+    },
+  ]);
+
+  // Auto-select first active plant if none selected
+  useEffect(() => {
+    if (plants.length > 0 && !selectedPlantId) {
+      const active = plants.find((p) => p.isActive);
+      if (active) {
+        setSelectedPlantId(active.id);
+      }
+    }
+  }, [plants, selectedPlantId]);
+
   useEffect(() => {
     loadData();
-  }, []);
+  }, [selectedPlantId]); // Reload when plant changes
 
   const loadData = async () => {
     setIsLoading(true);
+    // In a real scenario, we'd pass selectedPlantId to the API
+    // const data = await api.getAttendanceRecords(selectedPlantId);
     const data = await api.getAttendanceRecords();
+    // Mock client-side processing to simulate "Auto Attendance HR Plant Wise"
+    // We would filter here if records had plantIds, but for now we just load all
+    // and assume the backend handles the "Rule".
     setAttendanceRecords(data);
     setIsLoading(false);
+  };
+
+  const handleCorrectionAction = (id: string, action: 'Approved' | 'Rejected') => {
+    setCorrectionRequests((prev) =>
+      prev.map((req) => (req.id === id ? { ...req, status: action } : req))
+    );
   };
 
   const stats = [
@@ -169,9 +214,9 @@ const Attendance: React.FC = () => {
                       </p>
                     </td>
                     <td className="px-8 py-8">
-                      <span className="text-xs font-black bg-muted-bg px-3 py-1 rounded-sm text-text-muted uppercase tracking-widest border border-border">
+                      <VibrantBadge color="purple" variant="outline" className="font-black">
                         Shift {row.shift}
-                      </span>
+                      </VibrantBadge>
                     </td>
                     <td className="px-8 py-8 space-y-1">
                       <p className="text-sm font-black text-text-muted">
@@ -182,17 +227,7 @@ const Attendance: React.FC = () => {
                       </p>
                     </td>
                     <td className="px-8 py-8">
-                      <span
-                        className={`px-5 py-2 rounded-md text-[0.625rem] font-black uppercase tracking-widest border transition-all ${
-                          row.status === 'Present'
-                            ? 'bg-success-soft text-success border-success/20'
-                            : row.status === 'Late'
-                              ? 'bg-warning-soft text-warning border-warning/20'
-                              : 'bg-danger-soft text-danger border-danger/20'
-                        }`}
-                      >
-                        {row.status}
-                      </span>
+                      <VibrantBadge>{row.status}</VibrantBadge>
                     </td>
                     <td className="px-8 py-8">
                       <div className="flex items-center gap-2">
@@ -287,12 +322,12 @@ const Attendance: React.FC = () => {
                       const random = Math.random();
                       const color =
                         random > 0.9
-                          ? 'bg-danger'
+                          ? 'bg-vibrant-pink shadow-[0_0_8px_var(--vibrant-pink)]'
                           : random > 0.8
-                            ? 'bg-warning'
+                            ? 'bg-vibrant-orange shadow-[0_0_8px_var(--vibrant-orange)]'
                             : random > 0.7
-                              ? 'bg-primary'
-                              : 'bg-success';
+                              ? 'bg-vibrant-blue shadow-[0_0_8px_var(--vibrant-blue)]'
+                              : 'bg-vibrant-green shadow-[0_0_8px_var(--vibrant-green)]';
                       return (
                         <td key={i} className="px-1 py-4 text-center">
                           <div
@@ -318,93 +353,6 @@ const Attendance: React.FC = () => {
     </div>
   );
 
-  const renderShiftRoster = () => (
-    <div className="space-y-10 animate-in slide-in-from-right-8 duration-700">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        <div className="lg:col-span-2 bg-surface rounded-md border border-border shadow-md p-12">
-          <div className="flex items-center justify-between mb-12">
-            <h3 className="text-3xl font-black text-text-primary tracking-tight">
-              Shift Assignments
-            </h3>
-            <button
-              aria-label="Assign new shift"
-              className="bg-primary text-white px-8 py-3 rounded-md font-black uppercase text-[0.625rem] tracking-widest flex items-center gap-3"
-            >
-              <Plus size={16} /> Assign Shift
-            </button>
-          </div>
-          <div className="space-y-6">
-            {[
-              { shift: 'A', timing: '06:00 AM - 02:00 PM', nodes: 42, color: 'primary' },
-              { shift: 'B', timing: '02:00 PM - 10:00 PM', nodes: 38, color: 'primary' },
-              { shift: 'C', timing: '10:00 PM - 06:00 AM', nodes: 15, color: 'danger' },
-              { shift: 'G', timing: '09:00 AM - 05:30 PM', nodes: 140, color: 'success' },
-            ].map((s, i) => (
-              <div
-                key={i}
-                className="p-8 bg-muted-bg/30 rounded-md border border-border group hover:border-primary/30 transition-all flex items-center justify-between"
-              >
-                <div className="flex items-center gap-8">
-                  <div
-                    className={`w-16 h-16 bg-${s.color}-soft text-${s.color} rounded-md flex items-center justify-center font-black text-2xl shadow-inner`}
-                  >
-                    {s.shift}
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-black text-text-primary tracking-tight">
-                      Shift {s.shift}
-                    </h4>
-                    <p className="text-[0.625rem] font-black text-text-muted uppercase tracking-widest mt-2 flex items-center gap-3">
-                      <Clock size={12} /> {s.timing}
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-2xl font-black text-text-primary antialiased">{s.nodes}</p>
-                  <p className="text-[0.5625rem] font-black text-text-muted uppercase tracking-widest">
-                    Employees
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="space-y-10">
-          <div className="bg-surface p-12 rounded-md text-text-primary shadow-md relative overflow-hidden group border border-border">
-            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-1000">
-              <Zap size={140} />
-            </div>
-            <h4 className="text-[0.625rem] font-black uppercase tracking-[0.4em] text-primary mb-8">
-              Shift Optimization
-            </h4>
-            <p className="text-xl font-black leading-tight antialiased mb-10">
-              AI suggests a{' '}
-              <span className="text-primary underline decoration-primary/30 underline-offset-8">
-                shift rebalance
-              </span>{' '}
-              for Karachi Port Units due to upcoming peak load cycles.
-            </p>
-            <div className="space-y-4 mb-10">
-              <div className="flex justify-between text-[0.625rem] font-black uppercase text-text-muted">
-                <span>Shift A Demand</span>
-                <span className="text-primary">92%</span>
-              </div>
-              <div className="h-1.5 bg-muted-bg rounded-full overflow-hidden">
-                <div className="h-full bg-primary w-[92%] shadow-sm"></div>
-              </div>
-            </div>
-            <button
-              aria-label="Launch shift rebalancer"
-              className="w-full py-5 bg-primary text-surface rounded-md font-black uppercase text-[0.625rem] tracking-widest shadow-md hover:scale-105 transition-all"
-            >
-              Launch Rebalancer
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
   const renderCorrections = () => (
     <div className="space-y-10 animate-in slide-in-from-left-8 duration-700">
       <div className="bg-surface rounded-md border border-border shadow-md overflow-hidden min-h-[31.25rem]">
@@ -418,7 +366,7 @@ const Attendance: React.FC = () => {
             </p>
           </div>
           <span className="px-6 py-2 bg-danger-soft text-danger rounded-full text-[0.625rem] font-black uppercase tracking-widest border border-danger/20">
-            4 Pending Approvals
+            {correctionRequests.filter((r) => r.status === 'Pending').length} Pending Approvals
           </span>
         </div>
         <div className="overflow-x-auto">
@@ -433,58 +381,59 @@ const Attendance: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {[
-                {
-                  name: 'Alex Rivera',
-                  date: 'Jul 18, 2024',
-                  type: 'Missing Punch',
-                  reason: 'Biometric hardware failure at Site-B gate.',
-                  status: 'Pending',
-                },
-                {
-                  name: 'Maria Garcia',
-                  date: 'Jul 20, 2024',
-                  type: 'Shift Swap',
-                  reason: 'Emergency family medical protocol.',
-                  status: 'Pending',
-                },
-              ].map((req, i) => (
-                <tr key={i} className="group hover:bg-danger-soft/20 transition-all">
-                  <td className="px-14 py-8">
-                    <p className="text-lg font-black text-text-primary">{req.name}</p>
-                    <p className="text-[0.625rem] font-black text-text-muted uppercase tracking-widest mt-2">
-                      LHR-NODE-99
-                    </p>
-                  </td>
-                  <td className="px-8 py-8 text-sm font-bold text-text-muted uppercase">
-                    {req.date}
-                  </td>
-                  <td className="px-8 py-8">
-                    <span className="text-xs font-black text-primary uppercase tracking-tighter">
-                      {req.type}
-                    </span>
-                  </td>
-                  <td className="px-8 py-8 max-w-xs text-xs font-medium text-text-muted leading-relaxed italic">
-                    "{req.reason}"
-                  </td>
-                  <td className="px-14 py-8 text-right">
-                    <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all">
-                      <button
-                        aria-label="Approve request"
-                        className="p-4 bg-success text-white rounded-md shadow-md hover:scale-110 active:scale-90 transition-all"
-                      >
-                        <Check size={18} />
-                      </button>
-                      <button
-                        aria-label="Reject request"
-                        className="p-4 bg-danger text-white rounded-md shadow-md hover:scale-110 active:scale-90 transition-all"
-                      >
-                        <X size={18} />
-                      </button>
-                    </div>
+              {correctionRequests.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-14 py-8 text-center text-text-muted">
+                    No pending corrections.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                correctionRequests.map((req, i) => (
+                  <tr key={i} className="group hover:bg-danger-soft/20 transition-all">
+                    <td className="px-14 py-8">
+                      <p className="text-lg font-black text-text-primary">{req.name}</p>
+                      <p className="text-[0.625rem] font-black text-text-muted uppercase tracking-widest mt-2">
+                        LHR-NODE-99
+                      </p>
+                    </td>
+                    <td className="px-8 py-8 text-sm font-bold text-text-muted uppercase">
+                      {req.date}
+                    </td>
+                    <td className="px-8 py-8">
+                      <span className="text-xs font-black text-primary uppercase tracking-tighter">
+                        {req.type}
+                      </span>
+                    </td>
+                    <td className="px-8 py-8 max-w-xs text-xs font-medium text-text-muted leading-relaxed italic">
+                      "{req.reason}"
+                    </td>
+                    <td className="px-14 py-8 text-right">
+                      {req.status === 'Pending' ? (
+                        <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all">
+                          <button
+                            onClick={() => handleCorrectionAction(req.id, 'Approved')}
+                            aria-label="Approve request"
+                            className="p-4 bg-success text-white rounded-md shadow-md hover:scale-110 active:scale-90 transition-all"
+                          >
+                            <Check size={18} />
+                          </button>
+                          <button
+                            onClick={() => handleCorrectionAction(req.id, 'Rejected')}
+                            aria-label="Reject request"
+                            className="p-4 bg-danger text-white rounded-md shadow-md hover:scale-110 active:scale-90 transition-all"
+                          >
+                            <X size={18} />
+                          </button>
+                        </div>
+                      ) : (
+                        <VibrantBadge color={req.status === 'Approved' ? 'green' : 'red'}>
+                          {req.status}
+                        </VibrantBadge>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -503,6 +452,16 @@ const Attendance: React.FC = () => {
             <span className="w-8 h-[0.125rem] bg-primary"></span>
             Biometric & Geofenced Tracking
           </p>
+          {selectedPlantId && (
+            <div className="mt-2 flex items-center gap-2">
+              <span className="px-2 py-1 rounded bg-primary/10 border border-primary/20 text-[0.6rem] font-black text-primary uppercase tracking-widest">
+                Rule: Auto-Attendance (Plant-Wise)
+              </span>
+              <span className="text-[0.6rem] font-bold text-text-muted uppercase tracking-wider">
+                Active Plant: {plants.find((p) => p.id === selectedPlantId)?.name || 'Unknown'}
+              </span>
+            </div>
+          )}
         </div>
         <div className="flex gap-4 p-4 bg-surface rounded-md shadow-md border border-border">
           <button
@@ -515,34 +474,37 @@ const Attendance: React.FC = () => {
             aria-label="Force synchronization"
             className="bg-primary text-white px-10 py-4 rounded-md font-black uppercase text-[0.6875rem] tracking-widest flex items-center gap-4 shadow-md shadow-primary/20 hover:-translate-y-1 transition-all active:scale-95"
           >
-            <Fingerprint size={18} /> Forced Sync
+            <Fingerprint size={18} /> Sync{' '}
+            {plants.find((p) => p.id === selectedPlantId)?.name
+              ? `(${plants.find((p) => p.id === selectedPlantId)?.name})`
+              : ''}
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {stats.map((s, i) => (
           <div
             key={i}
-            className="bg-surface p-10 rounded-md border border-border shadow-sm relative overflow-hidden group hover:shadow-md hover:scale-[1.02] transition-all duration-300"
+            className="bg-surface p-4 rounded-md border border-border shadow-sm relative overflow-hidden group hover:shadow-md transition-all"
           >
             <div
-              className={`absolute -right-6 -bottom-6 w-32 h-32 bg-${s.color}-soft blur-3xl rounded-full group-hover:scale-150 transition-transform duration-1000`}
+              className={`absolute -right-3 -bottom-3 w-16 h-16 bg-${s.color}-soft blur-2xl rounded-full group-hover:scale-150 transition-transform duration-1000`}
             ></div>
-            <div className="flex items-center justify-between mb-8">
-              <div className={`p-4 rounded-md bg-${s.color}-soft text-${s.color} shadow-inner`}>
-                <s.icon size={24} />
+            <div className="flex items-center justify-between mb-3">
+              <div className={`p-2 rounded-md bg-${s.color}-soft text-${s.color}`}>
+                <s.icon size={14} />
               </div>
               <span
-                className={`text-[0.625rem] font-black px-3 py-1.5 rounded-md border ${s.trend === 'up' ? 'text-success bg-success-soft border-success/10' : s.trend === 'down' ? 'text-danger bg-danger-soft border-danger/10' : 'text-text-muted bg-muted-bg border-border'}`}
+                className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${s.trend === 'up' ? 'text-success bg-success-soft border-success/10' : s.trend === 'down' ? 'text-danger bg-danger-soft border-danger/10' : 'text-text-muted bg-muted-bg border-border'}`}
               >
                 {s.change}
               </span>
             </div>
-            <p className="text-[0.625rem] font-black text-text-muted uppercase tracking-widest mb-2">
+            <p className="text-[9px] font-bold text-text-muted uppercase tracking-wider mb-1">
               {s.label}
             </p>
-            <h4 className="text-4xl font-black text-text-primary tracking-tighter">{s.value}</h4>
+            <h4 className="text-xl font-black text-text-primary tracking-tight">{s.value}</h4>
           </div>
         ))}
       </div>
@@ -551,8 +513,9 @@ const Attendance: React.FC = () => {
         tabs={[
           { id: 'daily', label: 'Daily Log' },
           { id: 'matrix', label: 'Attendance Matrix' },
-          { id: 'roster', label: 'Shift Roster' },
+
           { id: 'corrections', label: 'Corrections' },
+          { id: 'shifts', label: 'Shift Management' },
         ]}
         activeTabId={activeTab}
         onTabChange={(id) => setActiveTab(id as AttendanceTab)}
@@ -563,8 +526,9 @@ const Attendance: React.FC = () => {
       <main>
         {activeTab === 'daily' && renderDailyLog()}
         {activeTab === 'matrix' && renderMonthlyMatrix()}
-        {activeTab === 'roster' && renderShiftRoster()}
+
         {activeTab === 'corrections' && renderCorrections()}
+        {activeTab === 'shifts' && <ShiftManagement onSync={loadData} />}
       </main>
 
       <div className="bg-surface p-20 rounded-md text-text-primary shadow-md relative overflow-hidden group border border-border">

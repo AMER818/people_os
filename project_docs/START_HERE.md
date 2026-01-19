@@ -12,7 +12,7 @@ FRONTEND SERVER
 BACKEND SERVER
 ├─ URL: http://127.0.0.1:3001
 ├─ Status: ✓ Running (Uvicorn)
-├─ Database: ✓ Connected (hunzal_hcm.db)
+├─ Database: ✓ Connected (people_os.db)
 └─ Ready: ✓ YES
 
 API ENDPOINT

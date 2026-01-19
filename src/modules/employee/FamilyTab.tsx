@@ -2,7 +2,9 @@ import React from 'react';
 import { Plus, Trash2, Calendar } from 'lucide-react';
 import { Employee as EmployeeType } from '../../types';
 import { Button } from '../../components/ui/Button';
+import { Card } from '../../components/ui/Card';
 import { RELATIONSHIPS } from './constants';
+import { DateInput } from '../../components/ui/DateInput';
 
 interface FamilyTabProps {
   employee: Partial<EmployeeType> | null;
@@ -31,14 +33,14 @@ const FamilyTab: React.FC<FamilyTabProps> = ({ employee, updateField }) => {
   };
 
   return (
-    <div className="space-y-8 animate-in slide-in-from-bottom-8 duration-700">
+    <Card className="space-y-8 animate-in slide-in-from-bottom-8 duration-700 p-8">
       <div className="flex items-center justify-between">
-        <h4 className="text-2xl font-black text-text-primary">Family Registry</h4>
+        <h4 className="text-2xl font-black text-text-primary">Family Members</h4>
         <Button onClick={addMember} icon={Plus} size="sm">
           Add Dependent
         </Button>
       </div>
-      <div className="overflow-hidden bg-surface rounded-md border border-border">
+      <div className="overflow-hidden rounded-md">
         <table className="w-full text-left">
           <thead>
             <tr className="bg-muted-bg text-[0.625rem] font-black uppercase text-text-muted tracking-widest">
@@ -65,24 +67,31 @@ const FamilyTab: React.FC<FamilyTabProps> = ({ employee, updateField }) => {
                     onChange={(e) => updateMember(i, 'relationship', e.target.value)}
                     className="bg-transparent border-none font-bold text-primary outline-none w-full cursor-pointer"
                   >
-                    {RELATIONSHIPS.map(rel => (
-                      <option key={rel} value={rel}>{rel}</option>
+                    {RELATIONSHIPS.map((rel) => (
+                      <option key={rel} value={rel}>
+                        {rel}
+                      </option>
                     ))}
                   </select>
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-2 text-text-secondary">
                     <Calendar size={14} className="text-text-muted" />
-                    <input
-                      type="date"
+                    <DateInput
                       value={member.dob}
-                      onChange={(e) => updateMember(i, 'dob', e.target.value)}
-                      className="bg-transparent border-none text-[0.75rem] font-bold outline-none"
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        updateMember(i, 'dob', e.target.value)
+                      }
+                      className="bg-transparent border-none font-bold outline-none h-auto p-0 text-[0.75rem]"
                     />
                   </div>
                 </td>
                 <td className="px-6 py-4 text-right">
-                  <button onClick={() => removeMember(i)} aria-label="Remove dependent" className="text-danger opacity-50 hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => removeMember(i)}
+                    aria-label="Remove dependent"
+                    className="text-danger opacity-50 hover:opacity-100 transition-opacity"
+                  >
                     <Trash2 size={16} />
                   </button>
                 </td>
@@ -96,7 +105,7 @@ const FamilyTab: React.FC<FamilyTabProps> = ({ employee, updateField }) => {
           </div>
         )}
       </div>
-    </div>
+    </Card>
   );
 };
 

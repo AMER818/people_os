@@ -5,7 +5,6 @@ import {
   AlertTriangle,
   Clock,
   Play,
-  Search,
   Filter,
   Activity,
   ShieldCheck,
@@ -21,11 +20,15 @@ import {
   ArrowRightLeft,
   Gauge,
   Sparkles,
+  Sliders,
 } from 'lucide-react';
+import OvertimeConfiguration from './OvertimeConfiguration';
 import { OTRequest } from '../../types';
 import { HorizontalTabs } from '../../components/ui/HorizontalTabs';
+import { useSearch } from '../../hooks/useSearch';
+import { SearchInput } from '../../components/ui/SearchInput';
 
-type OvertimeTab = 'ledger' | 'rebalance' | 'policies';
+type OvertimeTab = 'ledger' | 'rebalance' | 'policies' | 'config';
 
 const INITIAL_OT: OTRequest[] = [];
 
@@ -33,7 +36,11 @@ const Overtime: React.FC = () => {
   const [activeTab, setActiveTab] = useState<OvertimeTab>('ledger');
   const [requests, setRequests] = useState<OTRequest[]>(INITIAL_OT);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const {
+    searchTerm,
+    setSearchTerm,
+    filteredData: filteredRequests,
+  } = useSearch(requests, ['employeeName']);
 
   // Initiation State
   const [newOT, setNewOT] = useState({
@@ -111,13 +118,11 @@ const Overtime: React.FC = () => {
           </div>
           <div className="flex gap-4">
             <div className="relative group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-destructive transition-colors" />
-              <input
-                aria-label="Search overtime records"
-                className="bg-background border border-border pl-10 pr-6 py-3 rounded-2xl text-sm font-black outline-none w-64 text-foreground shadow-inner"
-                placeholder="Query Node..."
+              <SearchInput
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Query Node..."
+                className="w-64 rounded-2xl"
               />
             </div>
             <button
@@ -140,78 +145,76 @@ const Overtime: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-border font-sans">
-              {requests
-                .filter((r) => r.employeeName.toLowerCase().includes(searchTerm.toLowerCase()))
-                .map((req) => (
-                  <tr
-                    key={req.id}
-                    className="group hover:bg-destructive/5 transition-all cursor-pointer"
-                  >
-                    <td className="px-14 py-8">
-                      <p className="text-lg font-black text-foreground leading-none">
-                        {req.employeeName}
-                      </p>
-                      <p className="text-[0.625rem] font-black text-destructive uppercase tracking-widest mt-2">
-                        {req.employeeId}
-                      </p>
-                    </td>
-                    <td className="px-8 py-8">
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-xl font-black text-foreground">{req.hours}h</span>
-                        <span className="text-[0.625rem] font-black text-muted-foreground uppercase tracking-widest">
-                          {req.date}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-8 py-8">
-                      <span className="text-xs font-black text-muted-foreground uppercase tracking-widest bg-secondary px-4 py-1.5 rounded-xl border border-border">
-                        x{req.rate} Factor
+              {filteredRequests.map((req) => (
+                <tr
+                  key={req.id}
+                  className="group hover:bg-destructive/5 transition-all cursor-pointer"
+                >
+                  <td className="px-14 py-8">
+                    <p className="text-lg font-black text-foreground leading-none">
+                      {req.employeeName}
+                    </p>
+                    <p className="text-[0.625rem] font-black text-destructive uppercase tracking-widest mt-2">
+                      {req.employeeId}
+                    </p>
+                  </td>
+                  <td className="px-8 py-8">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-xl font-black text-foreground">{req.hours}h</span>
+                      <span className="text-[0.625rem] font-black text-muted-foreground uppercase tracking-widest">
+                        {req.date}
                       </span>
-                    </td>
-                    <td className="px-8 py-8">
-                      <span
-                        className={`px-5 py-2 rounded-2xl text-[0.625rem] font-black uppercase tracking-widest border transition-all ${
-                          req.status === 'Approved'
-                            ? 'bg-success/10 text-success border-success/20'
-                            : req.status === 'Pending'
-                              ? 'bg-warning/10 text-warning border-warning/20 animate-pulse'
-                              : 'bg-info/10 text-info border-info/20'
-                        }`}
-                      >
-                        {req.status}
-                      </span>
-                    </td>
-                    <td className="px-14 py-8 text-right">
-                      <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all">
-                        {req.status === 'Pending' ? (
-                          <>
-                            <button
-                              onClick={() => handleAction(req.id, 'Approved')}
-                              aria-label={`Approve overtime for ${req.employeeName}`}
-                              className="p-3 bg-success text-white rounded-xl shadow-lg hover:scale-110 active:scale-90 transition-all"
-                            >
-                              <Check size={18} />
-                            </button>
-                            <button
-                              onClick={() => handleAction(req.id, 'Processed')}
-                              aria-label={`Reject overtime for ${req.employeeName}`}
-                              className="p-3 bg-primary text-white rounded-xl shadow-lg hover:scale-110 active:scale-90 transition-all"
-                            >
-                              <Ban size={18} />
-                            </button>
-                          </>
-                        ) : (
+                    </div>
+                  </td>
+                  <td className="px-8 py-8">
+                    <span className="text-xs font-black text-muted-foreground uppercase tracking-widest bg-secondary px-4 py-1.5 rounded-xl border border-border">
+                      x{req.rate} Factor
+                    </span>
+                  </td>
+                  <td className="px-8 py-8">
+                    <span
+                      className={`px-5 py-2 rounded-2xl text-[0.625rem] font-black uppercase tracking-widest border transition-all ${
+                        req.status === 'Approved'
+                          ? 'bg-success/10 text-success border-success/20'
+                          : req.status === 'Pending'
+                            ? 'bg-warning/10 text-warning border-warning/20 animate-pulse'
+                            : 'bg-info/10 text-info border-info/20'
+                      }`}
+                    >
+                      {req.status}
+                    </span>
+                  </td>
+                  <td className="px-14 py-8 text-right">
+                    <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all">
+                      {req.status === 'Pending' ? (
+                        <>
                           <button
-                            aria-label="View history"
-                            className="p-3 bg-secondary text-muted-foreground rounded-xl hover:text-destructive transition-all"
+                            onClick={() => handleAction(req.id, 'Approved')}
+                            aria-label={`Approve overtime for ${req.employeeName}`}
+                            className="p-3 bg-success text-white rounded-xl shadow-lg hover:scale-110 active:scale-90 transition-all"
                           >
-                            <History size={18} />
+                            <Check size={18} />
                           </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                          <button
+                            onClick={() => handleAction(req.id, 'Processed')}
+                            aria-label={`Reject overtime for ${req.employeeName}`}
+                            className="p-3 bg-primary text-white rounded-xl shadow-lg hover:scale-110 active:scale-90 transition-all"
+                          >
+                            <Ban size={18} />
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          aria-label="View history"
+                          className="p-3 bg-secondary text-muted-foreground rounded-xl hover:text-destructive transition-all"
+                        >
+                          <History size={18} />
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
               {requests.length === 0 && (
                 <tr>
                   <td
@@ -473,6 +476,7 @@ const Overtime: React.FC = () => {
           { id: 'ledger', label: 'Extension Ledger', icon: BarChart3 },
           { id: 'rebalance', label: 'Rebalance Logic', icon: RefreshCw },
           { id: 'policies', label: 'Policy Matrix', icon: Settings2 },
+          { id: 'config', label: 'Configuration', icon: Sliders },
         ]}
         activeTabId={activeTab}
         onTabChange={(id) => setActiveTab(id as OvertimeTab)}
@@ -483,6 +487,7 @@ const Overtime: React.FC = () => {
         {activeTab === 'ledger' && renderLedger()}
         {activeTab === 'rebalance' && renderRebalance()}
         {activeTab === 'policies' && renderPolicies()}
+        {activeTab === 'config' && <OvertimeConfiguration />}
       </main>
 
       {/* Initiation Modal */}
@@ -588,7 +593,7 @@ const Overtime: React.FC = () => {
             <p className="text-muted-foreground mt-8 text-xl max-w-4xl leading-relaxed antialiased">
               The{' '}
               <span className="text-destructive underline underline-offset-8 decoration-4 decoration-destructive/30">
-                Hunzal Extension Kernel
+                PeopleOS Extension Kernel
               </span>{' '}
               ensures that every minute of temporal extendability is logged with cryptographic
               precision. AI-driven rebalancing automatically detects clusters exceeding burnout

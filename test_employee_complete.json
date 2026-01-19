@@ -1,0 +1,154 @@
+{
+  "id": "TEST-00001",
+  "employeeCode": "TEST-00001",
+  "name": "Ahmed Hassan Khan",
+  "status": "Active",
+  "avatar": "https://picsum.photos/seed/TEST-00001/200",
+
+  "plant_id": "plant_001",
+  "department_id": "dept_hr",
+  "designation_id": "desig_manager",
+  "sub_department_id": "subdept_recruitment",
+  "shift_id": "shift_morning",
+  "organization_id": "org_001",
+  "grade_id": "grade_m5",
+  "line_manager_id": "",
+
+  "hrPlant": "Main Plant",
+  "department": "Human Resources",
+  "designation": "HR Manager",
+  "subDepartment": "Recruitment",
+  "shift": "Morning Shift",
+  "orgName": "People's Industry Limited",
+  "grade": "M5",
+  "employmentLevel": "MNG",
+  "restDay": "Sunday",
+  "division": "White",
+
+  "maritalStatus": "Married",
+  "weddingAnniversaryDate": "2015-06-15",
+  "bloodGroup": "A+",
+  "religion": "Islam",
+  "nationality": "Pakistani",
+  "passportNumber": "AB1234567",
+  "drivingLicense": "DL-12345678",
+  "cnic": "12345-6789012-3",
+  "cnicIssueDate": "2010-01-15",
+  "cnicExpiryDate": "2030-01-15",
+  "dateOfBirth": "1985-03-20",
+  "gender": "Male",
+  "fatherName": "Hassan Ali Khan",
+  "motherName": "Fatima Begum",
+
+  "reference": "Ali Raza - 0300-1234567",
+  "personalCellNumber": "0300-7654321",
+  "officialCellNumber": "0321-9876543",
+  "phoneNumber": "042-35123456",
+  "personalEmail": "ahmed.hassan@gmail.com",
+  "officialEmail": "ahmed.hassan@peopleindustry.com",
+  "presentAddress": "House 123, Street 45, Block C, Johar Town",
+  "permanentAddress": "Village Khanpur, Tehsil Samundri",
+  "presentDistrict": "Lahore",
+  "permanentDistrict": "Faisalabad",
+  "millsResidenceBlock": "Block A",
+  "millsRoom": "Room 15",
+
+  "joiningDate": "2015-01-15",
+  "confirmationDate": "2015-07-15",
+  "probationPeriod": "6 Months",
+  "leavingDate": null,
+  "leavingType": null,
+
+  "grossSalary": 85000,
+  "paymentMode": "Bank Transfer",
+  "bankId": "bank_hbl",
+  "bankAccount": "12345678901234",
+
+  "houseRent": 25000,
+  "utilityAllowance": 5000,
+  "otherAllowance": 3000,
+
+  "socialSecurityStatus": true,
+  "socialSecurityNumber": "SS-123456789",
+  "medicalStatus": false,
+  "eobiStatus": true,
+  "eobiNumber": "EOBI-987654321",
+
+  "burnoutRisk": "Low",
+  "performanceScore": 85,
+  "sentimentScore": 75,
+
+  "family": [
+    {
+      "id": "fam_001",
+      "name": "Ayesha Khan",
+      "relationship": "Spouse",
+      "cnic": "12345-6789012-4",
+      "dateOfBirth": "1988-05-10",
+      "contactNumber": "0300-1111111"
+    },
+    {
+      "id": "fam_002",
+      "name": "Ali Ahmed Khan",
+      "relationship": "Child",
+      "cnic": "",
+      "dateOfBirth": "2016-09-20",
+      "contactNumber": ""
+    }
+  ],
+
+  "education": [
+    {
+      "id": "edu_001",
+      "institute": "University of Punjab",
+      "degree": "MBA",
+      "fieldOfStudy": "Human Resource Management",
+      "startYear": "2008",
+      "endYear": "2010",
+      "grade": "3.5 CGPA"
+    },
+    {
+      "id": "edu_002",
+      "institute": "Government College University",
+      "degree": "BBA",
+      "fieldOfStudy": "Business Administration",
+      "startYear": "2003",
+      "endYear": "2007",
+      "grade": "3.2 CGPA"
+    }
+  ],
+
+  "experience": [
+    {
+      "id": "exp_001",
+      "company": "ABC Corporation",
+      "position": "HR Officer",
+      "startDate": "2010-08-01",
+      "endDate": "2014-12-31",
+      "responsibilities": "Recruitment, employee relations, performance management"
+    }
+  ],
+
+  "increments": [
+    {
+      "id": "inc_001",
+      "effectiveDate": "2016-01-01",
+      "previousSalary": 65000,
+      "newSalary": 75000,
+      "incrementPercentage": 15.38,
+      "reason": "Annual Performance Review",
+      "approvedBy": "CEO"
+    },
+    {
+      "id": "inc_002",
+      "effectiveDate": "2020-01-01",
+      "previousSalary": 75000,
+      "newSalary": 85000,
+      "incrementPercentage": 13.33,
+      "reason": "Promotion to Manager",
+      "approvedBy": "Board"
+    }
+  ],
+
+  "discipline": []
+}

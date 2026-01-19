@@ -2,7 +2,7 @@ import sqlite3
 import uuid
 import os
 
-DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'backend', 'data', 'hunzal_hcm.db')
+DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'backend', 'data', 'people_os.db')
 
 LEVELS = [
     {"name": "Leadership level", "code": "LEAD", "description": "Top-level executive and leadership roles"},

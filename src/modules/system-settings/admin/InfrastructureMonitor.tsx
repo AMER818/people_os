@@ -35,10 +35,10 @@ const InfrastructureMonitor: React.FC<InfrastructureMonitorProps> = React.memo(
             <Server size={18} className="text-primary" />
             <div>
               <h3 className="font-bold text-base text-text-primary tracking-tight">
-                Node Infrastructure
+                System Infrastructure
               </h3>
               <p className="text-xs text-text-muted mt-1 font-medium">
-                Real-time cluster health and metrics
+                Current system status and metrics
               </p>
             </div>
           </div>
@@ -65,14 +65,14 @@ const InfrastructureMonitor: React.FC<InfrastructureMonitorProps> = React.memo(
               <div className="space-y-6">
                 <div>
                   <h4 className="text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                    <Activity size={12} className="text-primary" /> Resource Allocation
+                    <Activity size={12} className="text-primary" /> System Resources
                   </h4>
                   <div className="space-y-4">
                     {[
-                      { label: 'CPU Cluster Load', value: 42, color: 'primary' },
-                      { label: 'Memory Availability', value: 68, color: 'warning' },
+                      { label: 'CPU Usage', value: 42, color: 'primary' },
+                      { label: 'Memory Usage', value: 68, color: 'warning' },
                       {
-                        label: 'Local Persistent Storage',
+                        label: 'Storage Usage',
                         value: Math.round(storageUsage),
                         color: storageUsage > 80 ? 'danger' : 'success',
                       },
@@ -110,7 +110,7 @@ const InfrastructureMonitor: React.FC<InfrastructureMonitorProps> = React.memo(
                       success('System cache purged');
                     }}
                   >
-                    <RefreshCw size={14} className="mr-2" /> Flush Cache
+                    <RefreshCw size={14} className="mr-2" /> Clear Cache
                   </Button>
                   <Button
                     variant="outline"
@@ -121,7 +121,7 @@ const InfrastructureMonitor: React.FC<InfrastructureMonitorProps> = React.memo(
                       success('Log nodes rotated');
                     }}
                   >
-                    <History size={14} className="mr-2" /> Rotate Logs
+                    <History size={14} className="mr-2" /> Archive Logs
                   </Button>
                 </div>
               </div>
@@ -129,9 +129,9 @@ const InfrastructureMonitor: React.FC<InfrastructureMonitorProps> = React.memo(
               <div className="bg-slate-900 rounded-xl p-5 font-mono text-[0.65rem] relative overflow-hidden ring-1 ring-white/10">
                 <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
                   <span className="text-primary font-bold uppercase tracking-widest">
-                    Runtime Console
+                    Activity Log
                   </span>
-                  <span className="text-text-muted opacity-50">v4.2.0-secure</span>
+                  <span className="text-text-muted opacity-50">v4.2.0</span>
                 </div>
                 <div
                   className="space-y-1.5 max-h-[10rem] overflow-y-auto no-scrollbar"
@@ -149,7 +149,7 @@ const InfrastructureMonitor: React.FC<InfrastructureMonitorProps> = React.memo(
                 <div className="absolute bottom-4 right-4 flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
                   <span className="text-[0.55rem] text-success font-black tracking-widest uppercase">
-                    Kernel Active
+                    Active
                   </span>
                 </div>
               </div>
@@ -158,25 +158,25 @@ const InfrastructureMonitor: React.FC<InfrastructureMonitorProps> = React.memo(
             {/* Advanced Kernel Configurations */}
             <div className="mt-8 border-t border-border pt-6">
               <h4 className="text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                <Zap size={12} className="text-warning" /> Kernel Configurations
+                <Zap size={12} className="text-warning" /> Advanced Settings
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="flex items-center justify-between p-3 bg-muted-bg/20 rounded-lg border border-border/50">
-                  <span className="text-xs font-bold text-text-primary">Neural Bypass</span>
+                  <span className="text-xs font-bold text-text-primary">Security Bypass</span>
                   <Checkbox
                     checked={systemFlags.neural_bypass}
                     onCheckedChange={(v) => updateSystemFlags({ neural_bypass: v === true })}
                   />
                 </div>
                 <div className="flex items-center justify-between p-3 bg-muted-bg/20 rounded-lg border border-border/50">
-                  <span className="text-xs font-bold text-text-primary">API Response Caching</span>
+                  <span className="text-xs font-bold text-text-primary">API Caching</span>
                   <Checkbox
                     checked={systemFlags.api_caching}
                     onCheckedChange={(v) => updateSystemFlags({ api_caching: v === true })}
                   />
                 </div>
                 <div className="flex items-center justify-between p-3 bg-muted-bg/20 rounded-lg border border-border/50">
-                  <span className="text-xs font-bold text-text-primary">Verbose Debug Mode</span>
+                  <span className="text-xs font-bold text-text-primary">Debug Mode</span>
                   <Checkbox
                     checked={systemFlags.debug_mode}
                     onCheckedChange={(v) => updateSystemFlags({ debug_mode: v === true })}

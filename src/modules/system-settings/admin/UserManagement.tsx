@@ -33,19 +33,19 @@ const PermissionMatrix = React.memo(() => {
   const { rolePermissions, togglePermission } = useOrgStore();
 
   return (
-    <div className="bg-[#0f172a] border border-border/40 rounded-xl overflow-hidden mb-8 shadow-2xl">
-      <div className="px-6 py-5 border-b border-border/40 bg-slate-900/50">
-        <h3 className="font-black text-sm text-white flex items-center gap-3 uppercase tracking-wider">
-          <ShieldCheck size={20} className="text-primary-soft shadow-sm" />
-          PERMISSION MATRIX
+    <div className="card-vibrant rounded-xl overflow-hidden mb-8 shadow-sm">
+      <div className="px-6 py-5 border-b border-border bg-bg/50">
+        <h3 className="font-black text-sm text-vibrant flex items-center gap-3 uppercase tracking-wider">
+          <ShieldCheck size={20} className="text-primary" />
+          PERMISSIONS
         </h3>
-        <p className="text-[0.65rem] text-slate-400 mt-1.5 font-bold uppercase tracking-widest">
-          ROLE-BASED ACCESS CONTROL DEFINITIONS
+        <p className="text-[0.65rem] text-text-muted mt-1.5 font-bold uppercase tracking-widest">
+          Role Permissions
         </p>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-left">
-          <thead className="bg-slate-900/80 text-[0.6rem] uppercase text-slate-300 font-black tracking-[0.2em] border-b border-border/40">
+          <thead className="bg-bg/80 text-[0.6rem] uppercase text-text-muted font-black tracking-[0.2em] border-b border-border/40">
             <tr>
               <th scope="col" className="px-6 py-4">
                 ROLE
@@ -57,14 +57,14 @@ const PermissionMatrix = React.memo(() => {
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-border/20">
+          <tbody className="divide-y divide-border">
             {ROLE_HIERARCHY.slice()
               .reverse()
               .map((role) => (
-                <tr key={role} className="hover:bg-slate-800/60 transition-all duration-300 group">
+                <tr key={role} className="hover:bg-primary/5 transition-all duration-300 group">
                   <td
                     scope="row"
-                    className="px-6 py-4 font-black text-slate-200 text-xs tracking-tight group-hover:text-white transition-colors"
+                    className="px-6 py-4 font-black text-text-secondary text-xs tracking-tight group-hover:text-text-primary transition-colors"
                   >
                     {role}
                   </td>
@@ -93,7 +93,7 @@ const PermissionMatrix = React.memo(() => {
                               strokeWidth={3}
                             />
                           ) : (
-                            <X size={18} className="text-red-500" strokeWidth={3} />
+                            <X size={18} className="text-danger" strokeWidth={3} />
                           )}
                         </div>
                       </td>
@@ -125,7 +125,8 @@ interface UserManagementProps {
  * @param {boolean} props.isSaving - Loading state for persistence operations
  */
 const UserManagement: React.FC<UserManagementProps> = ({ onSync: syncCallback }) => {
-  const { users, addUser, updateUser, deleteUser, addAuditLog, fetchUsers } = useOrgStore();
+  const { users, addUser, updateUser, deleteUser, addAuditLog, fetchUsers, errorEntities } =
+    useOrgStore();
   const { success, error } = useToast();
   const adminUserModal = useModal();
   const [userToDelete, setUserToDelete] = useState<any | null>(null);
@@ -133,7 +134,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onSync: syncCallback })
   // Initial Fetch
   React.useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [fetchUsers]);
 
   const handleDeleteConfirm = async () => {
     if (!userToDelete) {
@@ -196,22 +197,22 @@ const UserManagement: React.FC<UserManagementProps> = ({ onSync: syncCallback })
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* Admin Management Section */}
       <div
-        className="bg-[#0f172a] border border-border/40 rounded-2xl shadow-2xl overflow-hidden"
+        className="card-vibrant rounded-2xl shadow-sm overflow-hidden"
         role="region"
         aria-label="Administrator Management"
       >
-        <div className="px-8 py-6 border-b border-border/40 bg-slate-900/50 flex items-center justify-between">
+        <div className="px-8 py-6 border-b border-border bg-bg/50 flex items-center justify-between">
           <div>
-            <h3 className="font-black text-sm text-white uppercase tracking-wider">
-              Access Control List
+            <h3 className="font-black text-sm text-vibrant uppercase tracking-wider">
+              Admin Users
             </h3>
-            <p className="text-[0.625rem] text-slate-400 font-bold mt-1.5 uppercase tracking-[0.2em]">
-              Manage root and administrative credentials
+            <p className="text-[0.625rem] text-text-muted font-bold mt-1.5 uppercase tracking-[0.2em]">
+              Manage system administrators
             </p>
           </div>
           <Button
             size="sm"
-            className="h-10 px-6 bg-blue-600 hover:bg-blue-500 text-white text-[0.65rem] font-black uppercase tracking-[0.15em] gap-3 rounded-lg shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all duration-300"
+            className="h-10 px-6 bg-primary hover:bg-primary/90 text-primary-foreground text-[0.65rem] font-black uppercase tracking-[0.15em] gap-3 rounded-lg shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300"
             onClick={() => {
               setFormData({
                 username: '',
@@ -231,7 +232,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onSync: syncCallback })
 
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="bg-slate-900/80 text-[0.6rem] uppercase text-slate-300 font-black tracking-[0.25em] border-b border-border/40">
+            <thead className="bg-bg/80 text-[0.6rem] uppercase text-text-muted font-black tracking-[0.25em] border-b border-border">
               <tr>
                 <th scope="col" className="px-8 py-5">
                   IDENTITY
@@ -247,15 +248,12 @@ const UserManagement: React.FC<UserManagementProps> = ({ onSync: syncCallback })
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/20">
+            <tbody className="divide-y divide-border">
               {users.map((user: any) => (
-                <tr
-                  key={user.id}
-                  className="hover:bg-slate-800/50 transition-all duration-200 group"
-                >
+                <tr key={user.id} className="hover:bg-primary/5 transition-all duration-200 group">
                   <td className="px-8 py-5">
                     <div className="flex items-center gap-4">
-                      <div className="w-9 h-9 rounded-full bg-blue-600/20 text-blue-400 flex items-center justify-center text-[0.7rem] font-black border border-blue-500/30">
+                      <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[0.7rem] font-black border border-primary/20">
                         {(user.name || user.username || 'U')
                           .split(' ')
                           .map((n: string) => n[0])
@@ -264,16 +262,18 @@ const UserManagement: React.FC<UserManagementProps> = ({ onSync: syncCallback })
                           .toUpperCase()}
                       </div>
                       <div>
-                        <p className="text-[0.75rem] font-black text-slate-100">{user.username}</p>
-                        <p className="text-[0.625rem] text-slate-400 font-medium tracking-tight mt-0.5">
+                        <p className="text-[0.75rem] font-black text-text-primary">
+                          {user.username}
+                        </p>
+                        <p className="text-[0.625rem] text-text-muted font-medium tracking-tight mt-0.5">
                           {user.name || 'No Name Set'}
                         </p>
                       </div>
                     </div>
                   </td>
                   <td className="px-8 py-5">
-                    <div className="inline-block px-4 py-2 bg-[#1e293b] border border-slate-700/50 rounded-lg shadow-inner">
-                      <span className="font-black text-[0.625rem] tracking-[0.2em] text-blue-400 uppercase">
+                    <div className="inline-block px-4 py-2 bg-bg border border-border rounded-lg shadow-sm">
+                      <span className="font-black text-[0.625rem] tracking-[0.2em] text-primary uppercase">
                         {user.role === 'SystemAdmin' ? 'SYSTEMADMIN' : user.role.toUpperCase()}
                       </span>
                     </div>
@@ -281,15 +281,15 @@ const UserManagement: React.FC<UserManagementProps> = ({ onSync: syncCallback })
                   <td className="px-8 py-5 text-center">
                     <div className="flex items-center justify-center gap-2">
                       {user.isSystemUser && (
-                        <div className="px-2.5 py-1 rounded-[4px] bg-blue-500/20 border border-blue-500/40">
-                          <span className="text-[10px] font-black text-blue-400 tracking-tighter">
+                        <div className="px-2.5 py-1 rounded-[4px] bg-primary/20 border border-primary/40">
+                          <span className="text-[10px] font-black text-primary tracking-tighter">
                             SYS
                           </span>
                         </div>
                       )}
                       {user.mfa_enabled && (
-                        <div className="px-2.5 py-1 rounded-[4px] bg-emerald-500/20 border border-emerald-500/40">
-                          <span className="text-[10px] font-black text-emerald-400 tracking-tighter">
+                        <div className="px-2.5 py-1 rounded-[4px] bg-success/20 border border-success/40">
+                          <span className="text-[10px] font-black text-success tracking-tighter">
                             MFA
                           </span>
                         </div>
@@ -297,11 +297,11 @@ const UserManagement: React.FC<UserManagementProps> = ({ onSync: syncCallback })
                     </div>
                   </td>
                   <td className="px-8 py-5 text-right">
-                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                    <div className="flex items-center justify-end gap-2 transition-all">
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-8 w-8 p-0 text-slate-500 hover:text-white hover:bg-slate-800"
+                        className="h-8 w-8 p-0 text-text-muted hover:text-primary hover:bg-primary/10"
                         onClick={() => {
                           setFormData(user);
                           adminUserModal.open();
@@ -313,7 +313,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onSync: syncCallback })
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-8 w-8 p-0 text-slate-500 hover:text-danger hover:bg-danger/10"
+                        className="h-8 w-8 p-0 text-text-muted hover:text-danger hover:bg-danger/10"
                         onClick={() => setUserToDelete(user)}
                         aria-label={`Delete ${user.name}`}
                       >
@@ -323,7 +323,24 @@ const UserManagement: React.FC<UserManagementProps> = ({ onSync: syncCallback })
                   </td>
                 </tr>
               ))}
-              {users.length === 0 && (
+              {errorEntities?.users && (
+                <tr>
+                  <td colSpan={4} className="px-6 py-8 text-center bg-danger/10">
+                    <p className="text-xs font-bold text-danger">
+                      Failed to load users: {errorEntities.users}
+                    </p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => fetchUsers()}
+                      className="mt-2 text-danger hover:text-danger/80"
+                    >
+                      Retry
+                    </Button>
+                  </td>
+                </tr>
+              )}
+              {!errorEntities?.users && users.length === 0 && (
                 <tr>
                   <td colSpan={4} className="px-6 py-12 text-center">
                     <div className="flex flex-col items-center gap-3">
@@ -335,7 +352,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onSync: syncCallback })
                           No system administrators found
                         </p>
                         <p className="text-[0.6rem] text-text-muted font-bold mt-1 antialiased">
-                          Start by provisioning a new administrative node.
+                          Start by adding a new administrator.
                         </p>
                       </div>
                     </div>
@@ -382,11 +399,11 @@ const UserManagement: React.FC<UserManagementProps> = ({ onSync: syncCallback })
       <Modal
         isOpen={adminUserModal.isOpen}
         onClose={adminUserModal.close}
-        title={formData.id ? 'Edit Administrator' : 'Provision New Admin'}
+        title={formData.id ? 'Edit Administrator' : 'Add New Administrator'}
       >
         <div className="space-y-4 py-2">
-          <p className="text-[0.6rem] text-slate-400 font-medium -mt-2 mb-2">
-            <span className="text-red-500">*</span> All fields are required
+          <p className="text-[0.6rem] text-text-muted font-medium -mt-2 mb-2">
+            <span className="text-danger">*</span> All fields are required
           </p>
           <div className="grid grid-cols-2 gap-4">
             <Input
@@ -414,7 +431,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onSync: syncCallback })
           />
           <div className="space-y-1.5">
             <label className="text-[0.6rem] font-black text-text-muted uppercase tracking-widest ml-1">
-              Administrative Role <span className="text-red-500">*</span>
+              Administrative Role <span className="text-danger">*</span>
             </label>
             <select
               className="w-full bg-muted-bg border-none rounded-lg p-2.5 font-black text-xs text-text-primary focus:ring-2 focus:ring-primary/20 outline-none"
@@ -440,20 +457,20 @@ const UserManagement: React.FC<UserManagementProps> = ({ onSync: syncCallback })
             />
           )}
 
-          <div className="flex items-center gap-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl">
+          <div className="flex items-center gap-3 p-3 bg-primary/10 border border-primary/20 rounded-xl">
             <input
               type="checkbox"
               id="isSystemUser"
-              className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-blue-500 focus:ring-blue-500/20"
+              className="w-4 h-4 rounded border-border bg-transparent text-primary focus:ring-primary/20"
               checked={formData.isSystemUser}
               onChange={(e) => updateField('isSystemUser', e.target.checked)}
             />
             <label htmlFor="isSystemUser" className="flex flex-col cursor-pointer">
-              <span className="text-[0.7rem] font-black text-blue-400 uppercase tracking-tight">
-                System User Status
+              <span className="text-[0.7rem] font-black text-primary uppercase tracking-tight">
+                System User
               </span>
-              <span className="text-[0.6rem] text-slate-400 font-bold">
-                Grants special system privileges and protection from deletion.
+              <span className="text-[0.6rem] text-text-muted font-bold">
+                Prevents this user from being deleted.
               </span>
             </label>
           </div>
@@ -463,7 +480,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onSync: syncCallback })
               Cancel
             </Button>
             <Button onClick={handleSave} isLoading={isFormSaving}>
-              {formData.id ? 'Update Node' : 'Initialize Admin'}
+              {formData.id ? 'Update User' : 'Add User'}
             </Button>
           </div>
         </div>

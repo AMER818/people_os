@@ -17,7 +17,7 @@ class DatabaseAnalyzer:
 
     def __init__(self):
         self.project_root = get_project_root()
-        self.db_path = self.project_root / "backend" / "data" / "hunzal_hcm.db"
+        self.db_path = self.project_root / "backend" / "data" / "people_os.db"
 
     def analyze(self) -> Dict:
         """Run database analysis"""

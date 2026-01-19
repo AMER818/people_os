@@ -7,8 +7,6 @@ import './styles/globals.css';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ThemeProvider } from './contexts/ThemeContext';
 
-console.log("Imports successful");
-
 const rootElement = document.getElementById('root');
 if (rootElement) {
   const root = ReactDOM.createRoot(rootElement);
@@ -22,5 +20,5 @@ if (rootElement) {
     </React.StrictMode>
   );
 } else {
-  document.body.innerHTML = "<h1>Root Element Not Found</h1>";
+  document.body.innerHTML = '<h1>Root Element Not Found</h1>';
 }

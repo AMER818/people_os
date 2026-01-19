@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { Briefcase, Plus, Edit2, Trash2, Award, Star, TrendingUp } from 'lucide-react';
+import { Briefcase, Plus, Edit2, Trash2, Award } from 'lucide-react';
 import { useOrgStore } from '@store/orgStore';
-import { Grade, Designation, EmploymentLevel } from '@/types';
+import { Designation } from '@/types';
 import { useToast } from '@components/ui/Toast';
 import { useModal } from '@hooks/useModal';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
 import { Modal } from '@components/ui/Modal';
-import { FormModal } from '@components/ui/FormModal';
+import { FormModal } from '@/components/ui/FormModal';
+import { VibrantBadge } from '@/components/ui/VibrantBadge';
 
 interface DesignationManagementProps {
   onSync: () => void;
@@ -15,119 +16,57 @@ interface DesignationManagementProps {
 
 const DesignationManagement: React.FC<DesignationManagementProps> = React.memo(({ onSync }) => {
   const {
-    profile,
     grades,
+    jobLevels, // Added for grouping
     designations,
-    employmentLevels,
-    departments,
-    addGrade,
-    updateGrade,
-    deleteGrade,
     addDesignation,
     updateDesignation,
     deleteDesignation,
-    addEmploymentLevel,
-    updateEmploymentLevel,
-    deleteEmploymentLevel,
     loadingEntities,
   } = useOrgStore();
 
   const { success, error: toastError } = useToast();
 
   // Modals
-  const gradeModal = useModal();
   const desigModal = useModal();
-  const empLevelModal = useModal();
   const deleteModal = useModal();
 
   // State
-  const [gradeData, setGradeData] = useState<Partial<Grade>>({ name: '', level: undefined });
   const [desigData, setDesigData] = useState<Partial<Designation>>({
     name: '',
     gradeId: '',
     departmentId: '',
   });
-  const [empLevelData, setEmpLevelData] = useState<Partial<EmploymentLevel>>({
-    name: '',
-    code: '',
-    description: '',
-  });
+
   const [deleteData, setDeleteData] = useState<{
-    type: 'grade' | 'designation' | 'employmentLevel';
     id: string;
     name: string;
-  }>({ type: 'grade', id: '', name: '' });
-
-  // --- Grade Handlers ---
-  const handleAddGrade = () => {
-    setGradeData({ name: '', level: undefined, employmentLevelId: '' });
-    gradeModal.open();
-  };
-
-  const handleEditGrade = (grade: Grade) => {
-    setGradeData(grade);
-    gradeModal.open();
-  };
-
-  const handleDeleteGrade = (id: string, name: string) => {
-    const hasDesigs = designations.some((desig) => desig.gradeId === id);
-    if (hasDesigs) {
-      toastError('Cannot delete grade with designations. Please remove designations first.');
-      return;
-    }
-    setDeleteData({ type: 'grade', id, name });
-    deleteModal.open();
-  };
-
-  const handleSaveGrade = async () => {
-    if (
-      !gradeData.name ||
-      gradeData.level === undefined ||
-      gradeData.level === undefined ||
-      !gradeData.employmentLevelId
-    ) {
-      toastError('Please enter Name, Numeric Level, and select an Employment Level');
-      return;
-    }
-
-    try {
-      if (gradeData.id) {
-        await updateGrade(gradeData.id, gradeData);
-        success('Grade updated successfully');
-      } else {
-        await addGrade({
-          ...gradeData,
-          organizationId: profile.id,
-          isActive: true,
-        } as any);
-        success('Grade added successfully');
-      }
-      gradeModal.close();
-      onSync();
-    } catch (error: any) {
-      toastError(`Failed to save grade: ${error.message}`);
-    }
-  };
+  }>({ id: '', name: '' });
 
   // --- Designation Handlers ---
-  const handleAddDesignation = () => {
+  const handleAddDesig = () => {
     setDesigData({ name: '', gradeId: '', departmentId: '' });
     desigModal.open();
   };
 
-  const handleEditDesignation = (desig: Designation) => {
+  const handleAddDesigToGrade = (gradeId: string) => {
+    setDesigData({ name: '', gradeId: gradeId, departmentId: '' });
+    desigModal.open();
+  };
+
+  const handleEditDesig = (desig: Designation) => {
     setDesigData(desig);
     desigModal.open();
   };
 
-  const handleDeleteDesignation = (id: string, name: string) => {
-    setDeleteData({ type: 'designation', id, name });
+  const handleDeleteDesig = (id: string, name: string) => {
+    setDeleteData({ id, name });
     deleteModal.open();
   };
 
-  const handleSaveDesignation = async () => {
-    if (!desigData.name || !desigData.gradeId || !desigData.departmentId) {
-      toastError('Please enter Name, select a Grade, and select a Department');
+  const handleSaveDesig = async () => {
+    if (!desigData.name || !desigData.gradeId) {
+      toastError('Please enter Name and select a Grade');
       return;
     }
 
@@ -138,7 +77,6 @@ const DesignationManagement: React.FC<DesignationManagementProps> = React.memo((
       } else {
         await addDesignation({
           ...desigData,
-          organizationId: profile.id,
           isActive: true,
         } as any);
         success('Designation added successfully');
@@ -150,441 +88,261 @@ const DesignationManagement: React.FC<DesignationManagementProps> = React.memo((
     }
   };
 
-  // --- Employment Level Handlers ---
-  const handleAddEmpLevel = () => {
-    setEmpLevelData({ name: '', code: '', description: '' });
-    empLevelModal.open();
-  };
-
-  const handleEditEmpLevel = (level: EmploymentLevel) => {
-    setEmpLevelData({ ...level });
-    empLevelModal.open();
-  };
-
-  const handleDeleteEmpLevel = (id: string, name: string) => {
-    setDeleteData({ type: 'employmentLevel', id, name });
-    deleteModal.open();
-  };
-
-  const handleSaveEmpLevel = async () => {
-    if (!empLevelData.name || !empLevelData.code) {
-      toastError('Please enter Name and Code');
+  const confirmDelete = async () => {
+    if (!deleteData.id) {
       return;
     }
-
-    // Uniqueness Check
-    const duplicate = employmentLevels.some(
-      (l) =>
-        (l.name.toLowerCase() === empLevelData.name!.toLowerCase() ||
-          l.code.toLowerCase() === empLevelData.code!.toLowerCase()) &&
-        l.id !== empLevelData.id
-    );
-
-    if (duplicate) {
-      toastError(
-        `Error: Level Name '${empLevelData.name}' or Code '${empLevelData.code}' already exists.`
-      );
-      return;
-    }
-
     try {
-      if (empLevelData.id) {
-        await updateEmploymentLevel(empLevelData.id, empLevelData as EmploymentLevel);
-        success('Employment Level updated successfully');
-      } else {
-        await addEmploymentLevel({ ...empLevelData } as EmploymentLevel);
-        success('Employment Level added successfully');
-      }
-      empLevelModal.close();
+      await deleteDesignation(deleteData.id);
+      success('Designation deleted successfully');
+      deleteModal.close();
       onSync();
     } catch (error: any) {
-      toastError(`Failed to save employment level: ${error.message}`);
+      toastError(`Failed to delete: ${error.message}`);
     }
   };
 
-  const confirmDelete = async () => {
-    try {
-      switch (deleteData.type) {
-        case 'grade':
-          await deleteGrade(deleteData.id);
-          break;
-        case 'designation':
-          await deleteDesignation(deleteData.id);
-          break;
-        case 'employmentLevel':
-          await deleteEmploymentLevel(deleteData.id);
-          break;
-      }
-      success('Item deleted successfully');
-      deleteModal.close();
-    } catch (error) {
-      toastError('Failed to delete item');
-    }
-  };
-
-  if (loadingEntities['grades'] || loadingEntities['designations']) {
+  if (loadingEntities['designations']) {
     return <div className="p-8 text-center text-text-muted">Loading designations...</div>;
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      {/* Employment Types Section */}
-      <div className="bg-[#0f172a] border border-border/40 rounded-xl overflow-hidden shadow-2xl">
-        <div className="px-8 py-6 border-b border-border/40 bg-slate-900/50 flex items-center justify-between">
+    <div className="space-y-8">
+      {/* Designations Section */}
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
           <div>
-            <h3 className="font-black text-sm text-white uppercase tracking-wider flex items-center gap-3">
-              <Briefcase size={20} className="text-primary-soft shadow-sm" />
-              Engagement Models
-            </h3>
-            <p className="text-[0.625rem] text-slate-400 font-bold mt-1.5 uppercase tracking-widest">
-              Define contractual frameworks for the workforce
-            </p>
+            <h2 className="text-xl font-bold text-text-primary flex items-center gap-2">
+              <Award className="w-5 h-5 text-primary" />
+              Designations (Job Titles)
+            </h2>
+            <p className="text-sm text-text-muted">Create job titles for your employees.</p>
           </div>
           <Button
-            onClick={handleAddEmpLevel}
-            size="sm"
-            className="h-9 px-4 bg-blue-600/10 border border-blue-500/30 text-blue-400 hover:bg-blue-600/20 text-[0.6rem] font-black uppercase tracking-[0.15em] gap-2 rounded-lg"
+            onClick={handleAddDesig}
+            className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20"
           >
-            <Plus size={14} strokeWidth={3} /> Add Level
+            <Plus className="w-4 h-4 mr-2" />
+            Add Designation
           </Button>
         </div>
-        <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {employmentLevels.map((level) => (
-            <div
-              key={level.id}
-              className="p-4 border border-border/20 rounded-xl bg-slate-900/40 hover:bg-slate-800/30 transition-all group border-l-2 border-l-emerald-500/50"
-            >
-              <div className="flex justify-between items-start">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-emerald-600/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
-                    <Briefcase size={14} />
-                  </div>
-                  <div>
-                    <h4 className="text-[0.75rem] font-black text-slate-200 uppercase tracking-tight">
-                      {level.name}
-                    </h4>
-                    <span className="text-[0.55rem] font-black font-mono text-emerald-400 uppercase tracking-widest opacity-70">
+
+        <div className="space-y-10">
+          {jobLevels?.map((level) => {
+            const levelGrades = grades
+              .filter((g) => g.jobLevelId === level.id)
+              .sort((a, b) => a.level - b.level);
+
+            if (levelGrades.length === 0) {
+              return null;
+            }
+
+            return (
+              <div key={level.id} className="space-y-4">
+                <div className="flex items-center gap-3 pb-2 border-b border-white/5">
+                  <h3 className="text-lg font-bold text-vibrant">{level.name}</h3>
+                  {level.code && (
+                    <VibrantBadge color="blue" className="font-mono text-xs">
                       {level.code}
-                    </span>
-                  </div>
+                    </VibrantBadge>
+                  )}
                 </div>
-                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 w-7 p-0 text-slate-500 hover:text-white hover:bg-slate-800"
-                    onClick={() => handleEditEmpLevel(level)}
-                  >
-                    <Edit2 size={12} />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 w-7 p-0 text-slate-500 hover:text-danger hover:bg-danger/10"
-                    onClick={() => handleDeleteEmpLevel(level.id, level.name)}
-                  >
-                    <Trash2 size={12} />
-                  </Button>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {levelGrades.map((grade) => {
+                    const gradeDesignations = designations.filter((d) => d.gradeId === grade.id);
+
+                    return (
+                      <div className="card-vibrant p-5 relative group flex flex-col h-full">
+                        {/* Grade Header */}
+                        <div className="flex justify-between items-start mb-4 pb-4 border-b border-border">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <div
+                                className="w-6 h-6 rounded bg-primary/10 flex items-center justify-center text-[10px] font-mono text-primary border border-primary/20"
+                                title="Grade Level"
+                              >
+                                {grade.level}
+                              </div>
+                              <h3 className="font-semibold text-text-primary text-lg">
+                                {grade.name}
+                              </h3>
+                            </div>
+                            {grade.code && (
+                              <p className="text-xs text-text-muted mt-1 font-mono">{grade.code}</p>
+                            )}
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            onClick={() => handleAddDesigToGrade(grade.id)}
+                            title="Add Designation to this Grade"
+                          >
+                            <Plus size={16} className="text-primary" />
+                          </Button>
+                        </div>
+
+                        {/* Designations List */}
+                        <div className="flex-1">
+                          <div className="flex justify-between items-center mb-3">
+                            <h4 className="text-xs font-semibold text-text-secondary uppercase tracking-wider flex items-center gap-1.5">
+                              <Briefcase size={12} />
+                              Job Titles
+                            </h4>
+                            <VibrantBadge variant="outline" className="text-[10px] px-2 py-0.5">
+                              {gradeDesignations.length}
+                            </VibrantBadge>
+                          </div>
+
+                          <div className="space-y-2">
+                            {gradeDesignations.length > 0 ? (
+                              gradeDesignations.map((desig) => (
+                                <div
+                                  key={desig.id}
+                                  className="card-vibrant p-3 flex items-center justify-between group/item hover:border-primary/50"
+                                >
+                                  <div className="flex flex-col">
+                                    <span className="text-sm text-text-primary font-medium">
+                                      {desig.name}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:group-hover/item:opacity-100 transition-opacity">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleEditDesig(desig)}
+                                      className="h-6 w-6 p-0 hover:bg-surface rounded"
+                                    >
+                                      <Edit2 size={12} className="text-primary" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleDeleteDesig(desig.id, desig.name)}
+                                      className="h-6 w-6 p-0 hover:bg-surface rounded"
+                                    >
+                                      <Trash2 size={12} className="text-danger" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="text-center py-4 text-xs text-text-muted italic bg-bg/20 rounded border border-dashed border-border">
+                                No job titles
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </div>
+            );
+          })}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Grades Section */}
-        <div className="bg-[#0f172a] border border-border/40 rounded-xl overflow-hidden shadow-2xl">
-          <div className="px-8 py-5 border-b border-border/40 bg-slate-900/50 flex items-center justify-between">
-            <div>
-              <h3 className="font-black text-xs text-white uppercase tracking-widest flex items-center gap-2">
-                <Award size={18} className="text-primary-soft shadow-sm" />
-                Grade Matrix
-              </h3>
+          {/* Fallback for empty state logic or unassigned could go here, but omitted to prevent clutter as per request to focus on sorting */}
+          {(!jobLevels || jobLevels.length === 0) && (
+            <div className="col-span-full py-12 text-center border-2 border-dashed border-border rounded-xl">
+              <Award className="w-12 h-12 text-text-muted mx-auto mb-3" />
+              <p className="text-text-secondary font-medium">No Job Levels configured</p>
             </div>
-            <Button
-              onClick={handleAddGrade}
-              size="sm"
-              className="h-8 px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[0.55rem] font-black uppercase tracking-wider gap-2 rounded-md border border-slate-700"
-            >
-              <Plus size={12} strokeWidth={3} /> Add Grade
-            </Button>
-          </div>
-          <div className="max-h-[400px] overflow-y-auto">
-            <table className="w-full text-left">
-              <thead className="bg-slate-900/80 text-[0.55rem] uppercase text-slate-500 font-black tracking-[0.2em] border-b border-border/40 sticky top-0">
-                <tr>
-                  <th className="px-8 py-4">GRADE IDENTITY</th>
-                  <th className="px-8 py-4 text-center">LEVEL</th>
-                  <th className="px-8 py-4 text-right">ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/20">
-                {grades
-                  .sort((a, b) => a.level - b.level)
-                  .map((grade) => (
-                    <tr key={grade.id} className="hover:bg-slate-800/20 group transition-colors">
-                      <td className="px-8 py-4">
-                        <span className="text-[0.65rem] font-black text-slate-300 uppercase tracking-tight">
-                          {grade.name}
-                        </span>
-                      </td>
-                      <td className="px-8 py-4 text-center">
-                        <div className="inline-block px-2 py-0.5 bg-slate-800/80 border border-slate-700/50 rounded text-blue-400 font-mono text-[0.6rem] font-black">
-                          {grade.level}
-                        </div>
-                      </td>
-                      <td className="px-8 py-4 text-right">
-                        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 w-7 p-0 text-slate-500 hover:text-white"
-                            onClick={() => handleEditGrade(grade)}
-                          >
-                            <Edit2 size={12} />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 w-7 p-0 text-slate-500 hover:text-danger"
-                            onClick={() => handleDeleteGrade(grade.id, grade.name)}
-                          >
-                            <Trash2 size={12} />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
+          )}
+
+          {/* Unassigned Designations (Safety Net) */}
+          {designations.filter((d) => !grades.find((g) => g.id === d.gradeId)).length > 0 && (
+            <div className="mt-8 p-4 border border-warning/30 bg-warning/5 rounded-xl">
+              <h3 className="font-bold text-warning mb-2 flex items-center gap-2">
+                <Award className="w-4 h-4" /> Unassigned Generic Designations
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {designations
+                  .filter((d) => !grades.find((g) => g.id === d.gradeId))
+                  .map((desig) => (
+                    <div
+                      key={desig.id}
+                      className="bg-surface p-3 rounded border border-border flex justify-between items-center"
+                    >
+                      <div className="flex flex-col">
+                        <span className="font-medium">{desig.name}</span>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditDesig(desig)}
+                          className="h-6 w-6 p-0"
+                        >
+                          <Edit2 size={12} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteDesig(desig.id, desig.name)}
+                          className="h-6 w-6 p-0"
+                        >
+                          <Trash2 size={12} className="text-danger" />
+                        </Button>
+                      </div>
+                    </div>
                   ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Designations Section */}
-        <div className="bg-[#0f172a] border border-border/40 rounded-xl overflow-hidden shadow-2xl">
-          <div className="px-8 py-5 border-b border-border/40 bg-slate-900/50 flex items-center justify-between">
-            <div>
-              <h3 className="font-black text-xs text-white uppercase tracking-widest flex items-center gap-2">
-                <Star size={18} className="text-primary-soft shadow-sm" />
-                Position Ledger
-              </h3>
+              </div>
             </div>
-            <Button
-              onClick={handleAddDesignation}
-              className="h-8 px-4 bg-blue-600 hover:bg-blue-500 text-white text-[0.55rem] font-black uppercase tracking-wider gap-2 rounded-md shadow-lg shadow-blue-500/10"
-            >
-              <Plus size={12} strokeWidth={3} /> Add Position
-            </Button>
-          </div>
-          <div className="max-h-[400px] overflow-y-auto">
-            <table className="w-full text-left">
-              <thead className="bg-slate-900/80 text-[0.55rem] uppercase text-slate-300 font-black tracking-[0.2em] border-b border-border/40 sticky top-0">
-                <tr>
-                  <th className="px-8 py-4">POSITION TITLE</th>
-                  <th className="px-8 py-4">GRADE COUPLING</th>
-                  <th className="px-8 py-4 text-right">ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/20">
-                {designations.map((desig) => {
-                  const grade = grades.find((g) => g.id === desig.gradeId);
-                  return (
-                    <tr key={desig.id} className="hover:bg-slate-800/20 group transition-colors">
-                      <td className="px-8 py-4">
-                        <span className="text-[0.65rem] font-black text-slate-100 uppercase tracking-tight">
-                          {desig.name}
-                        </span>
-                      </td>
-                      <td className="px-8 py-4">
-                        {grade ? (
-                          <div className="flex items-center gap-2">
-                            <TrendingUp size={10} className="text-blue-500/50" />
-                            <span className="text-[0.6rem] font-black text-slate-400 uppercase tracking-widest">
-                              {grade.name}
-                            </span>
-                          </div>
-                        ) : (
-                          <span className="text-[0.55rem] font-black text-danger/50 uppercase tracking-widest italic">
-                            Unlinked
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-8 py-4 text-right">
-                        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 w-7 p-0 text-slate-500 hover:text-white"
-                            onClick={() => handleEditDesignation(desig)}
-                          >
-                            <Edit2 size={12} />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 w-7 p-0 text-slate-500 hover:text-danger"
-                            onClick={() => handleDeleteDesignation(desig.id, desig.name)}
-                          >
-                            <Trash2 size={12} />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          )}
         </div>
       </div>
 
-      {/* Modals */}
-      <FormModal
-        isOpen={gradeModal.isOpen}
-        onClose={gradeModal.close}
-        title={gradeData.id ? 'Edit Grade' : 'Add Grade'}
-        onSave={handleSaveGrade}
-        saveLabel="Save"
-      >
-        <div className="space-y-4">
-          <Input
-            label="Grade Name"
-            placeholder="e.g. Officer"
-            value={gradeData.name}
-            onChange={(e) => setGradeData({ ...gradeData, name: e.target.value })}
-            required
-          />
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              label="Level (Numeric)"
-              type="number"
-              placeholder="e.g. 1"
-              value={gradeData.level ?? ''}
-              onChange={(e) => setGradeData({ ...gradeData, level: parseInt(e.target.value) || 0 })}
-              required
-            />
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">
-                Employment Level
-              </label>
-              <select
-                className="w-full bg-surface border border-border rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-primary/20 outline-none"
-                value={gradeData.employmentLevelId || ''}
-                onChange={(e) => setGradeData({ ...gradeData, employmentLevelId: e.target.value })}
-              >
-                <option value="">-- Select Level --</option>
-                {employmentLevels.map((el) => (
-                  <option key={el.id} value={el.id}>
-                    {el.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-      </FormModal>
-
+      {/* Designation Modal */}
       <FormModal
         isOpen={desigModal.isOpen}
         onClose={desigModal.close}
         title={desigData.id ? 'Edit Designation' : 'Add Designation'}
-        onSave={handleSaveDesignation}
-        saveLabel="Save"
+        onSave={handleSaveDesig}
+        saveLabel="Save Designation"
       >
         <div className="space-y-4">
           <Input
-            label="Designation Title"
-            placeholder="e.g. Senior Developer"
-            value={desigData.name}
+            label="Designation Name"
+            value={desigData.name || ''}
             onChange={(e) => setDesigData({ ...desigData, name: e.target.value })}
+            placeholder="e.g. Senior Developer"
             required
+            autoFocus
           />
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">
-                Structural Department
-              </label>
-              <select
-                className="w-full bg-surface border border-border rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-primary/20 outline-none"
-                value={desigData.departmentId || ''}
-                onChange={(e) => setDesigData({ ...desigData, departmentId: e.target.value })}
-              >
-                <option value="">-- Select Department --</option>
-                {departments.map((dept) => (
-                  <option key={dept.id} value={dept.id}>
-                    {dept.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">
-                Associated Grade
-              </label>
-              <select
-                className="w-full bg-surface border border-border rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-primary/20 outline-none"
-                value={desigData.gradeId || ''}
-                onChange={(e) => setDesigData({ ...desigData, gradeId: e.target.value })}
-              >
-                <option value="">-- Select Grade --</option>
-                {grades.map((g) => (
-                  <option key={g.id} value={g.id}>
-                    {g.name} (Level {g.level})
-                  </option>
-                ))}
-              </select>
-            </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-text-secondary">Grade</label>
+            <select
+              value={desigData.gradeId || ''}
+              onChange={(e) => setDesigData({ ...desigData, gradeId: e.target.value })}
+              className="w-full bg-bg border border-border rounded-lg p-2 text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            >
+              <option value="" className="bg-surface text-text-primary">
+                Select Grade
+              </option>
+              {grades.map((grade) => (
+                <option key={grade.id} value={grade.id} className="bg-surface text-text-primary">
+                  {grade.name} (Level {grade.level})
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       </FormModal>
 
-      <FormModal
-        isOpen={empLevelModal.isOpen}
-        onClose={empLevelModal.close}
-        title={empLevelData.id ? 'Edit Employment Level' : 'Add Employment Level'}
-        onSave={handleSaveEmpLevel}
-        saveLabel="Save"
-      >
-        <div className="space-y-4">
-          <Input
-            label="Level Name"
-            placeholder="e.g. Permanent"
-            value={empLevelData.name}
-            onChange={(e) => setEmpLevelData({ ...empLevelData, name: e.target.value })}
-            required
-          />
-          <Input
-            label="Code"
-            placeholder="e.g. PERM"
-            value={empLevelData.code}
-            onChange={(e) =>
-              setEmpLevelData({ ...empLevelData, code: e.target.value.toUpperCase() })
-            }
-            required
-          />
-          <Input
-            label="Description"
-            placeholder="e.g. Full-time employees with benefits"
-            value={empLevelData.description || ''}
-            onChange={(e) => setEmpLevelData({ ...empLevelData, description: e.target.value })}
-          />
-        </div>
-      </FormModal>
-
-      {/* Delete Confirmation Modal */}
+      {/* Delete Modal */}
       <Modal
         isOpen={deleteModal.isOpen}
         onClose={deleteModal.close}
-        title="Confirm Deletion"
+        title={`Delete Designation`}
         size="sm"
       >
         <div className="space-y-4">
           <p className="text-sm text-text-secondary">
-            Are you sure you want to delete <strong>{deleteData.name}</strong>? This action cannot
-            be undone.
+            Are you sure you want to delete <strong>{deleteData.name}</strong>?
           </p>
-          <div className="flex justify-end gap-3 pt-2">
+          <div className="flex justify-end gap-3">
             <Button variant="ghost" onClick={deleteModal.close}>
               Cancel
             </Button>

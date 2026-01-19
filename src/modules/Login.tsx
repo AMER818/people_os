@@ -23,18 +23,14 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     const safePassword = sanitizeInput(password);
 
     try {
-      // Artificial delay for smoother UX feel if response is too fast
-      const minTime = new Promise((resolve) => setTimeout(resolve, 800));
-      const loginPromise = api.login(safeUsername, safePassword, false);
-
-      const [loginSuccess] = await Promise.all([loginPromise, minTime]);
+      const loginSuccess = await api.login(safeUsername, safePassword, false);
 
       if (loginSuccess) {
         setSuccess(true);
-        // Allow success animation to play
+        // Quick success animation then proceed
         setTimeout(() => {
           onLogin();
-        }, 500);
+        }, 200);
       } else {
         setError('Invalid credentials');
         setLoading(false);
@@ -169,7 +165,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
         <div className="mt-8 text-center">
           <p className="text-xs text-text-muted font-medium">
-            Protected by <span className="text-primary font-bold">Hunzal Security™</span>
+            Protected by <span className="text-primary font-bold">PeopleOS Security™</span>
             <span className="mx-2 opacity-50">•</span>v{import.meta.env.VITE_APP_VERSION}
           </p>
         </div>

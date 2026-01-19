@@ -1,0 +1,8 @@
+Starting Deduplication Audit on d:\Project\PEOPLE_OS
+
+--- Scanning for File Duplication ---
+--- Scanning for Type Definition Duplication ---
+--- Scanning for UI Standard Violations ---
+--- Scanning for Code Search Violations (Manual Filtering) ---
+--- Verifying Specific Fixes ---
+Audit script failed: 'charmap' codec can't encode character '\u2713' in position 0: character maps to <undefined>

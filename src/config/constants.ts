@@ -33,9 +33,9 @@ export const ENVIRONMENT_URLS = {
 // Database Configuration
 export const DATABASE_CONFIG = {
   FILES: {
-    DEVELOPMENT: 'hunzal_hcm.db',
-    TEST: 'hunzal_hcm_test.db',
-    PRODUCTION: 'hunzal_hcm.db',
+    DEVELOPMENT: 'people_os.db',
+    TEST: 'people_os_test.db',
+    PRODUCTION: 'people_os.db',
   },
   PATH: './backend/data/',
 } as const;
@@ -67,7 +67,7 @@ export const LIMITS = {
 
 // Application Metadata
 export const APP_METADATA = {
-  NAME: 'Hunzal HCM',
+  NAME: 'PeopleOS HCM',
   VERSION: '4.2.0',
   API_VERSION: '1.0.0',
   NODE_NAME: 'Production Node',

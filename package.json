@@ -1,5 +1,5 @@
 {
-  "name": "hunzal-people-os",
+  "name": "people-os",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -14,7 +14,7 @@
     "test:e2e": "playwright test",
     "test:visual": "playwright test --grep \"visual regression\"",
     "test:coverage": "vitest run --coverage",
-    "start:backend": "venv\\Scripts\\python -m uvicorn backend.main:app --reload --host 0.0.0.0 --port 3002",
+    "start:backend": "venv\\Scripts\\python -m uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000",
     "start:worker": "venv\\Scripts\\python -m backend.worker",
     "seed:db": "venv\\Scripts\\python -m backend.initialize_auth",
     "start:all": "concurrently \"npm run start:backend\" \"npm run dev\"",

@@ -1,4 +1,6 @@
+import Logger from '@/utils/logger';
 import React, { useState } from 'react';
+// ... existing imports ...
 import { Cloud, Plus, Trash2, Eye, EyeOff, Copy } from 'lucide-react';
 import { useOrgStore } from '@store/orgStore';
 import { useToast } from '@components/ui/Toast';
@@ -86,7 +88,7 @@ const APIManager: React.FC = React.memo(() => {
 
   const simulateWebhookDelivery = (id: string) => {
     // This would be an API call in a real app
-    console.log(`Simulating webhook delivery for ${id}`);
+    Logger.info(`Simulating webhook delivery for ${id}`);
   };
 
   return (
@@ -111,7 +113,7 @@ const APIManager: React.FC = React.memo(() => {
           <section>
             <div className="flex items-center justify-between mb-4">
               <h4 className="text-base font-black text-text-primary uppercase tracking-tight">
-                Access Tokens
+                API Keys
               </h4>
               <Button
                 onClick={() => {
@@ -122,7 +124,7 @@ const APIManager: React.FC = React.memo(() => {
                 className="h-8 text-[0.6rem] uppercase tracking-wider font-black"
               >
                 <Plus size={14} className="mr-2" />
-                Generate Node Token
+                Create API Key
               </Button>
             </div>
 
@@ -181,7 +183,7 @@ const APIManager: React.FC = React.memo(() => {
             </div>
             {apiKeys.length === 0 && (
               <div className="p-10 text-center border-t border-border border-dashed font-bold uppercase text-[0.65rem] text-text-muted tracking-widest bg-muted-bg/10 rounded-xl mt-2">
-                No active access tokens found
+                No active API keys found
               </div>
             )}
           </section>
@@ -190,7 +192,7 @@ const APIManager: React.FC = React.memo(() => {
           <section>
             <div className="flex items-center justify-between mb-4">
               <h4 className="text-base font-black text-text-primary uppercase tracking-tight">
-                Event Webhooks
+                Webhooks
               </h4>
               <Button
                 onClick={() => {
@@ -245,7 +247,7 @@ const APIManager: React.FC = React.memo(() => {
                       }}
                       className="text-[0.5rem] font-black uppercase tracking-[0.2em] text-primary hover:underline underline-offset-4"
                     >
-                      Test Relay
+                      Test Webhook
                     </button>
                   </div>
                 </div>
@@ -261,7 +263,7 @@ const APIManager: React.FC = React.memo(() => {
       </div>
 
       <FormModal
-        title="Generate Access Token"
+        title="Create API Key"
         isOpen={apiKeyModal.isOpen}
         onClose={apiKeyModal.close}
         onSave={handleSaveKey}
@@ -269,23 +271,23 @@ const APIManager: React.FC = React.memo(() => {
       >
         <div className="space-y-6">
           <Input
-            label="Token Label"
+            label="Key Name"
             value={apiKeyForm.name}
             onChange={(e) => updateKeyField('name', e.target.value)}
             placeholder="e.g. Production Mobile App"
           />
           <div className="space-y-2">
             <label className="text-[0.625rem] font-black text-text-muted uppercase tracking-widest ml-1">
-              Capability Scope
+              Access Level
             </label>
             <select
               value={apiKeyForm.scope}
               onChange={(e) => updateKeyField('scope', e.target.value as any)}
               className="w-full bg-muted-bg border-none rounded-xl px-4 py-4 font-black text-sm text-text-primary focus:ring-2 focus:ring-primary/20 outline-none"
             >
-              <option value="Read-only">Read-only Stream</option>
-              <option value="Read/Write">Read/Write Access</option>
-              <option value="Full Admin">Full Root Admin</option>
+              <option value="Read-only">Read-Only</option>
+              <option value="Read/Write">Read/Write</option>
+              <option value="Full Admin">Admin Access</option>
             </select>
           </div>
         </div>
@@ -300,13 +302,13 @@ const APIManager: React.FC = React.memo(() => {
       >
         <div className="space-y-6">
           <Input
-            label="Handshake Identifier"
+            label="Webhook Name"
             value={webhookForm.name}
             onChange={(e) => updateWebhookField('name', e.target.value)}
             placeholder="e.g. Slack Integration"
           />
           <Input
-            label="Callback URL Terminal"
+            label="Callback URL"
             value={webhookForm.url}
             onChange={(e) => updateWebhookField('url', e.target.value)}
             placeholder="https://hooks.external.com/..."

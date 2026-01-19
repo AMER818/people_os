@@ -19,6 +19,7 @@ import { useModal } from '../../hooks/useModal';
 import { FormModal } from '../../components/ui/FormModal';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { DateInput } from '../../components/ui/DateInput';
 import RecruitmentFooter from '../recruitment/RecruitmentFooter';
 import { useSaveEntity } from '../../hooks/useSaveEntity';
 
@@ -56,7 +57,7 @@ const Onboarding: React.FC = () => {
         { id: 's3', label: 'Policy Review', done: false },
         { id: 's4', label: 'Neural Sync / Orientation', done: false },
       ],
-    })
+    }),
   });
 
   useEffect(() => {
@@ -214,8 +215,8 @@ const Onboarding: React.FC = () => {
               Auto-Immersion Protocol
             </h2>
             <p className="text-slate-400 text-xl leading-relaxed mb-12 antialiased">
-              The Hunzal immersion engine analyzes the hire's technical signature and automatically
-              provisions tailored{' '}
+              The PeopleOS immersion engine analyzes the hire's technical signature and
+              automatically provisions tailored{' '}
               <span className="text-white underline decoration-primary/40 underline-offset-8">
                 knowledge clusters
               </span>{' '}
@@ -242,7 +243,9 @@ const Onboarding: React.FC = () => {
                 className="p-8 bg-white/5 border border-white/10 rounded-[3rem] backdrop-blur-3xl text-center hover:bg-white/10 transition-all cursor-pointer"
               >
                 <item.icon className="w-10 h-10 mx-auto mb-6 text-primary" />
-                <p className="text-[0.6875rem] font-black uppercase tracking-[0.2em]">{item.label}</p>
+                <p className="text-[0.6875rem] font-black uppercase tracking-[0.2em]">
+                  {item.label}
+                </p>
               </div>
             ))}
           </div>
@@ -273,9 +276,8 @@ const Onboarding: React.FC = () => {
               value={newHire.role}
               onChange={(e) => updateHireField('role', e.target.value)}
             />
-            <Input
+            <DateInput
               label="Start Temporal Point"
-              type="date"
               required
               value={newHire.date}
               onChange={(e) => updateHireField('date', e.target.value)}
@@ -289,7 +291,6 @@ const Onboarding: React.FC = () => {
           />
         </div>
       </FormModal>
-
     </div>
   );
 };

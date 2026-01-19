@@ -20,6 +20,7 @@ import { useModal } from '../../hooks/useModal';
 import { FormModal } from '../../components/ui/FormModal';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { DateInput } from '../../components/ui/DateInput';
 import { useSaveEntity } from '../../hooks/useSaveEntity';
 import RecruitmentFooter from '../recruitment/RecruitmentFooter';
 
@@ -363,10 +364,9 @@ const PerformanceModule: React.FC = () => {
           />
 
           <div className="grid grid-cols-2 gap-8">
-            <Input
+            <DateInput
               label="Due Date"
-              type="date"
-              value={newGoal.dueDate}
+              value={newGoal.dueDate || ''}
               onChange={(e) => updateGoalField('dueDate', e.target.value)}
             />
             <Input

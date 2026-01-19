@@ -10,6 +10,7 @@ import {
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/Card';
 import { PALETTE } from '@/theme/palette';
+import { formatDate } from '@/utils/formatting';
 
 interface AuditReport {
   id: string;
@@ -31,7 +32,7 @@ export const TrendAnalysis: React.FC = () => {
           // Format date for chart
           const formattedUrl = json.reports.map((r: any) => ({
             ...r,
-            date: new Date(r.created_at).toLocaleDateString(),
+            date: formatDate(r.created_at),
             score: r.overall_score,
           }));
           setData(formattedUrl);

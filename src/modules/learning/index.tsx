@@ -4,7 +4,6 @@ import {
   Clock,
   BookOpen,
   Trophy,
-  Search,
   Filter,
   Award,
   Target,
@@ -22,6 +21,8 @@ import {
 import { Course } from '../../types';
 import { api } from '../../services/api';
 import { HorizontalTabs } from '../../components/ui/HorizontalTabs';
+import { useSearch } from '../../hooks/useSearch';
+import { SearchInput } from '../../components/ui/SearchInput';
 
 type LearningTab = 'ecosystem' | 'discover' | 'matrix' | 'vault';
 
@@ -42,7 +43,11 @@ const iconMap: IconMapType = {
 const LearningModule: React.FC = () => {
   const [activeTab, setActiveTab] = useState<LearningTab>('ecosystem');
   const [courses, setCourses] = useState<Course[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const {
+    searchTerm,
+    setSearchTerm,
+    filteredData: filteredCourses,
+  } = useSearch(courses, ['title']);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -91,7 +96,9 @@ const LearningModule: React.FC = () => {
     }
   };
 
-  const getIcon = (iconName: string | LucideIcon): LucideIcon => {
+  const getIcon = (iconName: string | LucideIcon | undefined | null): LucideIcon => {
+    if (!iconName) return BookOpen;
+
     if (typeof iconName === 'string' && iconMap[iconName]) {
       return iconMap[iconName];
     }
@@ -111,13 +118,11 @@ const LearningModule: React.FC = () => {
             </h3>
             <div className="flex gap-4">
               <div className="relative group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                <input
-                  aria-label="Search courses"
-                  className="bg-background border border-border pl-10 pr-6 py-3 rounded-2xl text-sm font-black outline-none w-64 shadow-inner text-foreground placeholder:text-muted-foreground"
-                  placeholder="Query Skill Nodes..."
+                <SearchInput
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Query Skill Nodes..."
+                  className="w-64 rounded-2xl"
                 />
               </div>
               <button
@@ -132,73 +137,71 @@ const LearningModule: React.FC = () => {
             {isLoading ? (
               <div className="text-center text-muted-foreground py-10">Loading courses...</div>
             ) : (
-              courses
-                .filter((c) => c.title.toLowerCase().includes(searchTerm.toLowerCase()))
-                .map((course) => {
-                  const IconComponent = getIcon(course.icon);
-                  return (
-                    <div
-                      key={course.id}
-                      className="p-8 bg-secondary/50 rounded-[3rem] border border-border group hover:shadow-xl transition-all"
-                    >
-                      <div className="flex flex-col md:flex-row items-center gap-10">
-                        <div
-                          className={`w-24 h-24 bg-card rounded-[2rem] flex items-center justify-center shadow-inner text-${course.color}-600 dark:text-${course.color}-400 group-hover:scale-110 transition-transform`}
-                        >
-                          <IconComponent size={42} />
+              filteredCourses.map((course) => {
+                const IconComponent = getIcon(course.icon);
+                return (
+                  <div
+                    key={course.id}
+                    className="p-8 bg-secondary/50 rounded-[3rem] border border-border group hover:shadow-xl transition-all"
+                  >
+                    <div className="flex flex-col md:flex-row items-center gap-10">
+                      <div
+                        className={`w-24 h-24 bg-card rounded-[2rem] flex items-center justify-center shadow-inner text-${course.color}-600 dark:text-${course.color}-400 group-hover:scale-110 transition-transform`}
+                      >
+                        <IconComponent size={42} />
+                      </div>
+                      <div className="flex-1 text-center md:text-left">
+                        <div className="flex items-center gap-3 justify-center md:justify-start mb-2">
+                          <span
+                            className={`px-3 py-1 rounded-lg text-[0.5625rem] font-black uppercase tracking-widest bg-${course.color}-50 dark:bg-${course.color}-900/20 text-${course.color}-600 dark:text-${course.color}-400 border border-${course.color}-100 dark:border-${course.color}-900/30`}
+                          >
+                            {course.level}
+                          </span>
+                          <span className="text-[0.625rem] font-bold text-muted-foreground uppercase tracking-widest">
+                            {course.provider}
+                          </span>
                         </div>
-                        <div className="flex-1 text-center md:text-left">
-                          <div className="flex items-center gap-3 justify-center md:justify-start mb-2">
-                            <span
-                              className={`px-3 py-1 rounded-lg text-[0.5625rem] font-black uppercase tracking-widest bg-${course.color}-50 dark:bg-${course.color}-900/20 text-${course.color}-600 dark:text-${course.color}-400 border border-${course.color}-100 dark:border-${course.color}-900/30`}
-                            >
-                              {course.level}
-                            </span>
-                            <span className="text-[0.625rem] font-bold text-muted-foreground uppercase tracking-widest">
-                              {course.provider}
+                        <h4 className="text-2xl font-black text-foreground tracking-tight antialiased leading-none mb-3">
+                          {course.title}
+                        </h4>
+                        <p className="text-[0.6875rem] text-muted-foreground font-bold uppercase tracking-widest flex items-center gap-2 justify-center md:justify-start">
+                          <Clock size={12} /> {course.duration} Allocation Required
+                        </p>
+                      </div>
+                      <div className="w-full md:w-56 space-y-6">
+                        {course.status === 'Completed' ? (
+                          <div className="flex flex-col items-center bg-success/5 p-4 rounded-[1.5rem] border border-success/10">
+                            <CheckCircle2 className="w-10 h-10 text-success mb-2" />
+                            <span className="text-[0.6875rem] font-black text-emerald-600 uppercase tracking-widest">
+                              Score: {course.score}%
                             </span>
                           </div>
-                          <h4 className="text-2xl font-black text-foreground tracking-tight antialiased leading-none mb-3">
-                            {course.title}
-                          </h4>
-                          <p className="text-[0.6875rem] text-muted-foreground font-bold uppercase tracking-widest flex items-center gap-2 justify-center md:justify-start">
-                            <Clock size={12} /> {course.duration} Allocation Required
-                          </p>
-                        </div>
-                        <div className="w-full md:w-56 space-y-6">
-                          {course.status === 'Completed' ? (
-                            <div className="flex flex-col items-center bg-success/5 p-4 rounded-[1.5rem] border border-success/10">
-                              <CheckCircle2 className="w-10 h-10 text-success mb-2" />
-                              <span className="text-[0.6875rem] font-black text-emerald-600 uppercase tracking-widest">
-                                Score: {course.score}%
-                              </span>
+                        ) : (
+                          <div className="space-y-4">
+                            <div className="flex justify-between text-[0.625rem] font-black uppercase tracking-widest text-muted-foreground">
+                              <span>Immersion</span>
+                              <span className="text-foreground">{course.progress || 0}%</span>
                             </div>
-                          ) : (
-                            <div className="space-y-4">
-                              <div className="flex justify-between text-[0.625rem] font-black uppercase tracking-widest text-muted-foreground">
-                                <span>Immersion</span>
-                                <span className="text-foreground">{course.progress || 0}%</span>
-                              </div>
-                              <div className="h-3 bg-secondary rounded-full overflow-hidden p-0.5">
-                                <div
-                                  className={`h-full bg-${course.color}-500 rounded-full transition-all duration-1000 shadow-[0_0_0.625rem_rgba(37,99,235,0.3)]`}
-                                  style={{ width: `${course.progress || 0}%` }}
-                                ></div>
-                              </div>
-                              <button
-                                onClick={() => handleResume(course.id)}
-                                aria-label={`Resume ${course.title}`}
-                                className="w-full py-4 bg-card rounded-2xl text-[0.625rem] font-black uppercase tracking-widest border border-border shadow-sm group-hover:bg-primary group-hover:text-primary-foreground transition-all active:scale-95"
-                              >
-                                Resume Session
-                              </button>
+                            <div className="h-3 bg-secondary rounded-full overflow-hidden p-0.5">
+                              <div
+                                className={`h-full bg-${course.color}-500 rounded-full transition-all duration-1000 shadow-[0_0_0.625rem_rgba(37,99,235,0.3)]`}
+                                style={{ width: `${course.progress || 0}%` }}
+                              ></div>
                             </div>
-                          )}
-                        </div>
+                            <button
+                              onClick={() => handleResume(course.id)}
+                              aria-label={`Resume ${course.title}`}
+                              className="w-full py-4 bg-card rounded-2xl text-[0.625rem] font-black uppercase tracking-widest border border-border shadow-sm group-hover:bg-primary group-hover:text-primary-foreground transition-all active:scale-95"
+                            >
+                              Resume Session
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  );
-                })
+                  </div>
+                );
+              })
             )}
           </div>
         </div>
@@ -409,7 +412,7 @@ const LearningModule: React.FC = () => {
             <p className="text-muted-foreground mt-8 text-xl max-w-4xl leading-relaxed antialiased">
               The{' '}
               <span className="text-primary underline underline-offset-8 decoration-4 decoration-primary/30">
-                Hunzal Learning Kernel
+                PeopleOS Learning Kernel
               </span>{' '}
               ensures that every developmental milestone is hashed to your personnel registry.
               Verified credentials directly influence promotion eligibility and project allocation

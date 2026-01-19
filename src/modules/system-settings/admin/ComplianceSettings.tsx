@@ -2,6 +2,7 @@ import React from 'react';
 import { useOrgStore } from '@store/orgStore';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
+import { DateInput } from '@components/ui/DateInput';
 import { Save, Scale } from 'lucide-react';
 import { useToast } from '@components/ui/Toast';
 
@@ -36,19 +37,16 @@ const ComplianceSettings: React.FC = () => {
           </div>
           <div>
             <h3 className="text-lg font-black text-text-primary uppercase tracking-tight">
-              Global Compliance Constants
+              Compliance Settings
             </h3>
-            <p className="text-sm text-text-muted">
-              Manage statutory rates and fiscal year definitions.
-            </p>
+            <p className="text-sm text-text-muted">Manage tax year and statutory rates.</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-4">
-            <Input
+            <DateInput
               label="Tax Year End"
-              type="date"
               value={localSettings.taxYear || ''}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setLocalSettings({ ...localSettings, taxYear: e.target.value })
@@ -90,7 +88,7 @@ const ComplianceSettings: React.FC = () => {
 
         <div className="mt-8 flex justify-end">
           <Button onClick={handleSave} className="font-black uppercase tracking-widest">
-            <Save size={16} className="mr-2" /> Save Constants
+            <Save size={16} className="mr-2" /> Save Settings
           </Button>
         </div>
       </div>

@@ -8,6 +8,7 @@ import EducationTab from './EducationTab';
 import ExperienceTab from './ExperienceTab';
 
 import DisciplineTab from './DisciplineTab';
+import { DetailLayout } from '../../components/layout/DetailLayout';
 import { Employee as EmployeeType } from '../../types';
 
 interface EmployeeMasterProps {
@@ -18,6 +19,7 @@ interface EmployeeMasterProps {
   isAnalyzing: boolean;
   aiSuggestions: any[];
   isDisabled?: boolean;
+  isNewRecord?: boolean;
 }
 
 const EmployeeMaster: React.FC<EmployeeMasterProps> = ({
@@ -28,6 +30,7 @@ const EmployeeMaster: React.FC<EmployeeMasterProps> = ({
   isAnalyzing,
   aiSuggestions,
   isDisabled,
+  isNewRecord = false,
 }) => {
   const renderTabContent = () => {
     switch (activeTab) {
@@ -41,7 +44,13 @@ const EmployeeMaster: React.FC<EmployeeMasterProps> = ({
           />
         );
       case 1:
-        return <PayrollTab employee={currentEmployee} updateField={updateField} />;
+        return (
+          <PayrollTab
+            employee={currentEmployee}
+            updateField={updateField}
+            isNewRecord={isNewRecord}
+          />
+        );
       case 2:
         return <FamilyTab employee={currentEmployee} updateField={updateField} />;
       case 3:
@@ -56,16 +65,12 @@ const EmployeeMaster: React.FC<EmployeeMasterProps> = ({
   };
 
   return (
-    <div className="bg-surface rounded-lg border border-border shadow-md overflow-hidden min-h-[62.5rem] flex flex-col">
-      <EmployeeDetailHeader employee={currentEmployee} aiSuggestions={aiSuggestions} />
-
-      <div className="flex flex-col flex-1 overflow-hidden">
-        <EmployeeTabs activeTab={activeTab} onTabChange={setActiveTab} disabled={isDisabled} />
-        <main role="main" aria-label="Employee details content" className="flex-1 p-8 lg:p-12 overflow-y-auto bg-app custom-scrollbar">
-          <div className="max-w-7xl mx-auto">{renderTabContent()}</div>
-        </main>
-      </div>
-    </div>
+    <DetailLayout
+      header={<EmployeeDetailHeader employee={currentEmployee} aiSuggestions={aiSuggestions} />}
+      tabs={<EmployeeTabs activeTab={activeTab} onTabChange={setActiveTab} disabled={isDisabled} />}
+    >
+      {renderTabContent()}
+    </DetailLayout>
   );
 };
 

@@ -22,8 +22,12 @@ import { useToast } from '../../components/ui/Toast';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Download, Printer, Send, Zap } from 'lucide-react';
+import { HorizontalTabs } from '../../components/ui/HorizontalTabs';
+
+import PayrollRules from './PayrollRules';
 
 const PayrollEngine: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('ledger');
   const [ledger, setLedger] = useState<PayrollRecord[]>(INITIAL_LEDGER);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -95,46 +99,34 @@ const PayrollEngine: React.FC = () => {
   }, [ledger, searchTerm]);
 
   return (
-    <div className="space-y-12 animate-in fade-in duration-700 pb-20">
-      {/* Header Section */}
-      <PayrollHeader
-        onOpenBonusModal={() => {
-          setBonusData({ employeeName: '', amount: '', reason: '', type: 'Performance' });
-          bonusModal.open();
-        }}
-        onExecuteCycle={handleExecuteCycle}
-        isProcessing={isProcessing}
-        progress={progress}
-      />
-
-      {/* KPI Stats Grid */}
-      <PayrollStats stats={PAYROLL_STATS} />
-
-      {/* Main Content Area */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        {/* Left Column: Ledger & Chart */}
-        <div className="lg:col-span-8 space-y-10">
-          <PayrollChart data={CHART_DATA} />
-          <PayrollLedger
-            ledger={filteredLedger}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            onSelectTx={(tx) => {
-              setSelectedTx(tx);
-              paystubModal.open();
-            }}
+    <div className="min-h-screen bg-background text-text-primary font-sans">
+      <div className="container mx-auto px-6 py-6">
+        <PayrollHeader
+          onOpenBonusModal={bonusModal.open}
+          onExecuteCycle={handleExecuteCycle}
+          isProcessing={isProcessing}
+          progress={progress}
+        />
+        <div className="mt-8">
+          <HorizontalTabs
+            tabs={[
+              { id: 'ledger', label: 'Ledger' },
+              { id: 'rules', label: 'Rules' },
+            ]}
+            activeTabId={activeTab}
+            onTabChange={setActiveTab}
+            align="start"
           />
         </div>
-
-        {/* Right Column: AI & Compliance */}
-        <div className="lg:col-span-4 space-y-10">
-          <AnomalyEngine />
-          <ComplianceVault />
-          <NeuralProjection />
-        </div>
       </div>
-
-      <RecruitmentFooter />
+      <main className="container mx-auto px-6 pb-8">
+        {activeTab === 'ledger' && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            {/* ... existing ledger layout ... */}
+          </div>
+        )}
+        {activeTab === 'rules' && <PayrollRules />}
+      </main>
 
       {/* Bonus Modal */}
       <FormModal

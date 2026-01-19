@@ -22,7 +22,11 @@ const EntropyAlert: React.FC = () => {
   };
 
   return (
-    <div role="alert" aria-label="Attrition Alert" className="bg-rose-50 dark:bg-rose-900/10 p-14 rounded-[4rem] border border-rose-100 dark:border-rose-900/20 shadow-sm relative overflow-hidden group">
+    <div
+      role="alert"
+      aria-label="Attrition Alert"
+      className="bg-rose-50 dark:bg-rose-900/10 p-14 rounded-[4rem] border border-rose-100 dark:border-rose-900/20 shadow-sm relative overflow-hidden group"
+    >
       <div className="absolute top-0 right-0 p-10 opacity-10 group-hover:scale-125 transition-transform duration-700">
         <ShieldAlert size={140} className="text-danger" />
       </div>
@@ -34,7 +38,7 @@ const EntropyAlert: React.FC = () => {
           Attrition Alert
         </h3>
       </div>
-      <div className="p-10 bg-white dark:bg-slate-800 rounded-[2.5rem] border border-rose-100 dark:border-rose-900/30 shadow-xl relative z-10">
+      <div className="p-10 bg-card rounded-[2.5rem] border border-rose-100 dark:border-rose-900/30 shadow-xl relative z-10">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-2.5 h-2.5 rounded-full bg-danger animate-ping"></div>
           <p className="text-[0.625rem] font-black text-danger uppercase tracking-[0.3em]">
@@ -50,7 +54,7 @@ const EntropyAlert: React.FC = () => {
         </p>
 
         {insights && (
-          <div className="mt-8 p-6 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-800 animate-in fade-in slide-in-from-top-2 duration-500">
+          <div className="mt-8 p-6 bg-muted rounded-3xl border border-border animate-in fade-in slide-in-from-top-2 duration-500">
             <div className="flex items-center gap-3 mb-4">
               <Sparkles className="w-4 h-4 text-info" />
               <p className="text-[0.625rem] font-black text-info uppercase tracking-widest">

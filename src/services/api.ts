@@ -23,13 +23,14 @@ import {
   PayrollSettings,
   Grade,
   Designation,
-  EmploymentLevel,
+  JobLevel,
   DepartmentStat,
   AttendanceStat,
   Holiday,
   Bank,
   SystemFlags,
   AISettings,
+  Plant,
 } from '../types';
 // Mock data imports removed to enforce strict backend dependency
 import { RateLimiter } from '../utils/security';
@@ -919,96 +920,7 @@ class ApiService {
     });
   }
 
-  // --- Leaves ---
-  async getLeaveRequests(): Promise<LeaveRequest[]> {
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(this.leaves), 500);
-    });
-  }
-
-  async saveLeaveRequest(request: LeaveRequest): Promise<void> {
-    return new Promise((resolve) => {
-      const index = this.leaves.findIndex((r) => r.id === request.id);
-      if (index !== -1) {
-        this.leaves[index] = request;
-      } else {
-        this.leaves.unshift(request);
-      }
-      setTimeout(resolve, 500);
-    });
-  }
-
-  async updateLeaveRequestStatus(id: string, status: LeaveRequest['status']): Promise<void> {
-    return new Promise((resolve) => {
-      const index = this.leaves.findIndex((r) => r.id === id);
-      if (index !== -1) {
-        this.leaves[index].status = status;
-      }
-      setTimeout(resolve, 500);
-    });
-  }
-
-  async getLeaveBalances(): Promise<LeaveBalance[]> {
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(this.leaveBalances), 500);
-    });
-  }
-
-  // --- Attendance ---
-  async getAttendanceRecords(): Promise<AttendanceRecord[]> {
-    try {
-      const response = await this.request(`${this.apiUrl}/attendance`);
-
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      Logger.warn('Backend unavailable, returning empty data', error);
-      return new Promise((resolve) => {
-        setTimeout(() => resolve(this.attendance), 500);
-      });
-    }
-  }
-
-  async saveAttendanceRecord(record: AttendanceRecord): Promise<void> {
-    this.enforceRateLimit();
-    try {
-      const exists = this.attendance.some((r) => r.id === record.id);
-      const method = exists ? 'PUT' : 'POST';
-      const url = exists ? `${this.apiUrl}/attendance/${record.id}` : `${this.apiUrl}/attendance`;
-
-      const response = await this.request(url, {
-        method: method,
-        body: JSON.stringify(record),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Backend error: ${response.statusText}`);
-      }
-
-      const savedRecord = await response.json();
-      const index = this.attendance.findIndex((r) => r.id === savedRecord.id);
-      if (index !== -1) {
-        this.attendance[index] = savedRecord;
-      } else {
-        this.attendance.unshift(savedRecord);
-      }
-    } catch (error) {
-      Logger.error('Failed to save attendance to backend', error);
-    }
-  }
-
-  async updateAttendanceStatus(id: string, status: AttendanceRecord['status']): Promise<void> {
-    return new Promise((resolve) => {
-      const index = this.attendance.findIndex((r) => r.id === id);
-      if (index !== -1) {
-        this.attendance[index].status = status;
-      }
-      setTimeout(resolve, 500);
-    });
-  }
+  // --- Leaves & Attendance [Migrated to Backend] ---
 
   // --- Assets ---
   async getAssets(): Promise<Asset[]> {
@@ -1410,7 +1322,7 @@ class ApiService {
       status: level === 'Error' ? 'Flagged' : 'Hashed',
     };
     this.logs.push(log);
-    sessionStorage.setItem('hunzal_logs', JSON.stringify(this.logs));
+    sessionStorage.setItem('people_os_logs', JSON.stringify(this.logs));
   }
 
   async getRules(): Promise<BusinessRule[]> {
@@ -1438,22 +1350,6 @@ class ApiService {
       this.logAction('Admin', 'Delete Rule', `Rule ${id} deleted.`, 'Warning');
       setTimeout(resolve, 500);
     });
-  }
-
-  // --- Payroll ---
-  async getPayrollRecords(): Promise<any[]> {
-    this.enforceRateLimit();
-    try {
-      const response = await this.request(`${this.apiUrl}/payroll`);
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      Logger.warn('Payroll backend unavailable, returning empty array', error);
-      return [];
-    }
   }
 
   async savePayrollRecord(record: any): Promise<void> {
@@ -1562,68 +1458,8 @@ class ApiService {
   }
 
   // --- Plants (Locations) ---
-  async getPlants(): Promise<any[]> {
-    try {
-      const response = await this.request(`${this.apiUrl}/plants`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch plants');
-      }
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      Logger.warn('Backend unavailable, returning empty plants', error);
-      return [];
-    }
-  }
-
-  async savePlant(plant: any): Promise<any> {
-    this.enforceRateLimit();
-    try {
-      const response = await this.request(`${this.apiUrl}/plants`, {
-        method: 'POST',
-        body: JSON.stringify(plant),
-      });
-      if (!response.ok) {
-        throw new Error('Failed to save plant');
-      }
-      return await response.json();
-    } catch (error) {
-      Logger.error('Backend unavailable, save plant failed', error);
-      throw error;
-    }
-  }
-
-  async updatePlant(id: string, plant: Partial<any>): Promise<any> {
-    this.enforceRateLimit();
-    try {
-      const response = await this.request(`${this.apiUrl}/plants/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(plant),
-      });
-      if (!response.ok) {
-        throw new Error('Failed to update plant');
-      }
-      return await response.json();
-    } catch (error) {
-      Logger.error('Backend unavailable, update plant failed', error);
-      throw error;
-    }
-  }
-
-  async deletePlant(id: string): Promise<void> {
-    this.enforceRateLimit();
-    try {
-      const response = await this.request(`${this.apiUrl}/plants/${id}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        throw new Error('Failed to delete plant');
-      }
-    } catch (error) {
-      Logger.error('Backend unavailable, delete plant failed', error);
-      throw error;
-    }
-  }
+  // --- Plants (Locations) ---
+  // Replaced by typed implementations below
 
   // --- RBAC ---
   async getAllRolePermissions(): Promise<Record<string, string[]>> {
@@ -1763,7 +1599,18 @@ class ApiService {
       body: JSON.stringify(designation),
     });
     if (!response.ok) {
-      throw new Error('Failed to save designation');
+      // Extract actual error from backend
+      let errorDetail = 'Failed to save designation';
+      try {
+        const errBody = await response.json();
+        errorDetail = errBody.detail || JSON.stringify(errBody);
+        Logger.error(`[API] saveDesignation failed: ${response.status} - ${errorDetail}`);
+      } catch {
+        Logger.error(
+          `[API] saveDesignation failed: ${response.status} - Could not parse error body`
+        );
+      }
+      throw new Error(errorDetail);
     }
     return await response.json();
   }
@@ -2324,11 +2171,57 @@ class ApiService {
     return await response.json();
   }
 
-  // --- Employment Levels ---
-  async getEmploymentLevels(orgId?: string): Promise<EmploymentLevel[]> {
-    const url = orgId
-      ? `${this.apiUrl}/employment-levels?org_id=${orgId}`
-      : `${this.apiUrl}/employment-levels`;
+  // --- Plants & Locations ---
+  async getPlants(): Promise<Plant[]> {
+    try {
+      const response = await this.request(`${this.apiUrl}/plants`);
+      if (!response.ok) {
+        return [];
+      }
+      return await response.json();
+    } catch (error) {
+      console.warn('Backend unavailable, returning empty plants', error);
+      return [];
+    }
+  }
+
+  async createPlant(plant: Plant): Promise<Plant> {
+    this.enforceRateLimit();
+    const response = await this.request(`${this.apiUrl}/plants`, {
+      method: 'POST',
+      body: JSON.stringify(plant),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to save location');
+    }
+    return await response.json();
+  }
+
+  async updatePlant(id: string, plant: Partial<Plant>): Promise<Plant> {
+    const response = await this.request(`${this.apiUrl}/plants/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(plant),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update location');
+    }
+    return await response.json();
+  }
+
+  async deletePlant(id: string): Promise<void> {
+    this.enforceRateLimit();
+    const response = await this.request(`${this.apiUrl}/plants/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete location');
+    }
+  }
+
+  // --- Job Levels ---
+  async getJobLevels(orgId?: string): Promise<JobLevel[]> {
+    const url = orgId ? `${this.apiUrl}/job-levels?org_id=${orgId}` : `${this.apiUrl}/job-levels`;
     const response = await this.request(url);
     if (!response.ok) {
       return [];
@@ -2336,38 +2229,120 @@ class ApiService {
     return await response.json();
   }
 
-  async createEmploymentLevel(data: Partial<EmploymentLevel>): Promise<EmploymentLevel> {
-    const response = await this.request(`${this.apiUrl}/employment-levels`, {
+  async createJobLevel(data: Partial<JobLevel>): Promise<JobLevel> {
+    const response = await this.request(`${this.apiUrl}/job-levels`, {
       method: 'POST',
       body: JSON.stringify(data),
     });
     if (!response.ok) {
-      throw new Error('Failed to create employment level');
+      throw new Error('Failed to create job level');
     }
     return await response.json();
   }
 
-  async updateEmploymentLevel(
-    id: string,
-    data: Partial<EmploymentLevel>
-  ): Promise<EmploymentLevel> {
-    const response = await this.request(`${this.apiUrl}/employment-levels/${id}`, {
+  async updateJobLevel(id: string, data: Partial<JobLevel>): Promise<JobLevel> {
+    const response = await this.request(`${this.apiUrl}/job-levels/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
     if (!response.ok) {
-      throw new Error('Failed to update employment level');
+      throw new Error('Failed to update job level');
     }
     return await response.json();
   }
 
-  async deleteEmploymentLevel(id: string): Promise<void> {
-    const response = await this.request(`${this.apiUrl}/employment-levels/${id}`, {
+  async deleteJobLevel(id: string): Promise<void> {
+    const response = await this.request(`${this.apiUrl}/job-levels/${id}`, {
       method: 'DELETE',
     });
     if (!response.ok) {
-      throw new Error('Failed to delete employment level');
+      throw new Error('Failed to delete job level');
     }
+  }
+
+  // --- System Maintenance ---
+  async getBackups(): Promise<Array<{ filename: string; size: number; created_at: string }>> {
+    const response = await this.request(`${this.apiUrl}/system/maintenance/backups`);
+    if (!response.ok) {
+      return [];
+    }
+    return await response.json();
+  }
+
+  async restoreFromServer(filename: string): Promise<void> {
+    this.enforceRateLimit();
+    const response = await this.request(`${this.apiUrl}/system/maintenance/restore/${filename}`, {
+      method: 'POST',
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.detail || 'Failed to restore system');
+    }
+  }
+
+  // --- Attendance ---
+  async getAttendanceRecords(date?: string): Promise<AttendanceRecord[]> {
+    const query = date ? `?date=${date}` : '';
+    const response = await this.request(`${this.apiUrl}/hcm/attendance${query}`);
+    if (!response.ok) return [];
+    return await response.json();
+  }
+
+  async createAttendanceRecord(data: Partial<AttendanceRecord>): Promise<AttendanceRecord> {
+    const response = await this.request(`${this.apiUrl}/hcm/attendance`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Failed to create attendance');
+    return await response.json();
+  }
+
+  // --- Payroll ---
+  async getPayrollRecords(): Promise<any[]> {
+    const response = await this.request(`${this.apiUrl}/hcm/payroll`);
+    if (!response.ok) return [];
+    return await response.json();
+  }
+
+  async runPayroll(data: any): Promise<any> {
+    const response = await this.request(`${this.apiUrl}/hcm/payroll`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Failed to run payroll');
+    return await response.json();
+  }
+
+  // --- Leaves ---
+  async getLeaveRequests(): Promise<LeaveRequest[]> {
+    const response = await this.request(`${this.apiUrl}/hcm/leaves`);
+    if (!response.ok) return [];
+    return await response.json();
+  }
+
+  async saveLeaveRequest(data: Partial<LeaveRequest>): Promise<LeaveRequest> {
+    const response = await this.request(`${this.apiUrl}/hcm/leaves`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Failed to create leave request');
+    return await response.json();
+  }
+
+  async updateLeaveRequestStatus(id: string, status: string): Promise<LeaveRequest> {
+    const response = await this.request(`${this.apiUrl}/hcm/leaves/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    });
+    if (!response.ok) throw new Error('Failed to update leave status');
+    return await response.json();
+  }
+
+  async getLeaveBalances(): Promise<LeaveBalance[]> {
+    const response = await this.request(`${this.apiUrl}/hcm/leaves/balances`);
+    if (!response.ok) return [];
+    return await response.json();
   }
 }
 

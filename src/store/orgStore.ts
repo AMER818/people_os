@@ -1,8 +1,10 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { useSystemStore } from '@/system/systemStore';
+import Logger from '@/utils/logger';
+import { formatTime } from '@/utils/formatting';
 import {
-  EmploymentLevel,
+  JobLevel,
   Shift,
   AuditLog,
   PayrollSettings,
@@ -21,7 +23,6 @@ import {
   AISettings,
   Employee,
   SubDepartment,
-  MasterDepartment,
   Position,
   SystemRole,
   Permission,
@@ -85,6 +86,7 @@ interface OrgState {
   // Loading state for lazy loading
   loadingEntities: Record<string, boolean>;
   errorEntities: Record<string, string | null>;
+  lastFetched: Record<string, number>;
 
   // Entity state management
   clearEntityError: (entity: string) => void;
@@ -95,12 +97,11 @@ interface OrgState {
   profile: OrganizationProfile;
   grades: Grade[];
   designations: Designation[];
-  employmentLevels: EmploymentLevel[];
+  jobLevels: JobLevel[];
   employees: Employee[];
   shifts: Shift[];
   departments: Department[];
   subDepartments: SubDepartment[];
-  masterDepartments: MasterDepartment[];
   plants: Plant[];
   holidays: Holiday[];
   banks: Bank[];
@@ -110,6 +111,8 @@ interface OrgState {
   aiSettings: AISettings;
   currentUser: User | null;
   payrollSettings: PayrollSettings;
+
+  backups: { filename: string; size: number; created_at: string }[];
 
   isLoading?: boolean;
   departmentStats?: DepartmentStat[];
@@ -124,11 +127,11 @@ interface OrgState {
   fetchPositions: () => Promise<void>;
   fetchShifts: () => Promise<void>;
   fetchPlants: () => Promise<void>;
-  fetchEmploymentLevels: () => Promise<void>;
+  fetchJobLevels: () => Promise<void>;
   fetchHolidays: () => Promise<void>;
   fetchBanks: () => Promise<void>;
   fetchUsers: () => Promise<void>;
-  fetchMasterDepartments: () => Promise<void>;
+  fetchEmployees: (force?: boolean) => Promise<void>;
 
   // Actions
   updateProfile: (profile: Partial<OrganizationProfile>) => void;
@@ -142,10 +145,6 @@ interface OrgState {
   addDepartment: (dept: Department) => Promise<void>;
   updateDepartment: (id: string, dept: Partial<Department>) => Promise<void>;
   deleteDepartment: (id: string) => Promise<void>;
-
-  addMasterDepartment: (dept: MasterDepartment) => void;
-  updateMasterDepartment: (id: string, dept: Partial<MasterDepartment>) => void;
-  deleteMasterDepartment: (id: string) => void;
 
   addSubDepartment: (subDept: any) => Promise<void>;
   updateSubDepartment: (id: string, subDept: Partial<any>) => Promise<void>;
@@ -163,9 +162,9 @@ interface OrgState {
   updatePosition: (id: string, position: Partial<Position>) => Promise<void>;
   deletePosition: (id: string) => Promise<void>;
 
-  addEmploymentLevel: (level: EmploymentLevel) => Promise<void>;
-  updateEmploymentLevel: (id: string, level: Partial<EmploymentLevel>) => Promise<void>;
-  deleteEmploymentLevel: (id: string) => Promise<void>;
+  addJobLevel: (level: JobLevel) => Promise<void>;
+  updateJobLevel: (id: string, level: Partial<JobLevel>) => Promise<void>;
+  deleteJobLevel: (id: string) => Promise<void>;
 
   addHoliday: (holiday: Holiday) => Promise<void>;
   updateHoliday: (id: number, holiday: Partial<Holiday>) => Promise<void>;
@@ -205,6 +204,8 @@ interface OrgState {
   optimizeDatabase: () => Promise<any>;
   flushCache: () => Promise<any>;
   rotateLogs: () => Promise<any>;
+  fetchBackups: () => Promise<void>;
+  restoreFromServer: (filename: string) => Promise<void>;
 
   // System Admin Actions
   updateRbac: (moduleIndex: number, roleIndex: number) => void;
@@ -234,13 +235,12 @@ export const useOrgStore = create<OrgState>()(
         country: '',
       },
       plants: [],
-      masterDepartments: [],
       departments: [],
       grades: [],
       designations: [],
       positions: [],
       jobLevels: [],
-      employmentLevels: [],
+
       businessRules: [],
       payrollRecords: [],
       holidays: [],
@@ -287,6 +287,7 @@ export const useOrgStore = create<OrgState>()(
         eobiRate: 0,
         socialSecurityRate: 0,
       },
+      backups: [],
       apiKeys: [],
       webhooks: [],
       infrastructureLogs: [],
@@ -325,93 +326,88 @@ export const useOrgStore = create<OrgState>()(
       subDepartments: [],
       loadingEntities: {},
       errorEntities: {},
+      lastFetched: {},
 
       clearEntityError: (entity: string) => {
         set((s) => ({ errorEntities: { ...s.errorEntities, [entity]: null } }));
       },
 
       fetchMasterData: async () => {
-        try {
-          const { api } = await import('../services/api');
+        const { api } = await import('../services/api');
 
-          // Define fallback for robust handling
-          // If API fails, we return NULL, so we can detect failure and preserve existing state.
+        // Helper to safely fetch data without crashing the whole chain
+        const safeFetch = async <T>(promise: Promise<T>, name: string): Promise<T | null> => {
+          try {
+            return await promise;
+          } catch (e) {
+            console.warn(`[fetchMasterData] Partial failure loading ${name}`, e);
+            return null;
+          }
+        };
+
+        try {
+          // Phase 1: Essentials (Config, Flags, Users - Required for UI shell)
+          const [systemFlags, payrollSettings, users] = await Promise.all([
+            safeFetch(api.getSystemFlags?.() ?? Promise.resolve(null), 'systemFlags'),
+            safeFetch(api.getPayrollSettings(), 'payrollSettings'),
+            safeFetch(api.getUsers(), 'users'),
+          ]);
+
+          set((state) => ({
+            systemFlags: systemFlags ? { ...state.systemFlags, ...systemFlags } : state.systemFlags,
+            payrollSettings: payrollSettings || state.payrollSettings,
+            users: users || state.users,
+          }));
+
+          // Phases 2 & 3: Structural & Operational (Merged for performance)
+          // Navigation, Structural and Operational data can all be loaded in parallel
           const [
-            desig,
-            grades,
+            plants,
             depts,
             subDepts,
-            plants,
+            desig,
+            grades,
             shifts,
-            payrollSettings,
-            users,
-            empTypes,
-            employees,
+            empLevels,
             holidays,
             banks,
             positions,
-            systemFlags,
           ] = await Promise.all([
-            api.getDesignations().catch((e) => {
-              console.error('Failed to load designations', e);
-              return null;
-            }),
-            api.getGrades().catch((e) => {
-              console.error('Failed to load grades', e);
-              return null;
-            }),
-            api.getDepartments().catch((e) => {
-              console.error('Failed to load departments', e);
-              return null;
-            }),
-            api.getSubDepartments().catch((e) => {
-              console.error('Failed to load sub-departments', e);
-              return null;
-            }),
-            (api.getPlants ? api.getPlants() : Promise.resolve([])).catch((e) => {
-              console.error('Failed to load plants', e);
-              return null;
-            }),
-            api.getShifts().catch((e) => {
-              console.error('Failed to load shifts', e);
-              return null;
-            }),
-            api.getPayrollSettings().catch((e) => {
-              console.error('Failed to load payroll settings', e);
-              return null;
-            }),
-            api.getUsers().catch((e) => {
-              console.error('Failed to load users', e);
-              return null;
-            }),
-            api.getEmploymentLevels().catch((e) => {
-              console.error('Failed to load employment levels', e);
-              return null;
-            }),
-            api.getEmployees().catch((e) => {
-              console.error('Failed to load employees', e);
-              return null;
-            }),
-            api.getHolidays().catch((e) => {
-              console.error('Failed to load holidays', e);
-              return null;
-            }),
-            api.getBanks().catch((e) => {
-              console.error('Failed to load banks', e);
-              return null;
-            }),
-            (api.getPositions ? api.getPositions() : Promise.resolve(null)).catch((e) => {
-              console.error('Failed to load positions', e);
-              return null;
-            }),
-            (api.getSystemFlags ? api.getSystemFlags() : Promise.resolve(null)).catch((e) => {
-              console.error('Failed to load system flags', e);
-              return null;
-            }),
+            safeFetch(api.getPlants?.() ?? Promise.resolve([]), 'plants'),
+            safeFetch(api.getDepartments(), 'departments'),
+            safeFetch(api.getSubDepartments(), 'subDepartments'),
+            safeFetch(api.getDesignations(), 'designations'),
+            safeFetch(api.getGrades(), 'grades'),
+            safeFetch(api.getShifts(), 'shifts'),
+            safeFetch(api.getJobLevels(), 'jobLevels'),
+            safeFetch(api.getHolidays(), 'holidays'),
+            safeFetch(api.getBanks(), 'banks'),
+            safeFetch(api.getPositions?.() ?? Promise.resolve(null), 'positions'),
           ]);
 
-          // Defensive Update: Only overwrite if we got valid data AND current state is empty.
-          // This prevents fetchMasterData from overwriting data loaded by granular lazy-loading actions.
+          const now = Date.now();
+          set((state) => ({
+            plants: plants || state.plants,
+            departments: depts || state.departments,
+            subDepartments: subDepts || state.subDepartments,
+            designations: desig || state.designations,
+            grades: grades || state.grades,
+            shifts: shifts || state.shifts,
+            jobLevels: empLevels || state.jobLevels,
+            holidays: holidays || state.holidays,
+            banks: banks || state.banks,
+            positions: positions || state.positions,
+            lastFetched: {
+              ...state.lastFetched,
+              designations: desig ? now : state.lastFetched.designations,
+              grades: grades ? now : state.lastFetched.grades,
+              shifts: shifts ? now : state.lastFetched.shifts,
+              jobLevels: empLevels ? now : state.lastFetched.jobLevels,
+              holidays: holidays ? now : state.lastFetched.holidays,
+              banks: banks ? now : state.lastFetched.banks,
+              positions: positions ? now : state.lastFetched.positions,
+            },
+          }));
 
           // Load Dynamic Permissions (Merged with defaults)
           try {
@@ -425,39 +421,10 @@ export const useOrgStore = create<OrgState>()(
             console.warn('Failed to load dynamic permissions, using defaults', e);
           }
 
-          set((state) => ({
-            designations:
-              desig !== null && state.designations.length === 0 ? desig : state.designations,
-            grades: grades !== null && state.grades.length === 0 ? grades : state.grades,
-            departments:
-              depts !== null && state.departments.length === 0 ? depts : state.departments,
-            subDepartments:
-              subDepts !== null && state.subDepartments.length === 0
-                ? subDepts
-                : state.subDepartments,
-            plants: plants !== null && state.plants.length === 0 ? plants : state.plants,
-            shifts: shifts !== null && state.shifts.length === 0 ? shifts : state.shifts,
-            payrollSettings: payrollSettings !== null ? payrollSettings : state.payrollSettings,
-            users: users !== null && state.users.length === 0 ? users : state.users,
-            employmentLevels:
-              empTypes !== null && state.employmentLevels.length === 0
-                ? empTypes
-                : state.employmentLevels,
-            employees:
-              employees !== null && state.employees.length === 0 ? employees : state.employees,
-            holidays: holidays !== null && state.holidays.length === 0 ? holidays : state.holidays,
-            banks: banks !== null && state.banks.length === 0 ? banks : state.banks,
-            positions:
-              positions !== null && state.positions.length === 0 ? positions : state.positions,
-            systemFlags:
-              systemFlags !== null ? { ...state.systemFlags, ...systemFlags } : state.systemFlags,
-          }));
-
           // Constitution: Analyze System Pressure & Entropy
           useSystemStore.getState().runCycle();
         } catch (error) {
           console.error('Critical Failure in fetchMasterData', error);
-          // Do not re-throw to prevent crash loop, but maybe set error state?
         }
       },
 
@@ -652,28 +619,28 @@ export const useOrgStore = create<OrgState>()(
         }
       },
 
-      fetchEmploymentLevels: async () => {
-        if (get().loadingEntities['employmentLevels']) {
+      fetchJobLevels: async () => {
+        if (get().loadingEntities['jobLevels']) {
           return;
         }
         set((s) => ({
-          loadingEntities: { ...s.loadingEntities, employmentLevels: true },
-          errorEntities: { ...s.errorEntities, employmentLevels: null },
+          loadingEntities: { ...s.loadingEntities, jobLevels: true },
+          errorEntities: { ...s.errorEntities, jobLevels: null },
         }));
         try {
           const { api } = await import('../services/api');
-          const data = await api.getEmploymentLevels();
-          set({ employmentLevels: data });
+          const data = await api.getJobLevels();
+          set({ jobLevels: data });
         } catch (e: any) {
-          console.error('fetchEmploymentLevels failed', e);
+          console.error('fetchJobLevels failed', e);
           set((s) => ({
             errorEntities: {
               ...s.errorEntities,
-              employmentLevels: e?.message || 'Failed to load job levels',
+              jobLevels: e?.message || 'Failed to load job levels',
             },
           }));
         } finally {
-          set((s) => ({ loadingEntities: { ...s.loadingEntities, employmentLevels: false } }));
+          set((s) => ({ loadingEntities: { ...s.loadingEntities, jobLevels: false } }));
         }
       },
 
@@ -754,30 +721,43 @@ export const useOrgStore = create<OrgState>()(
         }
       },
 
-      fetchMasterDepartments: async () => {
-        if (get().loadingEntities['masterDepartments']) {
+      fetchEmployees: async (force = false) => {
+        const STALE_THRESHOLD = 5 * 60 * 1000; // 5 minutes
+        const state = get();
+        const lastFetch = state.lastFetched.employees || 0;
+        const isStale = Date.now() - lastFetch > STALE_THRESHOLD;
+
+        // Skip if already loading or data is fresh (unless forced)
+        if (state.loadingEntities['employees']) {
           return;
         }
+        if (!force && !isStale && state.employees.length > 0) {
+          console.info('[fetchEmployees] Data is fresh, skipping refetch');
+          return;
+        }
+
         set((s) => ({
-          loadingEntities: { ...s.loadingEntities, masterDepartments: true },
-          errorEntities: { ...s.errorEntities, masterDepartments: null },
+          loadingEntities: { ...s.loadingEntities, employees: true },
+          errorEntities: { ...s.errorEntities, employees: null },
         }));
+
         try {
           const { api } = await import('../services/api');
-          const allDepts = await api.getDepartments();
-          // Filter for global departments (no plantId)
-          const masterDepts = allDepts.filter((d: any) => !d.plantId);
-          set({ masterDepartments: masterDepts as unknown as MasterDepartment[] });
+          const data = await api.getEmployees();
+          set((s) => ({
+            employees: data,
+            lastFetched: { ...s.lastFetched, employees: Date.now() },
+          }));
         } catch (e: any) {
-          console.error('fetchMasterDepartments failed', e);
+          console.error('fetchEmployees failed', e);
           set((s) => ({
             errorEntities: {
               ...s.errorEntities,
-              masterDepartments: e?.message || 'Failed to load global departments',
+              employees: e?.message || 'Failed to load employees',
             },
           }));
         } finally {
-          set((s) => ({ loadingEntities: { ...s.loadingEntities, masterDepartments: false } }));
+          set((s) => ({ loadingEntities: { ...s.loadingEntities, employees: false } }));
         }
       },
 
@@ -794,7 +774,7 @@ export const useOrgStore = create<OrgState>()(
           const savedProfile = await api.saveOrganization(currentProfile);
           if (savedProfile) {
             set({ profile: savedProfile });
-            console.log('Profile saved successfully:', savedProfile.name);
+            Logger.info('Profile saved successfully:', { name: savedProfile.name });
           }
         } catch (err) {
           console.error('Failed to save profile', err);
@@ -806,83 +786,93 @@ export const useOrgStore = create<OrgState>()(
         set({ isLoading: true });
         try {
           const { api } = await import('../services/api'); // Import API here
+
+          // --- PHASE 1: Critical (Unblock App Shell) ---
+          // Load settings and permissions required for the UI skeleton and access control
           const [
-            employees,
-            depts,
-            subs,
-            grades,
-            desigs,
-            plants,
-            shifts,
-            payroll,
-            // jobVacancies,
-            holidays,
-            banks,
-            remotePerms,
+            systemFlags,
+            rolePermissions,
             aiSettings,
             notificationSettings,
             complianceSettings,
-            systemFlags,
           ] = await Promise.all([
-            api.getEmployees(),
-            api.getDepartments(),
-            api.getSubDepartments(),
-            api.getGrades(),
-            api.getDesignations(),
-            api.getPlants ? api.getPlants() : Promise.resolve([]),
-            api.getShifts(),
-            api.getPayrollSettings(),
-            // api.getJobVacancies(),
-            api.getHolidays(),
-            api.getBanks(),
-            api.getRolePermissions(),
-            api.getAISettings(),
-            api.getNotificationSettings(),
-            api.getComplianceSettings(),
-            api.getSystemFlags(),
-            // Background fetch for heavy stats
-            api.getDepartmentStats().then((stats) => set({ departmentStats: stats })),
-            api.getAttendanceStats().then((stats) => set({ attendanceStats: stats })),
+            api.getSystemFlags().catch(() => null),
+            api.getRolePermissions().catch(() => ({})),
+            api.getAISettings().catch(() => null),
+            api.getNotificationSettings().catch(() => null),
+            api.getComplianceSettings().catch(() => null),
           ]);
 
-          // Merge Remote Permissions with Defaults (Prioritize Remote)
-          // Assuming INITIAL_ROLE_PERMISSIONS, SystemRole, and Permission are defined elsewhere
-
+          // Merge Remote Permissions with Defaults
           const mergedPerms = { ...INITIAL_ROLE_PERMISSIONS };
-          Object.entries(remotePerms).forEach(([role, perms]) => {
-            if (perms && perms.length > 0) {
-              // Ensure we typed cast properly or validate
-              (mergedPerms as any)[role] = perms;
-            }
-          });
+          if (rolePermissions) {
+            Object.entries(rolePermissions).forEach(([role, perms]) => {
+              if (perms && (perms as any).length > 0) {
+                (mergedPerms as any)[role] = perms;
+              }
+            });
+          }
 
           set({
-            employees,
-            departments: depts,
-            subDepartments: subs,
-            grades,
-            designations: desigs,
-            plants,
-            shifts,
-            payrollSettings: payroll,
-            // jobVacancies removed (schema update)
-            holidays: holidays,
-            banks: banks,
+            systemFlags: systemFlags || get().systemFlags,
             rolePermissions: mergedPerms,
             aiSettings: aiSettings || get().aiSettings,
             notificationSettings: notificationSettings || get().notificationSettings,
             complianceSettings: complianceSettings || get().complianceSettings,
-            systemFlags: systemFlags || get().systemFlags,
-            isLoading: false,
+            isLoading: false, // <--- CRITICAL: Unblock UI here
           });
+
+          // --- PHASE 2: Structure (Navigation & Dropdowns) ---
+          // Load organizational structure so users can navigate immediately
+          Promise.all([
+            api.getPlants ? api.getPlants() : Promise.resolve([]),
+            api.getDepartments(),
+            api.getSubDepartments(),
+            api.getDesignations(),
+            api.getGrades(),
+            api.getBanks(),
+          ])
+            .then(([plants, depts, subs, desigs, grades, banks]) => {
+              set({
+                plants,
+                departments: depts,
+                subDepartments: subs,
+                designations: desigs,
+                grades,
+                banks,
+              });
+            })
+            .catch((err) => console.error('Phase 2 (Structure) load failed', err));
+
+          // --- PHASE 3: Operational (Heavy Data) ---
+          // Load lists and stats. These are heavy and can stream in.
+          Promise.all([
+            api.getEmployees(),
+            api.getShifts(),
+            api.getPayrollSettings(),
+            api.getHolidays(),
+            api.getDepartmentStats().catch(() => []),
+            api.getAttendanceStats().catch(() => []),
+          ])
+            .then(([employees, shifts, payroll, holidays, deptStats, attStats]) => {
+              set({
+                employees,
+                shifts,
+                payrollSettings: payroll,
+                holidays: holidays,
+                departmentStats: deptStats,
+                attendanceStats: attStats,
+              });
+            })
+            .catch((err) => console.error('Phase 3 (Operational) load failed', err));
         } catch (error: any) {
-          console.error('initData failed', error);
+          console.error('initData Critical Failure', error);
           set((s) => ({
             errorEntities: {
               ...s.errorEntities,
-              initData: error?.message || 'Failed to initialize data',
+              initData: error?.message || 'Failed to initialize system',
             },
-            isLoading: false,
+            isLoading: false, // Unblock even on error to show error state
           }));
         }
       },
@@ -902,7 +892,7 @@ export const useOrgStore = create<OrgState>()(
           grades: [],
           designations: [],
           positions: [],
-          employmentLevels: [],
+          jobLevels: [],
 
           holidays: [],
           banks: [],
@@ -962,69 +952,7 @@ export const useOrgStore = create<OrgState>()(
           newMatrix[moduleIndex].perms[roleIndex] = !newMatrix[moduleIndex].perms[roleIndex];
           return { rbacMatrix: newMatrix };
         }),
-      addMasterDepartment: async (dept) => {
-        const { api } = await import('../services/api');
-        try {
-          // Master Dept = Dept with NO plantId
-          const saved = await api.saveDepartment({ ...dept, plantId: null } as any);
-          set((state) => ({
-            masterDepartments: [...state.masterDepartments, saved as unknown as MasterDepartment],
-          }));
 
-          // Automated Logging
-          const user = get().currentUser?.name || 'System';
-          get().addAuditLog({
-            user,
-            action: `Created Master Department: ${dept.name}`,
-            status: 'Hashed',
-          });
-        } catch (e) {
-          console.error(e);
-          throw e;
-        }
-      },
-      updateMasterDepartment: async (id, updates) => {
-        const { api } = await import('../services/api');
-        try {
-          const updated = await api.updateDepartment(id, updates as any);
-          set((state) => ({
-            masterDepartments: state.masterDepartments.map((d) =>
-              d.id === id ? { ...d, ...updated } : d
-            ),
-          }));
-
-          // Automated Logging
-          const user = get().currentUser?.name || 'System';
-          get().addAuditLog({
-            user,
-            action: `Updated Master Department: ${id}`,
-            status: 'Hashed',
-          });
-        } catch (e) {
-          console.error(e);
-          throw e;
-        }
-      },
-      deleteMasterDepartment: async (id) => {
-        const { api } = await import('../services/api');
-        try {
-          await api.deleteDepartment(id);
-          set((state) => ({
-            masterDepartments: state.masterDepartments.filter((d) => d.id !== id),
-          }));
-
-          // Automated Logging
-          const user = get().currentUser?.name || 'System';
-          get().addAuditLog({
-            user,
-            action: `Deleted Master Department: ${id}`,
-            status: 'Hashed',
-          });
-        } catch (e) {
-          console.error(e);
-          throw e;
-        }
-      },
       addAuditLog: (log) => {
         // Optimistic Update
         const newLog: AuditLog = {
@@ -1082,7 +1010,7 @@ export const useOrgStore = create<OrgState>()(
         try {
           // Check for ID, if new generated by UI, we might need to handle it or let backend generate.
           // UI usually generates temp ID.
-          const saved = await api.savePlant(plant);
+          const saved = await api.createPlant(plant);
           set((state) => ({ plants: [...state.plants, saved] }));
         } catch (e) {
           console.error(e);
@@ -1291,38 +1219,36 @@ export const useOrgStore = create<OrgState>()(
         }
       },
 
-      addEmploymentLevel: async (level) => {
+      addJobLevel: async (level) => {
         const { api } = await import('../services/api');
         try {
-          const saved = await api.createEmploymentLevel(level);
+          const saved = await api.createJobLevel(level);
           set((state) => ({
-            employmentLevels: [...state.employmentLevels, saved],
+            jobLevels: [...state.jobLevels, saved],
           }));
         } catch (e) {
           console.error(e);
           throw e;
         }
       },
-      updateEmploymentLevel: async (id, level) => {
+      updateJobLevel: async (id, level) => {
         const { api } = await import('../services/api');
         try {
-          const updated = await api.updateEmploymentLevel(id, level);
+          const updated = await api.updateJobLevel(id, level);
           set((state) => ({
-            employmentLevels: state.employmentLevels.map((l) =>
-              l.id === id ? { ...l, ...updated } : l
-            ),
+            jobLevels: state.jobLevels.map((l) => (l.id === id ? { ...l, ...updated } : l)),
           }));
         } catch (e) {
           console.error(e);
           throw e;
         }
       },
-      deleteEmploymentLevel: async (id) => {
+      deleteJobLevel: async (id) => {
         const { api } = await import('../services/api');
         try {
-          await api.deleteEmploymentLevel(id);
+          await api.deleteJobLevel(id);
           set((state) => ({
-            employmentLevels: state.employmentLevels.filter((l) => l.id !== id),
+            jobLevels: state.jobLevels.filter((l) => l.id !== id),
           }));
         } catch (e) {
           console.error(e);
@@ -1588,7 +1514,7 @@ export const useOrgStore = create<OrgState>()(
         try {
           const { api } = await import('../services/api');
           const result = await api.flushCache();
-          console.log('Cache flush initiated:', result);
+          Logger.info('Cache flush initiated:', result);
           return result;
         } catch (error) {
           console.error('Failed to flush cache:', error);
@@ -1599,7 +1525,7 @@ export const useOrgStore = create<OrgState>()(
         try {
           const { api } = await import('../services/api');
           const result = await api.optimizeDatabase();
-          console.log('Database optimization initiated:', result);
+          Logger.info('Database optimization initiated:', result);
           return result;
         } catch (error) {
           console.error('Failed to optimize database:', error);
@@ -1610,10 +1536,28 @@ export const useOrgStore = create<OrgState>()(
         try {
           const { api } = await import('../services/api');
           const result = await api.rotateLogs();
-          console.log('Log rotation initiated:', result);
+          Logger.info('Log rotation initiated:', result);
           return result;
         } catch (error) {
           console.error('Failed to rotate logs:', error);
+          throw error;
+        }
+      },
+      fetchBackups: async () => {
+        try {
+          const { api } = await import('../services/api');
+          const result = await api.getBackups();
+          set({ backups: result });
+        } catch (error) {
+          console.error('Failed to fetch backups:', error);
+        }
+      },
+      restoreFromServer: async (filename) => {
+        try {
+          const { api } = await import('../services/api');
+          await api.restoreFromServer(filename);
+        } catch (error) {
+          console.error('Failed to restore from server:', error);
           throw error;
         }
       },
@@ -1656,7 +1600,7 @@ export const useOrgStore = create<OrgState>()(
         try {
           const { api } = await import('../services/api');
           const result = await api.testEmailNotification(recipient);
-          console.log('Test email sent:', result);
+          Logger.info('Test email sent:', result);
           return result;
         } catch (error) {
           console.error('Failed to send test email:', error);
@@ -1677,7 +1621,7 @@ export const useOrgStore = create<OrgState>()(
         try {
           const { api } = await import('../services/api');
           const result = await api.cancelBackgroundJob(jobId);
-          console.log('Background job cancelled:', result);
+          Logger.info('Background job cancelled:', result);
           return result;
         } catch (error) {
           console.error('Failed to cancel background job:', error);
@@ -1785,7 +1729,7 @@ export const useOrgStore = create<OrgState>()(
                     logs: [
                       {
                         id: `log-${Date.now()}`,
-                        timestamp: new Date().toLocaleTimeString(),
+                        timestamp: formatTime(new Date()),
                         status: (result.status_code < 400 ? 'Success' : 'Failed') as
                           | 'Success'
                           | 'Failed',

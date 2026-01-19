@@ -1,5 +1,7 @@
 import React from 'react';
 import { Search, Fingerprint, ArrowUpRight, FileText, FileSpreadsheet } from 'lucide-react';
+import { VibrantBadge } from '../../components/ui/VibrantBadge';
+import { formatCurrency } from '../../utils/formatting';
 // import { exportToExcel, exportToPDF } from '../../utils/exportUtils'; // Lazy loaded
 
 interface PayrollLedgerProps {
@@ -41,14 +43,21 @@ const PayrollLedger: React.FC<PayrollLedgerProps> = ({
             <button
               onClick={async () => {
                 const { exportToPDF } = await import('../../utils/exportUtils');
-                const headers = ['ID', 'Name', 'Department', 'Gross Salary', 'Status', 'Payment Mode'];
-                const data = ledger.map(tx => ({
+                const headers = [
+                  'ID',
+                  'Name',
+                  'Department',
+                  'Gross Salary',
+                  'Status',
+                  'Payment Mode',
+                ];
+                const data = ledger.map((tx) => ({
                   ID: tx.id,
                   Name: tx.name,
                   Department: tx.dept,
                   'Gross Salary': tx.gross,
                   Status: tx.status,
-                  'Payment Mode': tx.paymentMode
+                  'Payment Mode': tx.paymentMode,
                 }));
                 exportToPDF(data, headers, 'Payroll_Ledger');
               }}
@@ -61,15 +70,15 @@ const PayrollLedger: React.FC<PayrollLedgerProps> = ({
             <button
               onClick={async () => {
                 const { exportToExcel } = await import('../../utils/exportUtils');
-                const data = ledger.map(tx => ({
+                const data = ledger.map((tx) => ({
                   ID: tx.id,
                   Name: tx.name,
                   Department: tx.dept,
                   'Gross Salary': tx.gross,
                   Status: tx.status,
                   'Payment Mode': tx.paymentMode,
-                  'Bank': tx.bankName,
-                  'Account': tx.accountNumber
+                  Bank: tx.bankName,
+                  Account: tx.accountNumber,
                 }));
                 exportToExcel(data, 'Payroll_Ledger');
               }}
@@ -85,7 +94,7 @@ const PayrollLedger: React.FC<PayrollLedgerProps> = ({
       <div className="overflow-x-auto">
         <table className="w-full text-left font-mono text-sm">
           <thead>
-            <tr className="bg-muted-bg/50 text-[0.625rem] font-black uppercase text-text-muted tracking-[0.25em] font-sans">
+            <tr className="bg-muted text-[0.625rem] font-black uppercase text-text-muted tracking-[0.25em] font-sans">
               <th className="px-6 py-3">Employee</th>
               <th className="px-6 py-3">Department</th>
               <th className="px-6 py-3">Gross Salary</th>
@@ -117,27 +126,19 @@ const PayrollLedger: React.FC<PayrollLedgerProps> = ({
                   )}
                 </td>
                 <td className="px-6 py-3">
-                  <span className="text-[0.625rem] font-black text-text-muted uppercase tracking-widest bg-muted-bg px-3 py-1 rounded-sm border border-border">
-                    {tx.dept}
-                  </span>
+                  <VibrantBadge variant="outline">{tx.dept}</VibrantBadge>
                 </td>
                 <td className="px-6 py-3 text-sm font-black text-text-primary antialiased font-mono">
-                  {tx.gross.toLocaleString()}
+                  {formatCurrency(tx.gross)}
                 </td>
                 <td className="px-6 py-3 text-center">
-                  <span
-                    className={`px-3 py-1 rounded-md text-[0.5625rem] font-black uppercase tracking-widest border transition-all ${tx.status === 'Processed'
-                      ? 'bg-success-soft text-success border-success/20 shadow-sm'
-                      : tx.status === 'Flagged'
-                        ? 'bg-danger-soft text-danger border-danger/20 animate-pulse'
-                        : 'bg-warning-soft text-warning border-warning/20'
-                      }`}
-                  >
-                    {tx.status}
-                  </span>
+                  <VibrantBadge>{tx.status}</VibrantBadge>
                 </td>
                 <td className="px-6 py-3 text-right">
-                  <button aria-label="View details" className="p-1.5 bg-muted-bg text-text-muted hover:text-primary rounded-md shadow-sm border border-border transition-all">
+                  <button
+                    aria-label="View details"
+                    className="p-1.5 bg-muted-bg text-text-muted hover:text-primary rounded-md shadow-sm border border-border transition-all"
+                  >
                     <ArrowUpRight size={14} />
                   </button>
                 </td>

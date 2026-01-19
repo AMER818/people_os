@@ -2,6 +2,7 @@ import React from 'react';
 import { GraduationCap, BookOpen, X } from 'lucide-react';
 import { Employee as EmployeeType } from '../../types';
 import { Button } from '../../components/ui/Button';
+import { Card } from '../../components/ui/Card';
 
 interface EducationTabProps {
   employee: Partial<EmployeeType> | null;
@@ -30,11 +31,9 @@ const EducationTab: React.FC<EducationTabProps> = ({ employee, updateField }) =>
   };
 
   return (
-    <div className="space-y-8 animate-in slide-in-from-bottom-8 duration-700">
+    <Card className="space-y-8 animate-in slide-in-from-bottom-8 duration-700 p-8">
       <div className="flex items-center justify-between">
-        <h4 className="text-2xl font-black text-text-primary antialiased">
-          Academic Credentials
-        </h4>
+        <h4 className="text-2xl font-black text-text-primary antialiased">Education History</h4>
         <Button onClick={addEdu} icon={BookOpen} size="sm">
           Add Degree
         </Button>
@@ -90,22 +89,45 @@ const EducationTab: React.FC<EducationTabProps> = ({ employee, updateField }) =>
 
             <div className="pt-4 border-t border-border mt-4 grid grid-cols-3 gap-4">
               <div>
-                <p className="text-[0.5625rem] font-black text-text-muted uppercase tracking-widest">GPA / Grade</p>
-                <input value={edu.gradeGpa} onChange={(e) => updateEdu(i, 'gradeGpa', e.target.value)} className="bg-transparent border-none text-xs font-bold text-text-primary w-full outline-none" placeholder="A+ / 3.5" />
+                <p className="text-[0.5625rem] font-black text-text-muted uppercase tracking-widest">
+                  GPA / Grade
+                </p>
+                <input
+                  value={edu.gradeGpa}
+                  onChange={(e) => updateEdu(i, 'gradeGpa', e.target.value)}
+                  className="bg-transparent border-none text-xs font-bold text-text-primary w-full outline-none"
+                  placeholder="A+ / 3.5"
+                />
               </div>
               <div>
-                <p className="text-[0.5625rem] font-black text-text-muted uppercase tracking-widest">Marks Obtained</p>
-                <input type="number" value={edu.marksObtained} onChange={(e) => updateEdu(i, 'marksObtained', Number(e.target.value))} className="bg-transparent border-none text-xs font-bold text-text-primary w-full outline-none" placeholder="0" />
+                <p className="text-[0.5625rem] font-black text-text-muted uppercase tracking-widest">
+                  Marks Obtained
+                </p>
+                <input
+                  type="number"
+                  value={edu.marksObtained}
+                  onChange={(e) => updateEdu(i, 'marksObtained', Number(e.target.value))}
+                  className="bg-transparent border-none text-xs font-bold text-text-primary w-full outline-none"
+                  placeholder="0"
+                />
               </div>
               <div>
-                <p className="text-[0.5625rem] font-black text-text-muted uppercase tracking-widest">Total Marks</p>
-                <input type="number" value={edu.totalMarks} onChange={(e) => updateEdu(i, 'totalMarks', Number(e.target.value))} className="bg-transparent border-none text-xs font-bold text-text-primary w-full outline-none" placeholder="0" />
+                <p className="text-[0.5625rem] font-black text-text-muted uppercase tracking-widest">
+                  Total Marks
+                </p>
+                <input
+                  type="number"
+                  value={edu.totalMarks}
+                  onChange={(e) => updateEdu(i, 'totalMarks', Number(e.target.value))}
+                  className="bg-transparent border-none text-xs font-bold text-text-primary w-full outline-none"
+                  placeholder="0"
+                />
               </div>
             </div>
           </div>
         ))}
       </div>
-    </div>
+    </Card>
   );
 };
 

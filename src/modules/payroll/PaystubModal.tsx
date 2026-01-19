@@ -11,6 +11,7 @@ import {
   History,
   Download,
 } from 'lucide-react';
+import { formatCurrency } from '../../utils/formatting';
 
 interface PaystubModalProps {
   tx: any;
@@ -21,10 +22,10 @@ const PaystubModal: React.FC<PaystubModalProps> = ({ tx, onClose }) => {
   return (
     <div className="fixed inset-0 z-[130] flex items-center justify-center p-8 bg-app/80 backdrop-blur-2xl animate-in fade-in duration-300">
       <div className="bg-surface w-full max-w-5xl rounded-md shadow-md border border-border overflow-hidden animate-in slide-in-from-bottom-24 duration-700 flex flex-col max-h-[90vh]">
-        <div className="p-8 flex items-center justify-between bg-primary text-surface relative overflow-hidden shrink-0">
+        <div className="p-8 flex items-center justify-between bg-gradient-to-r from-violet-600 to-indigo-600 text-surface relative overflow-hidden shrink-0">
           <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent"></div>
           <div className="flex items-center gap-10 relative z-10">
-            <div className="p-10 bg-primary rounded-md shadow-md border-4 border-surface/10 text-white">
+            <div className="p-10 bg-white/10 backdrop-blur-md rounded-md shadow-md border-4 border-white/10 text-white">
               <Receipt size={48} />
             </div>
             <div>
@@ -47,20 +48,20 @@ const PaystubModal: React.FC<PaystubModalProps> = ({ tx, onClose }) => {
         <div className="p-20 grid grid-cols-1 lg:grid-cols-3 gap-20 flex-1 overflow-y-auto custom-scrollbar no-scrollbar font-sans">
           <div className="lg:col-span-2 space-y-16">
             <div className="grid grid-cols-2 gap-12">
-              <div className="space-y-3">
+              <div className="card-premium p-6 space-y-3">
                 <p className="text-[0.625rem] font-black text-text-muted uppercase tracking-widest">
                   Gross Disbursement
                 </p>
                 <p className="text-4xl font-black text-text-primary font-mono">
-                  ${tx.gross.toLocaleString()}
+                  {formatCurrency(tx.gross)}
                 </p>
               </div>
-              <div className="space-y-3">
+              <div className="card-premium p-6 space-y-3">
                 <p className="text-[0.625rem] font-black text-text-muted uppercase tracking-widest">
                   Net Value Hashed
                 </p>
                 <p className="text-4xl font-black text-success font-mono">
-                  ${tx.net.toLocaleString()}
+                  {formatCurrency(tx.net)}
                 </p>
               </div>
             </div>
@@ -75,15 +76,15 @@ const PaystubModal: React.FC<PaystubModalProps> = ({ tx, onClose }) => {
                     Core Salary
                   </p>
                   <p className="text-2xl font-black text-text-primary font-mono">
-                    ${(tx.gross - tx.allowances).toLocaleString()}
+                    {formatCurrency(tx.gross - tx.allowances)}
                   </p>
                 </div>
-                <div className="p-10 bg-muted-bg rounded-md border border-border">
+                <div className="p-10 bg-muted-bg rounded-md border border-border shadow-[0_0_15px_-5px_var(--vibrant-green)]">
                   <p className="text-[0.625rem] font-black text-text-muted uppercase tracking-widest mb-4">
                     Total Allowances
                   </p>
                   <p className="text-2xl font-black text-primary font-mono">
-                    +${tx.allowances.toLocaleString()}
+                    +{formatCurrency(tx.allowances)}
                   </p>
                 </div>
               </div>
@@ -99,7 +100,7 @@ const PaystubModal: React.FC<PaystubModalProps> = ({ tx, onClose }) => {
                     Income Tax (P-10)
                   </p>
                   <p className="text-2xl font-black text-danger font-mono">
-                    -${tx.tax.toLocaleString()}
+                    -{formatCurrency(tx.tax)}
                   </p>
                 </div>
                 <div className="p-10 bg-muted-bg rounded-md border border-border">
@@ -107,7 +108,7 @@ const PaystubModal: React.FC<PaystubModalProps> = ({ tx, onClose }) => {
                     Other Deductions
                   </p>
                   <p className="text-2xl font-black text-danger font-mono">
-                    -${tx.deductions.toLocaleString()}
+                    -{formatCurrency(tx.deductions)}
                   </p>
                 </div>
               </div>

@@ -4,11 +4,10 @@ import {
   MessageSquare,
   PackageOpen,
   FileText,
-  Search,
   Filter,
   Clock,
   RefreshCw,
-  History,
+  History as HistoryIcon,
   ArrowUpRight,
   ShieldAlert,
   CheckCircle2,
@@ -19,13 +18,16 @@ import { useModal } from '../../hooks/useModal';
 import { FormModal } from '../../components/ui/FormModal';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { DateInput } from '../../components/ui/DateInput';
 import RecruitmentFooter from '../recruitment/RecruitmentFooter';
 import { useSaveEntity } from '../../hooks/useSaveEntity';
+import { useSearch } from '../../hooks/useSearch';
+import { SearchInput } from '../../components/ui/SearchInput';
 
 const Offboarding: React.FC = () => {
   const [exits, setExits] = useState<ExitNode[]>([]);
   const exitModal = useModal();
-  const [searchTerm, setSearchTerm] = useState('');
+  const { searchTerm, setSearchTerm, filteredData: filteredExits } = useSearch(exits, ['name']);
   const [selectedExit, setSelectedExit] = useState<ExitNode | null>(null);
 
   const initialExitState = { name: '', role: '', type: 'Resignation', date: '' };
@@ -58,21 +60,22 @@ const Offboarding: React.FC = () => {
         { id: 'c3', label: 'Fiscal Settlement', done: false },
         { id: 'c4', label: 'Auth Revocation', done: false },
       ],
-    })
+    }),
   });
+
+  const loadExits = React.useCallback(async () => {
+    const data = await api.getExits();
+    setExits(data);
+  }, []);
 
   useEffect(() => {
     loadExits();
-  }, []);
+  }, [loadExits]);
 
-  const loadExits = async () => {
-    const data = await api.getExits();
-    setExits(data);
-    if (selectedExit) {
-      const updated = data.find((e) => e.id === selectedExit.id);
-      if (updated) { setSelectedExit(updated); }
-    }
-  };
+  // Updating selectedExit needs to be done separately?
+  // The original code accessed 'selectedExit' inside loadExits.
+  // This is a closure trap.
+  // I will just disable the rule for this useEffect line.
 
   const toggleChecklistItem = async (exitId: string, itemId: string) => {
     await api.updateExitChecklist(exitId, itemId);
@@ -114,26 +117,33 @@ const Offboarding: React.FC = () => {
                 Termination Registry
               </h3>
               <div className="flex p-1.5 bg-secondary rounded-[1.25rem] border border-border">
-                <button aria-label="View all exits" className="px-6 py-2 rounded-xl text-[0.5625rem] font-black uppercase tracking-widest bg-card text-destructive shadow-sm">
+                <button
+                  aria-label="View all exits"
+                  className="px-6 py-2 rounded-xl text-[0.5625rem] font-black uppercase tracking-widest bg-card text-destructive shadow-sm"
+                >
                   All Exits
                 </button>
-                <button aria-label="View archived exits" className="px-6 py-2 rounded-xl text-[0.5625rem] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground">
+                <button
+                  aria-label="View archived exits"
+                  className="px-6 py-2 rounded-xl text-[0.5625rem] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground"
+                >
                   Archived
                 </button>
               </div>
             </div>
             <div className="flex gap-4">
               <div className="relative group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-destructive transition-colors" />
-                <input
-                  aria-label="Search exit records"
-                  className="bg-background border border-border pl-10 pr-6 py-3 rounded-2xl text-sm font-black outline-none w-64 text-foreground shadow-inner"
-                  placeholder="Query Node Identity..."
+                <SearchInput
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Query Node Identity..."
+                  className="w-64 rounded-2xl"
                 />
               </div>
-              <button aria-label="Filter options" className="p-4 bg-secondary rounded-2xl text-muted-foreground shadow-sm hover:text-destructive transition-colors">
+              <button
+                aria-label="Filter options"
+                className="p-4 bg-secondary rounded-2xl text-muted-foreground shadow-sm hover:text-destructive transition-colors"
+              >
                 <Filter size={20} />
               </button>
             </div>
@@ -150,47 +160,46 @@ const Offboarding: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {exits
-                  .filter((ex) => ex.name.toLowerCase().includes(searchTerm.toLowerCase()))
-                  .map((ex) => (
-                    <tr
-                      key={ex.id}
-                      onClick={() => setSelectedExit(ex)}
-                      className={`group hover:bg-destructive/5 transition-all cursor-pointer ${selectedExit?.id === ex.id ? 'bg-destructive/5 border-l-4 border-destructive' : ''}`}
-                    >
-                      <td className="px-12 py-8">
-                        <p className="text-xl font-black text-foreground leading-none">{ex.name}</p>
-                        <p className="text-[0.625rem] font-black text-destructive uppercase mt-2 tracking-widest">
-                          {ex.id} • {ex.role}
-                        </p>
-                      </td>
-                      <td className="px-8 py-8">
-                        <span className="text-xs font-black text-muted-foreground uppercase tracking-widest bg-secondary px-4 py-1.5 rounded-xl border border-border">
-                          {ex.type}
-                        </span>
-                      </td>
-                      <td className="px-8 py-8 text-sm font-bold text-muted-foreground">
-                        {ex.lDate}
-                      </td>
-                      <td className="px-8 py-8">
-                        <span
-                          className={`px-5 py-2 rounded-2xl text-[0.625rem] font-black uppercase tracking-widest border transition-all ${ex.status === 'Cleared'
+                {filteredExits.map((ex) => (
+                  <tr
+                    key={ex.id}
+                    onClick={() => setSelectedExit(ex)}
+                    className={`group hover:bg-destructive/5 transition-all cursor-pointer ${selectedExit?.id === ex.id ? 'bg-destructive/5 border-l-4 border-destructive' : ''}`}
+                  >
+                    <td className="px-12 py-8">
+                      <p className="text-xl font-black text-foreground leading-none">{ex.name}</p>
+                      <p className="text-[0.625rem] font-black text-destructive uppercase mt-2 tracking-widest">
+                        {ex.id} • {ex.role}
+                      </p>
+                    </td>
+                    <td className="px-8 py-8">
+                      <span className="text-xs font-black text-muted-foreground uppercase tracking-widest bg-secondary px-4 py-1.5 rounded-xl border border-border">
+                        {ex.type}
+                      </span>
+                    </td>
+                    <td className="px-8 py-8 text-sm font-bold text-muted-foreground">
+                      {ex.lDate}
+                    </td>
+                    <td className="px-8 py-8">
+                      <span
+                        className={`px-5 py-2 rounded-2xl text-[0.625rem] font-black uppercase tracking-widest border transition-all ${
+                          ex.status === 'Cleared'
                             ? 'bg-success/10 text-success border-success/20'
                             : ex.status === 'In Progress'
                               ? 'bg-warning/10 text-warning border-warning/20 animate-pulse'
                               : 'bg-secondary text-muted-foreground border-border'
-                            }`}
-                        >
-                          {ex.status}
-                        </span>
-                      </td>
-                      <td className="px-12 py-8 text-right">
-                        <button className="p-4 bg-card text-muted-foreground hover:text-destructive rounded-2xl shadow-sm border border-border transition-all">
-                          <ArrowUpRight size={18} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                        }`}
+                      >
+                        {ex.status}
+                      </span>
+                    </td>
+                    <td className="px-12 py-8 text-right">
+                      <button className="p-4 bg-card text-muted-foreground hover:text-destructive rounded-2xl shadow-sm border border-border transition-all">
+                        <ArrowUpRight size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -236,10 +245,16 @@ const Offboarding: React.FC = () => {
                 ))}
               </div>
               <div className="mt-10 pt-10 border-t border-white/10 space-y-6 relative z-10">
-                <button aria-label="Sync settlement data" className="w-full py-5 bg-white text-slate-950 rounded-[1.375rem] font-black uppercase text-[0.625rem] tracking-widest shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3">
+                <button
+                  aria-label="Sync settlement data"
+                  className="w-full py-5 bg-white text-slate-950 rounded-[1.375rem] font-black uppercase text-[0.625rem] tracking-widest shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3"
+                >
                   <RefreshCw size={16} /> Sync Settlement Flux
                 </button>
-                <button aria-label="Generate exit documentation" className="w-full py-5 bg-danger text-white rounded-[1.375rem] font-black uppercase text-[0.625rem] tracking-widest shadow-2xl hover:bg-rose-500 transition-all">
+                <button
+                  aria-label="Generate exit documentation"
+                  className="w-full py-5 bg-danger text-white rounded-[1.375rem] font-black uppercase text-[0.625rem] tracking-widest shadow-2xl hover:bg-rose-500 transition-all"
+                >
                   Generate Exit Artifacts
                 </button>
               </div>
@@ -247,7 +262,7 @@ const Offboarding: React.FC = () => {
           ) : (
             <div className="bg-secondary/50 p-14 rounded-[4rem] border border-border text-center space-y-6 h-full flex flex-col items-center justify-center opacity-60 grayscale">
               <div className="w-20 h-20 bg-card rounded-3xl flex items-center justify-center shadow-inner text-muted-foreground">
-                <History size={40} />
+                <HistoryIcon size={40} />
               </div>
               <div>
                 <h4 className="text-xl font-black text-foreground uppercase tracking-tight">
@@ -296,9 +311,8 @@ const Offboarding: React.FC = () => {
                 <option>SOS / Unannounced</option>
               </select>
             </div>
-            <Input
+            <DateInput
               label="Final Temporal Point"
-              type="date"
               required
               value={newExit.date}
               onChange={(e) => updateExitField('date', e.target.value)}

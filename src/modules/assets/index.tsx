@@ -151,7 +151,7 @@ const AssetManagement: React.FC = () => {
 
       <AssetStats stats={stats} />
 
-      <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-2xl overflow-hidden min-h-[43.75rem] flex flex-col">
+      <div className="bg-card rounded-[2rem] border border-border shadow-2xl overflow-hidden min-h-[43.75rem] flex flex-col">
         <AssetControls
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}

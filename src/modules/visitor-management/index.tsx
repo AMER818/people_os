@@ -10,18 +10,24 @@ import {
   UserCircle,
   BellRing,
   Download,
+  LogOut,
 } from 'lucide-react';
 import { VisitorNode } from '../../types';
 import { api } from '../../services/api';
+import { formatTime } from '../../utils/formatting';
 import { HorizontalTabs } from '../../components/ui/HorizontalTabs';
 import { useSaveEntity } from '../../hooks/useSaveEntity';
 import { FormModal } from '../../components/ui/FormModal';
 import { useModal } from '../../hooks/useModal';
+import { Modal } from '../../components/ui/Modal';
+import { Button } from '../../components/ui/Button';
 
 const VisitorManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'ledger' | 'requests'>('ledger');
   const requestModal = useModal();
   const directModal = useModal();
+  const checkoutModal = useModal();
+  const [guestToCheckOut, setGuestToCheckOut] = useState<string | null>(null);
   const [visitors, setVisitors] = useState<VisitorNode[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -103,7 +109,7 @@ const VisitorManagement: React.FC = () => {
     transform: (data) => ({
       ...data,
       id: `DIR-${Math.floor(Math.random() * 900) + 100}`,
-      checkIn: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      checkIn: formatTime(new Date()),
       status: 'On-Site',
       requestDate: new Date().toISOString().split('T')[0],
       avatar: `https://picsum.photos/seed/${Math.random()}/200`,
@@ -148,15 +154,22 @@ const VisitorManagement: React.FC = () => {
     },
   ];
 
-  const handleCheckOut = async (id: string) => {
-    if (confirm('Terminate guest session and log exit time?')) {
-      const checkOutTime = new Date().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-      await api.updateVisitorStatus(id, 'Checked-Out', checkOutTime);
-      loadVisitors();
+  const handleCheckOutClick = (id: string) => {
+    setGuestToCheckOut(id);
+    checkoutModal.open();
+  };
+
+  const confirmCheckOut = async () => {
+    if (!guestToCheckOut) {
+      return;
     }
+
+    const checkOutTime = formatTime(new Date());
+
+    await api.updateVisitorStatus(guestToCheckOut, 'Checked-Out', checkOutTime);
+    await loadVisitors();
+    checkoutModal.close();
+    setGuestToCheckOut(null);
   };
 
   const handleAction = async (id: string, action: 'Approve' | 'Reject') => {
@@ -337,7 +350,7 @@ const VisitorManagement: React.FC = () => {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleCheckOut(row.id);
+                            handleCheckOutClick(row.id);
                           }}
                           className="px-6 py-2 bg-foreground text-background rounded-xl text-[0.625rem] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl"
                         >
@@ -503,6 +516,36 @@ const VisitorManagement: React.FC = () => {
           </div>
         </div>
       </FormModal>
+
+      {/* Checkout Confirmation Modal */}
+      <Modal
+        isOpen={checkoutModal.isOpen}
+        onClose={checkoutModal.close}
+        title="Session Termination"
+        size="sm"
+      >
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 p-4 bg-orange-500/10 border border-orange-500/20 rounded-xl text-orange-200">
+            <LogOut className="w-5 h-5 text-orange-400" />
+            <p className="text-sm font-medium">Terminate guest session?</p>
+          </div>
+          <p className="text-xs text-slate-400">
+            This will log the exit time and close the active access session. Use only when the guest
+            has physically vacated the premises.
+          </p>
+          <div className="flex justify-end gap-3 mt-6">
+            <Button variant="ghost" onClick={checkoutModal.close} className="text-slate-400">
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmCheckOut}
+              className="bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/20"
+            >
+              Log Exit
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

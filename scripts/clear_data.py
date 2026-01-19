@@ -1,7 +1,7 @@
 import sqlite3
 import uuid
 
-DB_PATH = "backend/data/hunzal_hcm.db"
+DB_PATH = "backend/data/people_os.db"
 
 
 def clear_and_reset():

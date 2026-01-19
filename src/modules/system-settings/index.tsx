@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { DetailLayout } from '../../components/layout/DetailLayout';
 import {
   Settings,
   Layout,
@@ -20,36 +21,47 @@ import { api } from '../../services/api';
 import { secureStorage } from '../../utils/secureStorage';
 import { HorizontalTabs } from '../../components/ui/HorizontalTabs';
 import ErrorBoundary from '../../components/ErrorBoundary';
-
-// Sub-components
-import UserManagement from './admin/UserManagement';
-import InfrastructureMonitor from './admin/InfrastructureMonitor';
-import APIManager from './admin/APIManager';
-import NotificationsManager from './admin/NotificationsManager';
-import DataManagement from './admin/DataManagement';
-import AIConfig from './admin/AIConfig';
-import DashboardOverview from './admin/DashboardOverview';
-import { AuditDashboard } from './audit/AuditDashboard';
+import ModuleSkeleton from '../../components/ui/ModuleSkeleton'; // Improved loading state
 import { SYSTEM_CONFIG } from './admin/systemConfig';
-import ComplianceSettings from './admin/ComplianceSettings';
-import SecuritySettings from './admin/SecuritySettings';
+
+// Lazy Load Sub-components for better performance
+const UserManagement = React.lazy(() => import('./admin/UserManagement'));
+const InfrastructureMonitor = React.lazy(() => import('./admin/InfrastructureMonitor'));
+const APIManager = React.lazy(() => import('./admin/APIManager'));
+const NotificationsManager = React.lazy(() => import('./admin/NotificationsManager'));
+const DataManagement = React.lazy(() => import('./admin/DataManagement'));
+const AIConfig = React.lazy(() => import('./admin/AIConfig'));
+const DashboardOverview = React.lazy(() => import('./admin/DashboardOverview'));
+const ComplianceSettings = React.lazy(() => import('./admin/ComplianceSettings'));
+const SecuritySettings = React.lazy(() => import('./admin/SecuritySettings'));
+
+// Handle named export for AuditDashboard
+const AuditDashboard = React.lazy(() =>
+  import('./audit/AuditDashboard').then((module) => ({ default: module.AuditDashboard }))
+);
 
 const SystemSettings: React.FC = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
   const [isSyncing, setIsSyncing] = useState(false);
   const [storageUsage, setStorageUsage] = useState(0);
   const [systemHealth, setSystemHealth] = useState([
-    { label: 'Core API', status: 'Checking...', latency: '0ms', icon: Globe, color: 'text-muted' },
-    { label: 'AI Engine', status: 'Checking...', latency: '0ms', icon: Zap, color: 'text-muted' },
     {
-      label: 'Primary DB',
+      label: 'API Service',
+      status: 'Checking...',
+      latency: '0ms',
+      icon: Globe,
+      color: 'text-muted',
+    },
+    { label: 'AI Service', status: 'Checking...', latency: '0ms', icon: Zap, color: 'text-muted' },
+    {
+      label: 'Database',
       status: 'Checking...',
       latency: '0ms',
       icon: Database,
       color: 'text-muted',
     },
     {
-      label: 'Auth Cluster',
+      label: 'Auth Service',
       status: 'Checking...',
       latency: '0ms',
       icon: Lock,
@@ -95,7 +107,7 @@ const SystemSettings: React.FC = () => {
           },
           ...prev.slice(1),
         ]);
-      } catch (e) {
+      } catch {
         setSystemHealth((prev) => [
           { ...prev[0], status: 'Offline', latency: 'N/A', color: 'text-danger' },
           ...prev.slice(1),
@@ -137,52 +149,58 @@ const SystemSettings: React.FC = () => {
   ];
 
   return (
-    <div className="max-w-[1400px] mx-auto space-y-8 animate-in fade-in duration-500 pb-20">
-      {/* Module Header Info */}
-      {/* Module Header Info - Refined to remove redundancy with App Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-surface/50 p-6 rounded-[2rem] border border-border/40 shadow-xl relative overflow-hidden group">
-        <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:rotate-12 transition-transform duration-1000">
-          <Settings size={80} />
-        </div>
-        <div className="relative z-10 flex items-center gap-6">
-          <div className="p-3 bg-primary/10 rounded-2xl text-primary border border-primary/20">
-            <Settings size={24} />
+    <DetailLayout
+      className="animate-in fade-in duration-500"
+      containerClassName="max-w-[1400px]"
+      header={
+        <div className="max-w-[1400px] mx-auto px-6 pt-6 mb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 card-vibrant p-6 shadow-xl relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:rotate-12 transition-transform duration-1000">
+              <Settings size={80} />
+            </div>
+            <div className="relative z-10 flex items-center gap-6">
+              <div className="p-3 bg-primary/10 rounded-2xl text-primary border border-primary/20">
+                <Settings size={24} />
+              </div>
+              <div>
+                <p className="text-[0.625rem] font-black text-text-muted uppercase tracking-[0.3em] mb-1">
+                  System Information
+                </p>
+                <p className="text-text-primary font-bold flex items-center gap-2 text-sm antialiased">
+                  <span className="flex w-2 h-2 rounded-full bg-success animate-pulse" />
+                  {SYSTEM_CONFIG.NODE_NAME} • v{SYSTEM_CONFIG.VERSION} •{' '}
+                  {SYSTEM_CONFIG.CLUSTER_TYPE}
+                </p>
+              </div>
+            </div>
+            <div className="relative z-10">
+              <Button
+                onClick={handleSyncSettings}
+                disabled={isSyncing}
+                className="px-6 h-11 rounded-xl font-black uppercase tracking-widest shadow-lg shadow-primary/10 hover:scale-105 active:scale-95 transition-all text-[0.65rem] bg-primary text-white"
+              >
+                <RefreshCw size={14} className={`mr-2.5 ${isSyncing ? 'animate-spin' : ''}`} />
+                {isSyncing ? 'Syncing...' : 'Sync Settings'}
+              </Button>
+            </div>
           </div>
-          <div>
-            <p className="text-[0.625rem] font-black text-text-muted uppercase tracking-[0.3em] mb-1">
-              System Instance Node
-            </p>
-            <p className="text-text-primary font-bold flex items-center gap-2 text-sm antialiased">
-              <span className="flex w-2 h-2 rounded-full bg-success animate-pulse" />
-              {SYSTEM_CONFIG.NODE_NAME} • v{SYSTEM_CONFIG.VERSION} • {SYSTEM_CONFIG.CLUSTER_TYPE}
-            </p>
-          </div>
         </div>
-        <div className="relative z-10">
-          <Button
-            onClick={handleSyncSettings}
+      }
+      tabs={
+        <div className="max-w-[1400px] mx-auto px-6">
+          <HorizontalTabs
+            tabs={sections}
+            activeTabId={activeSection}
+            onTabChange={setActiveSection}
+            wrap={true}
             disabled={isSyncing}
-            className="px-6 h-11 rounded-xl font-black uppercase tracking-widest shadow-lg shadow-primary/10 hover:scale-105 active:scale-95 transition-all text-[0.65rem] bg-primary text-white"
-          >
-            <RefreshCw size={14} className={`mr-2.5 ${isSyncing ? 'animate-spin' : ''}`} />
-            {isSyncing ? 'Syncing...' : 'Sync Settings'}
-          </Button>
+            align="start"
+            className="mb-0"
+          />
         </div>
-      </div>
-
-      {/* Navigation - Separate Section */}
-      <HorizontalTabs
-        tabs={sections}
-        activeTabId={activeSection}
-        onTabChange={setActiveSection}
-        wrap={true}
-        disabled={isSyncing}
-        align="start"
-        className="mb-0"
-      />
-
-      {/* Main Content Area */}
-      <div className="bg-surface rounded-[2.5rem] border border-border shadow-2xl overflow-hidden min-h-[700px] p-8">
+      }
+    >
+      <Suspense fallback={<ModuleSkeleton />}>
         {activeSection === 'dashboard' && (
           <DashboardOverview systemHealth={systemHealth} storageUsage={storageUsage} />
         )}
@@ -207,8 +225,8 @@ const SystemSettings: React.FC = () => {
             <DataManagement />
           </>
         )}
-      </div>
-    </div>
+      </Suspense>
+    </DetailLayout>
   );
 };
 

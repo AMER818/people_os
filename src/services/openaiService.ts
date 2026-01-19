@@ -26,7 +26,7 @@ export const testOpenAIConnection = async () => {
 
 export const getChatResponse = async (_history: any[], message: string) => {
   try {
-    if (!message) return 'Message empty.';
+    if (!message) {return 'Message empty.';}
 
     // This is a stub implementation. In a real scenario, this would call the OpenAI API.
     Logger.info('Chat request received (Stub):', message);

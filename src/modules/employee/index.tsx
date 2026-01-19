@@ -2,11 +2,13 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Save } from 'lucide-react';
 import { Employee as EmployeeType, AISuggestion } from '../../types';
 import { api } from '../../services/api';
+import Logger from '../../utils/logger';
 import { LEAVING_TYPES } from './constants';
 
 // UI Components
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { DateInput } from '../../components/ui/DateInput';
 import { useModal } from '../../hooks/useModal';
 import { FormModal } from '../../components/ui/FormModal';
 import Modal from '../../components/ui/Modal';
@@ -23,34 +25,48 @@ import { useOrgStore } from '../../store/orgStore';
 import { getWorkforceOptimization } from '../../services/geminiService';
 
 const Employee: React.FC = () => {
+  // Use store for employees with lazy loading
+  const { employees: storeEmployees, fetchEmployees, loadingEntities } = useOrgStore();
   const [employees, setEmployees] = useState<EmployeeType[]>([]);
   const [viewMode, setViewMode] = useState<'dashboard' | 'master'>('dashboard');
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Local State
   const [activeTab, setActiveTab] = useState(0);
-  const [searchTerm, setSearchTerm] = useState('');
   const [currentEmployee, setCurrentEmployee] = useState<Partial<EmployeeType> | null>(null);
-  const [aiSuggestions, setAiSuggestions] = useState<AISuggestion[]>([]);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [isNewRecord, setIsNewRecord] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<AISuggestion[]>([]);
 
-  const { success, error: toastError } = useToast();
-  const exitModal = useModal();
-  const deleteModal = useModal();
-
+  // Modal State
   const [exitTargetEmployee, setExitTargetEmployee] = useState<EmployeeType | null>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [exitData, setExitData] = useState({
-    leavingDate: new Date().toISOString().split('T')[0],
+    leavingDate: '',
     leavingType: 'Resignation',
     remarks: '',
   });
-  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+
+  const exitModal = useModal();
+  const deleteModal = useModal();
+  const { success, error: toastError } = useToast();
+
+  // Sync loading state
+  useEffect(() => {
+    setIsLoading(loadingEntities['employees'] || false);
+  }, [loadingEntities]);
 
   useEffect(() => {
-    const loadEmployees = async () => {
-      const data = await api.getEmployees();
-      setEmployees(data);
-    };
-    loadEmployees();
-  }, []);
+    // Fetch employees lazily (skips if data is fresh)
+    fetchEmployees();
+  }, [fetchEmployees]);
+
+  // Sync local state with store
+  useEffect(() => {
+    setEmployees(storeEmployees);
+  }, [storeEmployees]);
 
   useEffect(() => {
     if (viewMode === 'master' && activeTab === 0 && currentEmployee) {
@@ -62,6 +78,8 @@ const Employee: React.FC = () => {
       };
       analyze();
     }
+    // Intentional: Only re-analyze when ID changes, preventing loops on minor updates
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewMode, activeTab, currentEmployee?.id]);
 
   const filteredEmployees = useMemo(() => {
@@ -135,16 +153,67 @@ const Employee: React.FC = () => {
       name: '',
       status: 'Active',
       avatar: `https://picsum.photos/seed/${code}/200`,
+
+      // Organizational IDs (for ID-based binding)
+      plant_id: '',
+      department_id: '',
+      designation_id: '',
+      sub_department_id: '',
+      shift_id: '',
+      organization_id: '',
+      grade_id: '',
+      line_manager_id: '',
+
+      // Organizational Display Names (legacy)
+      hrPlant: '',
+      department: '',
+      designation: '',
+      subDepartment: '',
+      shift: '',
+      orgName: '',
+      grade: '',
+      employmentLevel: '',
+      restDay: 'Sunday',
+      division: 'Nil',
+
+      // Personal
+      maritalStatus: 'Single',
+      bloodGroup: '',
+      religion: 'Islam',
+      nationality: 'Pakistani',
+      cnic: '',
+      cnicExpiryDate: '',
+      dateOfBirth: '',
+      gender: '',
+      fatherName: '',
+
+      // Contact
+      personalCellNumber: '',
+      presentAddress: '',
+      permanentAddress: '',
+      presentDistrict: '',
+      permanentDistrict: '',
+
+      // Employment
+      joiningDate: new Date().toISOString().split('T')[0],
+      probationPeriod: '',
+      grossSalary: 0,
+      paymentMode: 'Cash Payment',
+
+      // Benefits
+      socialSecurityStatus: false,
+      medicalStatus: false,
+      eobiStatus: false,
+
+      // Sub-records
       family: [],
       education: [],
       experience: [],
       increments: [],
       discipline: [],
-      maritalStatus: 'Single',
-      grossSalary: 0,
-      joiningDate: new Date().toISOString().split('T')[0],
     };
     setCurrentEmployee(newEmp);
+    setIsNewRecord(true);
     setViewMode('master');
     setActiveTab(0);
   };
@@ -153,6 +222,13 @@ const Employee: React.FC = () => {
     if (!currentEmployee || !currentEmployee.id) {
       return;
     }
+
+    // Validation: Mandatory Gross Salary for new records
+    if (isNewRecord && (!currentEmployee.grossSalary || Number(currentEmployee.grossSalary) <= 0)) {
+      toastError('Validation Failed: Gross Salary is required for new employees.');
+      return;
+    }
+
     setIsSaving(true);
     try {
       await api.saveEmployee(currentEmployee as EmployeeType);
@@ -166,11 +242,13 @@ const Employee: React.FC = () => {
 
       const data = await api.getEmployees();
       setEmployees(data);
-      alert('Employee changes saved successfully!');
-      setViewMode('dashboard');
+      success('Employee changes saved successfully!');
+      setIsNewRecord(false); // Lock compensation fields after first save
+      // Keep edit view open - don't auto-navigate to dashboard
     } catch (error) {
-      console.error('Failed to save employee:', error);
-      alert('Failed to save employee changes. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.error('Failed to save employee:', errorMessage);
+      toastError(`Save failed: ${errorMessage}`);
     } finally {
       setIsSaving(false);
     }
@@ -178,18 +256,20 @@ const Employee: React.FC = () => {
 
   const handleSelectEmployee = (emp: EmployeeType) => {
     setCurrentEmployee(emp);
+    setIsNewRecord(false); // Editing existing record - lock compensation
     setViewMode('master');
     setActiveTab(0);
   };
 
   const updateField = (field: keyof EmployeeType, value: unknown) => {
-    if (!currentEmployee) {
-      return;
-    }
-
-    const update = { ...currentEmployee, [field]: value };
-    // if (field === 'designation') { update.grade = DESIGNATION_TO_GRADE[value as string] || 'M9'; }
-    setCurrentEmployee(update);
+    // Use functional update to avoid stale closure issues
+    // when multiple updateField calls happen in sequence
+    setCurrentEmployee((prev) => {
+      if (!prev) {
+        return prev;
+      }
+      return { ...prev, [field]: value };
+    });
   };
 
   const handleEdit = (emp: EmployeeType) => {
@@ -257,6 +337,14 @@ const Employee: React.FC = () => {
     }
   };
 
+  if (isLoading && employees.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-[100rem] mx-auto space-y-14 pb-20 animate-in fade-in duration-700">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-10">
@@ -314,6 +402,7 @@ const Employee: React.FC = () => {
             isAnalyzing={isAnalyzing}
             aiSuggestions={aiSuggestions}
             isDisabled={isSaving}
+            isNewRecord={isNewRecord}
           />
         </div>
       )}
@@ -334,9 +423,8 @@ const Employee: React.FC = () => {
               {exitTargetEmployee.employeeCode}).
             </p>
             <div className="space-y-4">
-              <Input
+              <DateInput
                 label="Last Working Day"
-                type="date"
                 value={exitData.leavingDate}
                 onChange={(e) => setExitData({ ...exitData, leavingDate: e.target.value })}
               />

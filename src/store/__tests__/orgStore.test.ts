@@ -20,7 +20,7 @@ const mockApi = {
   getShifts: vi.fn(),
   getPayrollSettings: vi.fn(),
   getUsers: vi.fn(),
-  getEmploymentLevels: vi.fn(),
+  getJobLevels: vi.fn(),
   getEmployees: vi.fn(),
   getHolidays: vi.fn(),
   getBanks: vi.fn(),
@@ -177,7 +177,7 @@ describe('OrgStore - Master Data Fetching', () => {
     (api.getShifts as any).mockResolvedValueOnce([]);
     (api.getPayrollSettings as any).mockResolvedValueOnce({});
     (api.getUsers as any).mockResolvedValueOnce([]);
-    (api.getEmploymentLevels as any).mockResolvedValueOnce([]);
+    (api.getJobLevels as any).mockResolvedValueOnce([]);
     (api.getEmployees as any).mockResolvedValueOnce([]);
     (api.getHolidays as any).mockResolvedValueOnce([]);
     (api.getBanks as any).mockResolvedValueOnce([]);
@@ -209,7 +209,7 @@ describe('OrgStore - Master Data Fetching', () => {
     (api.getShifts as any).mockResolvedValueOnce([]);
     (api.getPayrollSettings as any).mockResolvedValueOnce({});
     (api.getUsers as any).mockResolvedValueOnce([]);
-    (api.getEmploymentLevels as any).mockResolvedValueOnce([]);
+    (api.getJobLevels as any).mockResolvedValueOnce([]);
     (api.getEmployees as any).mockResolvedValueOnce([]);
     (api.getHolidays as any).mockResolvedValueOnce([]);
     (api.getBanks as any).mockResolvedValueOnce([]);

@@ -12,6 +12,7 @@ import {
   Play,
   AlertTriangle,
   Clock,
+  Settings as Config,
 } from 'lucide-react';
 import { Tabs } from '../../../components/ui/Tabs';
 import { TrendAnalysis } from './components/TrendAnalysis';
@@ -21,6 +22,7 @@ import { api } from '../../../services/api';
 import { useToast } from '../../../components/ui/Toast';
 import { HealthRadar } from './components/HealthRadar';
 import { SystemLogViewer } from './components/SystemLogViewer';
+import { formatDate, formatTime } from '../../../utils/formatting';
 
 const AUDIT_TABS = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -218,12 +220,9 @@ export const AuditDashboard: React.FC = () => {
       </div>
       <div className="max-w-md space-y-2">
         <h3 className="text-2xl font-black text-text-primary uppercase tracking-tight">
-          System Audit Ready
+          Ready to Audit
         </h3>
-        <p className="text-text-muted">
-          Initialize your first comprehensive system audit to generate a baseline health score and
-          identify potential risks.
-        </p>
+        <p className="text-text-muted">Start a new audit to check system health.</p>
       </div>
       <button
         onClick={runAudit}
@@ -236,7 +235,7 @@ export const AuditDashboard: React.FC = () => {
         ) : (
           <Play size={20} fill="currentColor" />
         )}
-        Run Initial Audit
+        Start Audit
       </button>
     </div>
   );
@@ -250,10 +249,10 @@ export const AuditDashboard: React.FC = () => {
             <AlertTriangle className="text-danger" size={24} />
             <div>
               <div className="font-black text-danger text-sm uppercase tracking-wider">
-                Health Regression Detected
+                Health Drop Detected
               </div>
               <div className="text-xs text-danger/80">
-                {regressions.length} dimension(s) dropped significantly since last run.
+                {regressions.length} metrics have dropped since last run.
               </div>
             </div>
           </div>
@@ -271,14 +270,12 @@ export const AuditDashboard: React.FC = () => {
       <div className="flex flex-wrap items-center justify-between gap-6">
         <div>
           <h2 className="text-3xl font-black text-text-primary uppercase tracking-tight flex items-center gap-3">
-            System Health Intelligence
+            System Audit
             <span className="text-xs px-2 py-1 bg-primary/20 text-primary rounded-md font-black tracking-widest uppercase">
               Beta
             </span>
           </h2>
-          <p className="text-sm text-text-muted mt-1">
-            Quantitative analysis across 9 dimensions of technical excellence
-          </p>
+          <p className="text-sm text-text-muted mt-1">Comprehensive system health analysis</p>
         </div>
       </div>
 
@@ -320,12 +317,12 @@ export const AuditDashboard: React.FC = () => {
           {isRunning ? (
             <>
               <RefreshCw size={14} className="animate-spin" />
-              <span>Running Logic...</span>
+              <span>Running...</span>
             </>
           ) : (
             <>
               <Play size={14} fill="currentColor" />
-              <span>Run Audit</span>
+              <span>Start Audit</span>
             </>
           )}
         </button>
@@ -370,7 +367,7 @@ export const AuditDashboard: React.FC = () => {
                     </div>
                     <div>
                       <div className="text-[0.625rem] font-black uppercase tracking-widest text-text-muted">
-                        Risk Profile
+                        Risk Level
                       </div>
                       <div
                         className={`text-2xl font-black ${getRiskColor(latestReport.risk_level)} uppercase`}
@@ -385,7 +382,7 @@ export const AuditDashboard: React.FC = () => {
                   <div className="flex justify-between items-center h-full">
                     <div className="space-y-1">
                       <div className="text-[0.625rem] font-black uppercase tracking-widest text-text-muted">
-                        Critical Violations
+                        Critical Issues
                       </div>
                       <div className="text-2xl font-black text-danger">
                         {latestReport.critical_count}
@@ -394,7 +391,7 @@ export const AuditDashboard: React.FC = () => {
                     <div className="w-px h-10 bg-border" />
                     <div className="space-y-1">
                       <div className="text-[0.625rem] font-black uppercase tracking-widest text-text-muted">
-                        Major Findings
+                        Major Issues
                       </div>
                       <div className="text-2xl font-black text-warning">
                         {latestReport.major_count}
@@ -420,8 +417,8 @@ export const AuditDashboard: React.FC = () => {
                 {/* Recent History */}
                 <div className="bg-surface border border-border rounded-3xl p-8">
                   <h3 className="text-lg font-black text-text-primary uppercase tracking-tight mb-6 flex items-center gap-3">
-                    <Clock size={20} className="text-primary" />
-                    Audit Velocity
+                    <Config size={20} className="text-primary" />
+                    Recent Audits
                   </h3>
 
                   <div className="space-y-3">
@@ -430,7 +427,7 @@ export const AuditDashboard: React.FC = () => {
                         key={report.id}
                         onClick={() => viewReport(report.id)}
                         className="w-full flex items-center justify-between p-4 rounded-2xl border border-border hover:border-primary/40 cursor-pointer transition-all bg-background/30 hover:bg-background/60 text-left"
-                        aria-label={`View report from ${new Date(report.created_at).toLocaleDateString()} with score ${report.overall_score}`}
+                        aria-label={`View report from ${formatDate(report.created_at)} with score ${report.overall_score}`}
                       >
                         <div className="flex items-center gap-4">
                           <div
@@ -442,11 +439,11 @@ export const AuditDashboard: React.FC = () => {
                           </div>
                           <div>
                             <div className="text-sm font-bold text-text-primary">
-                              {new Date(report.created_at).toLocaleDateString()}
+                              {formatDate(report.created_at)}
                             </div>
                             <div className="text-[0.625rem] font-black uppercase tracking-widest text-text-muted">
                               {report.risk_level} Risk •{' '}
-                              {report.critical_count + report.major_count} Findings
+                              {report.critical_count + report.major_count} Issues
                             </div>
                           </div>
                         </div>
@@ -504,9 +501,11 @@ export const AuditDashboard: React.FC = () => {
                       key={r.id}
                       onClick={() => loadDiff(r.id)}
                       className="w-full text-left p-3 rounded-xl border border-border hover:bg-primary/5 transition-colors flex justify-between"
-                      aria-label={`Select report from ${new Date(r.created_at).toLocaleString()}`}
+                      aria-label={`Select report from ${formatDate(r.created_at)} ${formatTime(r.created_at)}`}
                     >
-                      <span>{new Date(r.created_at).toLocaleString()}</span>
+                      <span>
+                        {formatDate(r.created_at)} {formatTime(r.created_at)}
+                      </span>
                       <span className={getScoreColor(r.overall_score)}>{r.overall_score}/5.0</span>
                     </button>
                   ))}

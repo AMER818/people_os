@@ -11,7 +11,7 @@ const BonusModal: React.FC<BonusModalProps> = ({ onClose }) => {
       <div className="bg-surface w-full max-w-xl rounded-md shadow-md border border-border overflow-hidden animate-in slide-in-from-bottom-12 duration-500">
         <div className="p-12 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-5">
-            <div className="p-4 bg-success text-white rounded-md shadow-md shadow-success/20">
+            <div className="p-4 bg-success text-white rounded-md shadow-[0_0_15px_var(--vibrant-green)]">
               <DollarSign size={24} />
             </div>
             <div>

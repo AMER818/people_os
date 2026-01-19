@@ -3,7 +3,6 @@ import {
   Plus,
   Coffee,
   FileText,
-  Search,
   Filter,
   AlertTriangle,
   Download,
@@ -24,11 +23,14 @@ import { api } from '../../services/api';
 import { HorizontalTabs } from '../../components/ui/HorizontalTabs';
 import { useModal } from '../../hooks/useModal';
 import { FormModal } from '../../components/ui/FormModal';
+import { DateInput } from '../../components/ui/DateInput';
 import { Modal } from '../../components/ui/Modal';
 import { useToast } from '../../components/ui/Toast';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { useSaveEntity } from '../../hooks/useSaveEntity';
+import { useSearch } from '../../hooks/useSearch';
+import { SearchInput } from '../../components/ui/SearchInput';
 
 type LeaveTab = 'ledger' | 'matrix' | 'forecast';
 
@@ -38,7 +40,11 @@ const Leaves: React.FC = () => {
   const confirmModal = useModal();
   const [requests, setRequests] = useState<LeaveRequest[]>([]);
   const [balances, setBalances] = useState<LeaveBalance[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const {
+    searchTerm,
+    setSearchTerm,
+    filteredData: filteredRequests,
+  } = useSearch(requests, ['employeeName']);
   const [isLoading, setIsLoading] = useState(true);
   const { success } = useToast();
 
@@ -50,6 +56,7 @@ const Leaves: React.FC = () => {
   }>({ title: '', message: '', onConfirm: () => {} });
 
   const initialRequestState = {
+    employeeId: '',
     name: '',
     type: 'Annual' as LeaveRequest['type'],
     start: '',
@@ -71,12 +78,12 @@ const Leaves: React.FC = () => {
     },
     successMessage: 'Leave request submitted successfully.',
     initialState: initialRequestState,
-    validate: (data) => !!(data.name && data.start && data.end && data.reason),
+    validate: (data) => !!(data.employeeId && data.name && data.start && data.end && data.reason),
     transform: (data) => ({
-      id: `LR-${Math.floor(Math.random() * 900) + 100}`,
-      employeeId: 'ABC01-TEMP',
+      id: '', // Placeholder for creation, backend generates actual ID
+      employeeId: data.employeeId,
       employeeName: data.name,
-      type: data.type,
+      type: data.type, // Map UI type to schema type
       startDate: data.start,
       endDate: data.end,
       status: 'Pending',
@@ -90,10 +97,15 @@ const Leaves: React.FC = () => {
 
   const loadData = async () => {
     setIsLoading(true);
-    const [reqs, bals] = await Promise.all([api.getLeaveRequests(), api.getLeaveBalances()]);
-    setRequests(reqs);
-    setBalances(bals);
-    setIsLoading(false);
+    try {
+      const [reqs, bals] = await Promise.all([api.getLeaveRequests(), api.getLeaveBalances()]);
+      setRequests(reqs);
+      setBalances(bals);
+    } catch (e) {
+      console.error('Failed to load leave data', e);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const stats = [
@@ -132,9 +144,13 @@ const Leaves: React.FC = () => {
   ];
 
   const handleAction = async (id: string, status: 'Approved' | 'Rejected') => {
-    await api.updateLeaveRequestStatus(id, status);
-    await loadData();
-    success(`Leave request ${status.toLowerCase()} successfully.`);
+    try {
+      await api.updateLeaveRequestStatus(id, status);
+      await loadData();
+      success(`Leave request ${status.toLowerCase()} successfully.`);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const renderLedger = () => (
@@ -148,13 +164,11 @@ const Leaves: React.FC = () => {
         </div>
         <div className="flex gap-4">
           <div className="relative group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted group-focus-within:text-primary transition-colors" />
-            <input
-              aria-label="Search employees"
-              className="bg-app border border-border pl-10 pr-6 py-3 rounded-md text-sm font-black outline-none w-64 text-text-primary shadow-inner"
-              placeholder="Search Employee..."
+            <SearchInput
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search Employee..."
+              className="w-64"
             />
           </div>
           <button
@@ -177,77 +191,75 @@ const Leaves: React.FC = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-border font-sans">
-            {requests
-              .filter((r) => r.employeeName.toLowerCase().includes(searchTerm.toLowerCase()))
-              .map((req, index) => (
-                <tr
-                  key={req.id}
-                  className="group hover:bg-primary-soft/50 transition-all cursor-pointer animate-in slide-in-from-bottom-2 duration-500"
-                  style={{ animationDelay: `${index * 50}ms` }}
-                >
-                  <td className="px-12 py-8">
-                    <p className="text-lg font-black text-text-primary leading-none">
-                      {req.employeeName}
-                    </p>
-                    <p className="text-[0.625rem] font-black text-primary uppercase tracking-widest mt-2">
-                      {req.employeeId}
-                    </p>
-                  </td>
-                  <td className="px-8 py-8">
-                    <span className="text-xs font-black text-text-muted uppercase tracking-widest bg-muted-bg px-4 py-1.5 rounded-sm border border-border">
-                      {req.type}
-                    </span>
-                  </td>
-                  <td className="px-8 py-8">
-                    <p className="text-sm font-black text-text-primary">{req.startDate}</p>
-                    <p className="text-[0.625rem] text-text-muted font-bold uppercase tracking-widest mt-1">
-                      to {req.endDate}
-                    </p>
-                  </td>
-                  <td className="px-8 py-8">
-                    <span
-                      className={`px-5 py-2 rounded-md text-[0.625rem] font-black uppercase tracking-widest border transition-all ${
-                        req.status === 'Approved'
-                          ? 'bg-success-soft text-success border-success/20'
-                          : req.status === 'Pending'
-                            ? 'bg-warning-soft text-warning border-warning/20 animate-pulse'
-                            : 'bg-danger-soft text-danger border-danger/20'
-                      }`}
-                    >
-                      {req.status}
-                    </span>
-                  </td>
-                  <td className="px-12 py-8 text-right">
-                    <div className="flex justify-end gap-3 transition-all">
-                      {req.status === 'Pending' ? (
-                        <>
-                          <button
-                            onClick={() => handleAction(req.id, 'Approved')}
-                            aria-label="Approve leave"
-                            className="p-3 bg-success text-white rounded-md shadow-md hover:scale-110 active:scale-90 transition-all"
-                          >
-                            <Check size={18} />
-                          </button>
-                          <button
-                            onClick={() => handleAction(req.id, 'Rejected')}
-                            aria-label="Reject leave"
-                            className="p-3 bg-danger text-white rounded-md shadow-md hover:scale-110 active:scale-90 transition-all"
-                          >
-                            <Ban size={18} />
-                          </button>
-                        </>
-                      ) : (
+            {filteredRequests.map((req, index) => (
+              <tr
+                key={req.id}
+                className="group hover:bg-primary-soft/50 transition-all cursor-pointer animate-in slide-in-from-bottom-2 duration-500"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <td className="px-12 py-8">
+                  <p className="text-lg font-black text-text-primary leading-none">
+                    {req.employeeName}
+                  </p>
+                  <p className="text-[0.625rem] font-black text-primary uppercase tracking-widest mt-2">
+                    {req.employeeId}
+                  </p>
+                </td>
+                <td className="px-8 py-8">
+                  <span className="text-xs font-black text-text-muted uppercase tracking-widest bg-muted-bg px-4 py-1.5 rounded-sm border border-border">
+                    {req.type}
+                  </span>
+                </td>
+                <td className="px-8 py-8">
+                  <p className="text-sm font-black text-text-primary">{req.startDate}</p>
+                  <p className="text-[0.625rem] text-text-muted font-bold uppercase tracking-widest mt-1">
+                    to {req.endDate}
+                  </p>
+                </td>
+                <td className="px-8 py-8">
+                  <span
+                    className={`px-5 py-2 rounded-md text-[0.625rem] font-black uppercase tracking-widest border transition-all ${
+                      req.status === 'Approved'
+                        ? 'bg-success-soft text-success border-success/20'
+                        : req.status === 'Pending'
+                          ? 'bg-warning-soft text-warning border-warning/20 animate-pulse'
+                          : 'bg-danger-soft text-danger border-danger/20'
+                    }`}
+                  >
+                    {req.status}
+                  </span>
+                </td>
+                <td className="px-12 py-8 text-right">
+                  <div className="flex justify-end gap-3 transition-all">
+                    {req.status === 'Pending' ? (
+                      <>
                         <button
-                          aria-label="View history"
-                          className="p-3 bg-muted-bg text-text-muted rounded-md hover:text-primary transition-all"
+                          onClick={() => handleAction(req.id, 'Approved')}
+                          aria-label="Approve leave"
+                          className="p-3 bg-success text-white rounded-md shadow-md hover:scale-110 active:scale-90 transition-all"
                         >
-                          <History size={18} />
+                          <Check size={18} />
                         </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                        <button
+                          onClick={() => handleAction(req.id, 'Rejected')}
+                          aria-label="Reject leave"
+                          className="p-3 bg-danger text-white rounded-md shadow-md hover:scale-110 active:scale-90 transition-all"
+                        >
+                          <Ban size={18} />
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        aria-label="View history"
+                        className="p-3 bg-muted-bg text-text-muted rounded-md hover:text-primary transition-all"
+                      >
+                        <History size={18} />
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
@@ -442,9 +454,16 @@ const Leaves: React.FC = () => {
       >
         <div className="space-y-8">
           <Input
+            label="Employee ID"
+            required
+            placeholder="e.g. EMP-001"
+            value={newRequest.employeeId}
+            onChange={(e) => updateRequestField('employeeId', e.target.value)}
+          />
+          <Input
             label="Employee Name"
             required
-            placeholder="Select Employee..."
+            placeholder="Name will be auto-fetched if possible..."
             value={newRequest.name}
             onChange={(e) => updateRequestField('name', e.target.value)}
           />
@@ -464,9 +483,8 @@ const Leaves: React.FC = () => {
                 <option value="Unpaid">Unpaid</option>
               </select>
             </div>
-            <Input
+            <DateInput
               label="Date Range"
-              type="date"
               required
               value={newRequest.start}
               onChange={(e) => {

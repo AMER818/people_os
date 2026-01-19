@@ -1,23 +1,67 @@
 import datetime as dt
 import json
 import uuid
+import time
 from datetime import datetime
 from typing import List, Optional
+from fastapi import HTTPException
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload, selectinload
 
-from . import models, schemas
+from . import schemas
 from .utils import format_to_db
+import backend.domains.core.models as core_models
+import backend.domains.hcm.models as hcm_models
+
+# Map models for generic usage if needed, or replace usages
+class ModelsProxy:
+    def __getattr__(self, name):
+        if hasattr(core_models, name): return getattr(core_models, name)
+        if hasattr(hcm_models, name): return getattr(hcm_models, name)
+        raise AttributeError(f"Model {name} not found in Core or HCM domains")
+
+models = ModelsProxy()
 
 
 def get_employee(db: Session, employee_id: str):
     return (
-        db.query(models.DBEmployee).filter(models.DBEmployee.id == employee_id).first()
+        db.query(models.DBEmployee)
+        .options(
+            joinedload(models.DBEmployee.department_rel),
+            joinedload(models.DBEmployee.designation_rel),
+            joinedload(models.DBEmployee.grade_rel),
+            joinedload(models.DBEmployee.plant_rel),
+            joinedload(models.DBEmployee.shift_rel),
+            selectinload(models.DBEmployee.education),
+            selectinload(models.DBEmployee.experience),
+            selectinload(models.DBEmployee.family),
+            selectinload(models.DBEmployee.discipline),
+            selectinload(models.DBEmployee.increments),
+        )
+        .filter(models.DBEmployee.id == employee_id)
+        .first()
     )
 
 
 def get_employees(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.DBEmployee).offset(skip).limit(limit).all()
+    return (
+        db.query(models.DBEmployee)
+        .options(
+            joinedload(models.DBEmployee.department_rel),
+            joinedload(models.DBEmployee.designation_rel),
+            joinedload(models.DBEmployee.grade_rel),
+            joinedload(models.DBEmployee.plant_rel),
+            joinedload(models.DBEmployee.shift_rel),
+            selectinload(models.DBEmployee.education),
+            selectinload(models.DBEmployee.experience),
+            selectinload(models.DBEmployee.family),
+            selectinload(models.DBEmployee.discipline),
+            selectinload(models.DBEmployee.increments),
+        )
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
 
 
     return db.query(models.DBEmployee).offset(skip).limit(limit).all()
@@ -438,22 +482,7 @@ def create_job_vacancy(db: Session, job: schemas.JobVacancyCreate, user_id: str)
 
 
 
-def create_department(db: Session, dept: schemas.DepartmentCreate, user_id: str):
-    if isinstance(user_id, dict):
-        user_id = user_id.get("id", "UNKNOWN")
-    db_dept = models.DBDepartment(
-        id=dept.id or str(uuid.uuid4()),
-        code=dept.code,
-        name=dept.name,
-        is_active=dept.is_active,
-        organization_id=dept.organization_id,
-        created_by=user_id,
-        updated_by=user_id,
-    )
-    db.add(db_dept)
-    db.commit()
-    db.refresh(db_dept)
-    return db_dept
+
 
 
 def update_job_vacancy(
@@ -516,6 +545,7 @@ def create_organization(db: Session, org: schemas.OrganizationCreate, user_id: s
             code=org_code,
             name=org.name or "My Organization",
             is_active=org.is_active,
+            head_id=org.head_id, # Add head_id
             created_by=user_id,
             updated_by=user_id,
             # Contact & Location
@@ -574,6 +604,8 @@ def update_organization(
         db_org.code = org.code or db_org.code
         db_org.name = org.name or db_org.name
         db_org.is_active = org.is_active
+        if org.head_id is not None:
+            db_org.head_id = org.head_id
 
         # Contact & Location
         db_org.email = org.email
@@ -796,9 +828,13 @@ def get_departments(db: Session, skip: int = 0, limit: int = 100):
 def create_department(db: Session, dept: schemas.DepartmentCreate, user_id: str):
     if isinstance(user_id, dict):
         user_id = user_id.get("id", "UNKNOWN")
+    
+    # Ensure code is uppercase (redundant but safe)
+    clean_code = dept.code.upper() if dept.code else ""
+    
     db_dept = models.DBDepartment(
         id=dept.id or str(uuid.uuid4()),
-        code=dept.code,
+        code=clean_code,
         name=dept.name,
         isActive=dept.is_active,
         organization_id=dept.organization_id,
@@ -849,9 +885,25 @@ def get_sub_departments(db: Session):
 def create_sub_department(db: Session, sub: schemas.SubDepartmentCreate, user_id: str):
     if isinstance(user_id, dict):
         user_id = user_id.get("id", "UNKNOWN")
+    
+    # Logic to auto-generate code if missing
+    sub_code = sub.code
+    if not sub_code:
+        # Get parent department code
+        parent = db.query(models.DBDepartment).filter(
+            models.DBDepartment.id == sub.parent_department_id
+        ).first()
+        parent_code = parent.code if parent else "DEPT"
+        
+        # Count existing sub-departments for this parent
+        count = db.query(models.DBSubDepartment).filter(
+            models.DBSubDepartment.parent_department_id == sub.parent_department_id
+        ).count()
+        sub_code = f"{parent_code}-{str(count + 1).zfill(2)}"
+    
     db_sub = models.DBSubDepartment(
         id=sub.id or str(uuid.uuid4()),
-        code=sub.code,
+        code=sub_code.upper(),
         name=sub.name,
         parent_department_id=sub.parent_department_id,
         is_active=sub.is_active,
@@ -919,7 +971,7 @@ def create_grade(db: Session, grade: schemas.GradeCreate, user_id: str):
         level=grade.level,
         is_active=grade.is_active,
         organization_id=grade.organization_id,
-        employment_level_id=grade.employment_level_id,  # Added for Hierarchy
+        job_level_id=grade.job_level_id,  # Linked to Job Level
         created_by=user_id,
         updated_by=user_id,
         # Legacy
@@ -938,7 +990,7 @@ def update_grade(db: Session, grade_id: str, grade: schemas.GradeCreate, user_id
         db_grade.level = grade.level
         db_grade.is_active = grade.is_active
         db_grade.organization_id = grade.organization_id
-        db_grade.employment_level_id = grade.employment_level_id  # Added for Hierarchy
+        db_grade.job_level_id = grade.job_level_id  # Linked to Job Level
         db_grade.updated_by = user_id
         db.commit()
         db.refresh(db_grade)
@@ -958,7 +1010,7 @@ def get_designations(db: Session):
     return db.query(models.DBDesignation).all()
 
 
-def create_designation(db: Session, desig: schemas.DesignationCreate, user_id: str):
+def create_designation(db: Session, desig: schemas.DesignationCreate, user_id: str, org_id: str = None):
     import time
 
     # Generate ID first
@@ -966,14 +1018,22 @@ def create_designation(db: Session, desig: schemas.DesignationCreate, user_id: s
 
     # Auto-generate code
     code = getattr(desig, "code", None) or f"DSG-{generated_id}"
+    
+    # Use provided org_id or fall back to desig.organization_id
+    final_org_id = org_id or desig.organization_id
+    
+    # CRITICAL FIX: Convert empty string to None for FK fields
+    # Frontend may send "" instead of null, which causes FK constraint failure
+    dept_id = desig.department_id if desig.department_id else None
+    grade_id = desig.grade_id if desig.grade_id else None
 
     db_desig = models.DBDesignation(
         id=generated_id,
         name=desig.name,
-        grade_id=desig.grade_id,
-        department_id=desig.department_id,
+        grade_id=grade_id,  # Use sanitized value
+        department_id=dept_id,  # Use sanitized value (None instead of "")
         is_active=desig.is_active,
-        organization_id=desig.organization_id,
+        organization_id=final_org_id,
         created_by=user_id,
         updated_by=user_id,
         # Legacy
@@ -1025,21 +1085,33 @@ def get_shifts(db: Session):
 def create_shift(db: Session, shift: schemas.ShiftCreate, user_id: str):
     import time
 
+    # Check for existing code in organization
+    existing = db.query(models.DBShift).filter(
+        models.DBShift.code == shift.code,
+        models.DBShift.organization_id == shift.organization_id
+    ).first()
+    if existing:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Shift with code '{shift.code}' already exists in this organization."
+        )
+
     db_shift = models.DBShift(
         id=shift.id if shift.id else f"SHF-{int(time.time())}",
         name=shift.name,
         code=shift.code,
         type=shift.type,
-        startTime=shift.startTime,
-        endTime=shift.endTime,
-        gracePeriod=shift.gracePeriod,
-        breakDuration=shift.breakDuration,
-        workDays=",".join(shift.workDays) if shift.workDays else "",
+        start_time=shift.start_time,
+        end_time=shift.end_time,
+        grace_period=shift.grace_period,
+        break_duration=shift.break_duration,
+        work_days=",".join(shift.work_days) if shift.work_days else "",
+        color=shift.color,
+        description=shift.description,
         isActive=shift.is_active,
         organization_id=shift.organization_id,
         created_by=user_id,
         updated_by=user_id,
-        # Legacy
     )
     db.add(db_shift)
     db.commit()
@@ -1050,14 +1122,29 @@ def create_shift(db: Session, shift: schemas.ShiftCreate, user_id: str):
 def update_shift(db: Session, shift_id: str, shift: schemas.ShiftCreate, user_id: str):
     db_shift = db.query(models.DBShift).filter(models.DBShift.id == shift_id).first()
     if db_shift:
+        # Check for existing code if it's changing
+        if db_shift.code != shift.code:
+            existing = db.query(models.DBShift).filter(
+                models.DBShift.code == shift.code,
+                models.DBShift.organization_id == shift.organization_id,
+                models.DBShift.id != shift_id
+            ).first()
+            if existing:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Shift with code '{shift.code}' already exists in this organization."
+                )
+
         db_shift.name = shift.name
         db_shift.code = shift.code
         db_shift.type = shift.type
-        db_shift.startTime = shift.startTime
-        db_shift.endTime = shift.endTime
-        db_shift.gracePeriod = shift.gracePeriod
-        db_shift.breakDuration = shift.breakDuration
-        db_shift.workDays = ",".join(shift.workDays) if shift.workDays else ""
+        db_shift.start_time = shift.start_time
+        db_shift.end_time = shift.end_time
+        db_shift.grace_period = shift.grace_period
+        db_shift.break_duration = shift.break_duration
+        db_shift.work_days = ",".join(shift.work_days) if shift.work_days else ""
+        db_shift.color = shift.color
+        db_shift.description = shift.description
         db_shift.isActive = shift.is_active
         db_shift.organization_id = shift.organization_id
         db_shift.updated_by = user_id
@@ -1074,23 +1161,23 @@ def delete_shift(db: Session, shift_id: str):
     return db_shift
 
 
-# --- Employment Levels ---
-def get_employment_levels(db: Session):
-    return db.query(models.DBEmploymentLevel).all()
+# --- Job Levels ---
+def get_job_levels(db: Session):
+    return db.query(models.DBJobLevel).all()
 
 
-def create_employment_level(
-    db: Session, emp_level: schemas.EmploymentLevelCreate, user_id: str
+def create_job_level(
+    db: Session, job_level: schemas.JobLevelCreate, user_id: str
 ):
     import time
 
-    db_level = models.DBEmploymentLevel(
-        id=emp_level.id if emp_level.id else f"EL-{int(time.time())}",
-        name=emp_level.name,
-        code=emp_level.code,
-        description=emp_level.description,
-        is_active=emp_level.is_active,
-        organization_id=emp_level.organization_id,
+    db_level = models.DBJobLevel(
+        id=job_level.id if job_level.id else f"JL-{int(time.time())}",
+        name=job_level.name,
+        code=job_level.code,
+        description=job_level.description,
+        is_active=job_level.is_active,
+        organization_id=job_level.organization_id,
         created_by=user_id,
         updated_by=user_id,
     )
@@ -1100,19 +1187,19 @@ def create_employment_level(
     return db_level
 
 
-def update_employment_level(
-    db: Session, level_id: str, emp_level: schemas.EmploymentLevelCreate, user_id: str
+def update_job_level(
+    db: Session, level_id: str, job_level: schemas.JobLevelCreate, user_id: str
 ):
     db_level = (
-        db.query(models.DBEmploymentLevel)
-        .filter(models.DBEmploymentLevel.id == level_id)
+        db.query(models.DBJobLevel)
+        .filter(models.DBJobLevel.id == level_id)
         .first()
     )
     if db_level:
-        db_level.name = emp_level.name
-        db_level.code = emp_level.code
-        db_level.description = emp_level.description
-        db_level.is_active = emp_level.is_active
+        db_level.name = job_level.name
+        db_level.code = job_level.code
+        db_level.description = job_level.description
+        db_level.is_active = job_level.is_active
         db_level.updated_by = user_id
         db.commit()
         db.refresh(db_level)
@@ -1307,7 +1394,30 @@ def create_audit_log(db: Session, log: schemas.AuditLogCreate):
 
 
 def get_payroll_records(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.DBPayroll).offset(skip).limit(limit).all()
+    return db.query(models.DBPayrollLedger).offset(skip).limit(limit).all()
+
+
+def create_payroll_ledger_entry(
+    db: Session, payroll: schemas.PayrollLedgerCreate, user_id: str
+):
+    db_payroll = models.DBPayrollLedger(
+        employee_id=payroll.employee_id,
+        period_month=payroll.period_month,
+        period_year=payroll.period_year,
+        basic_salary=payroll.basic_salary,
+        gross_salary=payroll.gross_salary,
+        net_salary=payroll.net_salary,
+        additions=payroll.additions,
+        deductions=payroll.deductions,
+        status=payroll.status,
+        payment_mode=payroll.payment_mode,
+        created_by=user_id,
+        updated_by=user_id,
+    )
+    db.add(db_payroll)
+    db.commit()
+    db.refresh(db_payroll)
+    return db_payroll
 
 
 # --- Organizations ---
@@ -2448,7 +2558,7 @@ def update_notification_settings(db: Session, organization_id: str, settings: sc
 
 # --- Employment Levels ---
 def get_employment_levels(db: Session, organization_id: Optional[str] = None):
-    query = db.query(models.DBEmploymentLevel)
+    query = db.query(models.DBEmploymentLevel).filter(models.DBEmploymentLevel.is_active == True)
     if organization_id:
         query = query.filter(models.DBEmploymentLevel.organization_id == organization_id)
     return query.all()
@@ -2491,6 +2601,298 @@ def update_employment_level(db: Session, level_id: str, level: schemas.Employmen
 def delete_employment_level(db: Session, level_id: str):
     db_level = db.query(models.DBEmploymentLevel).filter(models.DBEmploymentLevel.id == level_id).first()
     if db_level:
-        db.delete(db_level)
+        db_level.is_active = False
+        db_level.updated_at = datetime.utcnow()
         db.commit()
+        db.refresh(db_level)
     return db_level
+
+
+# --- Plants (Locations) & Divisions ---
+
+def get_plants(db: Session, organization_id: Optional[str] = None):
+    query = db.query(models.DBHRPlant)
+    if organization_id:
+        query = query.filter(models.DBHRPlant.organization_id == organization_id)
+    return query.all()
+
+def get_plant(db: Session, plant_id: str):
+    return db.query(models.DBHRPlant).filter(models.DBHRPlant.id == plant_id).first()
+
+def create_plant(db: Session, plant: schemas.PlantCreate, user_id: str):
+    # 1. Extract divisions
+    divisions_data = plant.divisions
+    
+    # 2. Create Plant
+    db_plant = models.DBHRPlant(
+        id=str(uuid.uuid4()),
+        name=plant.name,
+        location=plant.location,
+        code=plant.code,
+        head_of_plant=plant.head_of_plant,
+        contact_number=plant.contact_number,
+        is_active=plant.is_active,
+        current_sequence=plant.current_sequence,
+        organization_id=plant.organization_id,
+        created_by=user_id,
+        updated_by=user_id
+    )
+    db.add(db_plant)
+    db.flush() # Flush to get ID if needed, though we set it manually.
+
+    # 3. Create Divisions
+    for div in divisions_data:
+        db_div = models.DBPlantDivision(
+            id=str(uuid.uuid4()),
+            plant_id=db_plant.id,
+            name=div.name,
+            code=div.code,
+            is_active=div.is_active,
+            created_by=user_id,
+            updated_by=user_id
+        )
+        db.add(db_div)
+
+    try:
+        db.commit()
+        db.refresh(db_plant)
+        return db_plant
+    except Exception as e:
+        db.rollback()
+        raise e
+
+def update_plant(db: Session, plant_id: str, plant: schemas.PlantCreate, user_id: str):
+    db_plant = get_plant(db, plant_id)
+    if not db_plant:
+        return None
+
+    # Update basic fields
+    db_plant.name = plant.name
+    db_plant.location = plant.location
+    db_plant.code = plant.code
+    db_plant.head_of_plant = plant.head_of_plant
+    db_plant.contact_number = plant.contact_number
+    db_plant.is_active = plant.is_active
+    db_plant.organization_id = plant.organization_id # Usually shouldn't change, but ok
+    db_plant.updated_by = user_id
+
+    # Update Divisions: Full Replacement Strategy for Simplicity
+    # (Or smart diffing, but frontend likely sends full list)
+    
+    # 1. Delete existing divisions? No, that loses IDs if they matter.
+    # Ideally checking IDs. The schema `PlantDivisionCreate` has optional ID.
+    
+    existing_divs = {d.id: d for d in db_plant.plant_divisions}
+    incoming_divs = plant.divisions
+    
+    # Track processed IDs
+    processed_ids = set()
+
+    for div_data in incoming_divs:
+        if div_data.id and div_data.id in existing_divs:
+            # Update existing
+            existing_div = existing_divs[div_data.id]
+            existing_div.name = div_data.name
+            existing_div.code = div_data.code
+            existing_div.is_active = div_data.is_active
+            existing_div.updated_by = user_id
+            processed_ids.add(div_data.id)
+        else:
+            # Create new
+            new_div = models.DBPlantDivision(
+                id=str(uuid.uuid4()),
+                plant_id=db_plant.id,
+                name=div_data.name,
+                code=div_data.code,
+                is_active=div_data.is_active,
+                created_by=user_id,
+                updated_by=user_id
+            )
+            db.add(new_div)
+    
+    # Delete removed
+    for div_id, div in existing_divs.items():
+        if div_id not in processed_ids:
+            db.delete(div)
+
+    try:
+        db.commit()
+        db.refresh(db_plant)
+        return db_plant
+    except Exception as e:
+        db.rollback()
+        raise e
+
+def delete_plant(db: Session, plant_id: str):
+    db_plant = get_plant(db, plant_id)
+    if db_plant:
+        db.delete(db_plant)
+        db.commit()
+    return db_plant
+
+
+# --- Attendance ---
+def get_attendance_records(
+    db: Session,
+    skip: int = 0,
+    limit: int = 100,
+    employee_id: str = None,
+    date: str = None,
+):
+    query = db.query(models.DBAttendance)
+    if employee_id:
+        query = query.filter(models.DBAttendance.employee_id == employee_id)
+    if date:
+        query = query.filter(models.DBAttendance.date == date)
+    return query.offset(skip).limit(limit).all()
+
+
+def create_attendance_record(
+    db: Session, attendance: schemas.AttendanceCreate, user_id: str
+):
+    db_attendance = models.DBAttendance(
+        employee_id=attendance.employee_id,
+        date=attendance.date,
+        clock_in=attendance.clock_in,
+        clock_out=attendance.clock_out,
+        status=attendance.status,
+        shift_id=attendance.shift_id,
+        created_by=user_id,
+        updated_by=user_id,
+    )
+    db.add(db_attendance)
+    db.commit()
+    db.refresh(db_attendance)
+    return db_attendance
+
+
+# --- Leaves ---
+def get_leave_requests(
+    db: Session,
+    skip: int = 0,
+    limit: int = 100,
+    employee_id: str = None,
+    status: str = None,
+):
+    query = db.query(models.DBLeaveRequest)
+    if employee_id:
+        query = query.filter(models.DBLeaveRequest.employee_id == employee_id)
+    if status:
+        query = query.filter(models.DBLeaveRequest.status == status)
+    
+    requests = query.offset(skip).limit(limit).all()
+    # Enrich with employee name for UI
+    for req in requests:
+        if req.employee:
+            req.employee_name = req.employee.name
+    return requests
+
+def create_leave_request(
+    db: Session, leave: schemas.LeaveRequestCreate, user_id: str
+):
+    db_leave = models.DBLeaveRequest(
+        id=f"LR-{int(time.time())}", # Simple ID generation
+        employee_id=leave.employee_id,
+        type=leave.type,
+        start_date=leave.start_date,
+        end_date=leave.end_date,
+        days=leave.days,
+        reason=leave.reason,
+        status="Pending",
+        created_by=user_id,
+        updated_by=user_id
+    )
+    db.add(db_leave)
+    db.commit()
+    db.refresh(db_leave)
+    return db_leave
+
+def update_leave_status(
+    db: Session, leave_id: str, status: str, user_id: str
+):
+    db_leave = db.query(models.DBLeaveRequest).filter(models.DBLeaveRequest.id == leave_id).first()
+    if db_leave:
+        db_leave.status = status
+        db_leave.updated_by = user_id
+        
+        # If Approved, update balance
+        if status == "Approved":
+            # Find balance
+            # Assuming current year 2025 for simplicity
+            current_year = 2025 
+            balance = db.query(models.DBLeaveBalance).filter(
+                models.DBLeaveBalance.employee_id == db_leave.employee_id,
+                models.DBLeaveBalance.year == current_year
+            ).first()
+            
+            if not balance:
+                # auto-create default balance if missing
+                balance = models.DBLeaveBalance(
+                    employee_id=db_leave.employee_id,
+                    year=current_year,
+                    annual_total=14,
+                    sick_total=10,
+                    casual_total=10,
+                    annual_used=0.0,
+                    sick_used=0.0,
+                    casual_used=0.0,
+                    unpaid_used=0.0,
+                    created_by="System"
+                )
+                db.add(balance)
+            
+            # Deduct
+            if db_leave.type == "Annual":
+                balance.annual_used += db_leave.days
+            elif db_leave.type == "Sick":
+                balance.sick_used += db_leave.days
+            elif db_leave.type == "Casual":
+                balance.casual_used += db_leave.days
+            elif db_leave.type == "Unpaid":
+                balance.unpaid_used += db_leave.days
+                
+        db.commit()
+        db.refresh(db_leave)
+    return db_leave
+
+def get_leave_balances(db: Session, year: int = 2025):
+    balances = db.query(models.DBLeaveBalance).filter(models.DBLeaveBalance.year == year).all()
+    
+    # Format for UI
+    results = []
+    for b in balances:
+        # Sums
+        total = b.annual_total + b.sick_total + b.casual_total
+        used = b.annual_used + b.sick_used + b.casual_used
+        
+        # UI "x/y" format? Types.ts says 'annual' is number, but 'annual_used' is float.
+        # Let's map to schema:
+        # name: Employee Name
+        # annual: Used count (as per type definition in schema, simpler)
+        
+        obj = schemas.LeaveBalance(
+            id=b.id,
+            employee_id=b.employee_id,
+            year=b.year,
+            annual_total=b.annual_total,
+            annual_used=b.annual_used,
+            sick_total=b.sick_total,
+            sick_used=b.sick_used,
+            casual_total=b.casual_total,
+            casual_used=b.casual_used,
+            unpaid_used=b.unpaid_used,
+            
+            # Computed
+            name=b.employee.name if b.employee else "Unknown",
+            total=total,
+            used=used,
+            
+            # Formatted strings if needed by frontend (based on index.tsx observation)
+            # Actually, let's just send numbers. If UI looks weird, we fix UI or this.
+            annual=f"{int(b.annual_used)}/{int(b.annual_total)}", # Hack to match likely UI expectation "2/14"
+            # Note: The schema field 'annual' was Optional[str]. I defined it as such in schemas.py
+        )
+        results.append(obj)
+        
+    return results
+

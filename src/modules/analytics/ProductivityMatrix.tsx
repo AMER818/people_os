@@ -20,7 +20,7 @@ const ProductivityMatrix: React.FC<ProductivityMatrixProps> = ({ data }) => {
     <div
       role="region"
       aria-label="Productivity Matrix Chart"
-      className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col min-h-[31.25rem]"
+      className="bg-card rounded-[2rem] border border-border shadow-2xl overflow-hidden flex flex-col min-h-[31.25rem]"
     >
       <div className="p-14 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/20 backdrop-blur-3xl">
         <div>

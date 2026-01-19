@@ -12,7 +12,9 @@ import {
   MessageSquare,
   Ban,
 } from 'lucide-react';
+import { VibrantBadge } from '../../components/ui/VibrantBadge';
 import { Candidate } from '../../types';
+import { formatTime } from '../../utils/formatting';
 
 import { useOrgStore } from '../../store/orgStore';
 
@@ -52,7 +54,7 @@ const CandidateAuditModal: React.FC<CandidateAuditModalProps> = ({ candidate, on
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/80 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="bg-white dark:bg-slate-900 w-full max-w-5xl rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-card w-full max-w-5xl rounded-[2.5rem] shadow-2xl border border-border overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="bg-slate-950 p-10 flex items-center justify-between relative overflow-hidden shrink-0">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-transparent"></div>
@@ -66,12 +68,10 @@ const CandidateAuditModal: React.FC<CandidateAuditModalProps> = ({ candidate, on
                 {candidate.firstName} {candidate.lastName}
               </h3>
               <div className="flex flex-wrap items-center gap-4 mt-4">
-                <span className="text-info font-black text-[0.6875rem] uppercase tracking-[0.2em] bg-blue-400/10 px-4 py-2 rounded-xl border border-blue-400/20">
-                  {candidate.id}
-                </span>
-                <span className="text-success font-black text-[0.6875rem] uppercase tracking-[0.2em] flex items-center gap-2 bg-emerald-400/10 px-4 py-2 rounded-xl border border-emerald-400/20">
-                  <CheckCircle size={14} /> VETTING COMPLETE
-                </span>
+                <VibrantBadge color="blue">{candidate.id}</VibrantBadge>
+                <VibrantBadge color="green">
+                  <CheckCircle size={14} className="mr-1" /> VETTING COMPLETE
+                </VibrantBadge>
               </div>
             </div>
           </div>
@@ -87,7 +87,7 @@ const CandidateAuditModal: React.FC<CandidateAuditModalProps> = ({ candidate, on
         <div className="flex-1 overflow-y-auto p-10 grid grid-cols-1 lg:grid-cols-3 gap-10 custom-scrollbar">
           <div className="lg:col-span-2 space-y-10">
             {/* AI Analysis Section */}
-            <div className="bg-slate-50 dark:bg-slate-950/50 rounded-[2rem] p-8 border border-slate-100 dark:border-slate-800">
+            <div className="bg-muted rounded-[2rem] p-8 border border-border">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <div className="p-3 bg-purple-100 dark:bg-purple-900/30 text-purple-600 rounded-xl">
@@ -111,11 +111,11 @@ const CandidateAuditModal: React.FC<CandidateAuditModalProps> = ({ candidate, on
                 </button>
               </div>
               {aiAnalysis ? (
-                <div className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed animate-in fade-in duration-500 p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                <div className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed animate-in fade-in duration-500 p-6 bg-card rounded-2xl border border-border shadow-sm">
                   {aiAnalysis}
                 </div>
               ) : (
-                <div className="text-center py-12 text-slate-400 text-xs uppercase tracking-widest font-bold border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">
+                <div className="text-center py-12 text-muted-foreground text-xs uppercase tracking-widest font-bold border-2 border-dashed border-border rounded-2xl">
                   No Analysis Generated
                 </div>
               )}
@@ -135,7 +135,7 @@ const CandidateAuditModal: React.FC<CandidateAuditModalProps> = ({ candidate, on
                   { act: 'Initial Screening', time: 'Jul 20, 10:16 AM', status: 'Done' },
                   aiAnalysis && {
                     act: 'AI Audit Completed',
-                    time: new Date().toLocaleTimeString(),
+                    time: formatTime(new Date()),
                     status: 'Done',
                   },
                   { act: 'Interview Scheduled', time: 'Jul 22, 02:00 PM', status: 'Pending' },
@@ -143,7 +143,7 @@ const CandidateAuditModal: React.FC<CandidateAuditModalProps> = ({ candidate, on
                   .filter(Boolean)
                   .map((step: any, i) => (
                     <div key={i} className="relative group">
-                      <div className="absolute -left-[2.5625rem] top-1 w-4 h-4 rounded-full bg-white dark:bg-slate-900 border-4 border-indigo-500 shadow-lg group-hover:scale-125 transition-transform"></div>
+                      <div className="absolute -left-[2.5625rem] top-1 w-4 h-4 rounded-full bg-card border-4 border-indigo-500 shadow-lg group-hover:scale-125 transition-transform"></div>
                       <div className="flex items-center gap-3">
                         <HistoryIcon size={16} className="text-indigo-400" />
                         <p className="text-lg font-bold text-slate-800 dark:text-white">
@@ -160,13 +160,13 @@ const CandidateAuditModal: React.FC<CandidateAuditModalProps> = ({ candidate, on
           </div>
 
           <div className="space-y-8">
-            <div className="bg-slate-50 dark:bg-slate-950 p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800">
+            <div className="bg-muted p-8 rounded-[2rem] border border-border">
               <h5 className="text-[0.625rem] font-black uppercase tracking-[0.3em] text-slate-400 mb-6">
                 Contact Info
               </h5>
               <div className="space-y-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-white dark:bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 shadow-sm">
+                  <div className="w-10 h-10 bg-card rounded-xl flex items-center justify-center text-slate-400 shadow-sm">
                     <Mail size={18} />
                   </div>
                   <div>
@@ -177,7 +177,7 @@ const CandidateAuditModal: React.FC<CandidateAuditModalProps> = ({ candidate, on
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-white dark:bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 shadow-sm">
+                  <div className="w-10 h-10 bg-card rounded-xl flex items-center justify-center text-slate-400 shadow-sm">
                     <Phone size={18} />
                   </div>
                   <div>
@@ -191,10 +191,10 @@ const CandidateAuditModal: React.FC<CandidateAuditModalProps> = ({ candidate, on
             </div>
 
             <div className="space-y-4">
-              <button className="w-full py-5 bg-slate-900 dark:bg-primary text-white rounded-[1.5rem] font-black uppercase text-[0.625rem] tracking-widest shadow-xl flex items-center justify-center gap-3 hover:scale-105 transition-all">
+              <button className="w-full py-5 bg-foreground dark:bg-primary text-background dark:text-primary-foreground rounded-[1.5rem] font-black uppercase text-[0.625rem] tracking-widest shadow-xl flex items-center justify-center gap-3 hover:scale-105 transition-all">
                 <Check size={16} /> Approve Candidate
               </button>
-              <button className="w-full py-5 bg-white dark:bg-slate-800 text-slate-500 rounded-[1.5rem] font-black uppercase text-[0.625rem] tracking-widest shadow-lg flex items-center justify-center gap-3 hover:scale-105 transition-all">
+              <button className="w-full py-5 bg-card text-slate-500 rounded-[1.5rem] font-black uppercase text-[0.625rem] tracking-widest shadow-lg flex items-center justify-center gap-3 hover:scale-105 transition-all">
                 <MessageSquare size={16} /> Send Message
               </button>
               <button className="w-full py-5 bg-rose-50 dark:bg-rose-900/10 text-danger rounded-[1.5rem] font-black uppercase text-[0.625rem] tracking-widest flex items-center justify-center gap-3 hover:bg-rose-100 dark:hover:bg-rose-900/20 transition-all">

@@ -7,12 +7,13 @@ import sqlite3
 import os
 
 # Database path
-DB_PATH = os.path.join(os.path.dirname(__file__), "data", "hunzal_hcm.db")
+DB_PATH = os.path.join(os.path.dirname(__file__), "data", "people_os.db")
 
 # Define migrations: table -> list of (column_name, column_definition)
 MIGRATIONS = {
-    "organizations": [
+    "core_organizations": [
         ("is_active", "INTEGER DEFAULT 1"),
+        ("head_id", "TEXT"),
     ],
     "grades": [
         ("is_active", "INTEGER DEFAULT 1"),
@@ -74,7 +75,7 @@ MIGRATIONS = {
         ("created_by", "TEXT"),
         ("updated_by", "TEXT"),
     ],
-    "employees": [
+    "hcm_employees": [
         ("employee_code", "TEXT"),
         ("created_at", "TEXT"),
         ("updated_at", "TEXT"),
@@ -122,10 +123,16 @@ def migrate():
 
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
+    
+    # DEBUG: List all tables available
+    print("🔎 DEBUG: Tables in DB:")
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    print([r[0] for r in cursor.fetchall()])
 
     print("=" * 50)
     print("🔄 Starting Database Migration")
     print("=" * 50)
+    print(f"Targeting: {DB_PATH}")
 
     total_added = 0
 

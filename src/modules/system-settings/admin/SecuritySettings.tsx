@@ -39,11 +39,9 @@ const SecuritySettings: React.FC = () => {
       {/* Header Section */}
       <div className="flex flex-col gap-1">
         <h2 className="text-xl font-black text-text-primary uppercase tracking-tight flex items-center gap-2">
-          <Shield className="text-primary w-6 h-6" /> Security Intelligence
+          <Shield className="text-primary w-6 h-6" /> Security Settings
         </h2>
-        <p className="text-sm text-text-muted font-medium">
-          Manage advanced authentication and cryptographic protocols.
-        </p>
+        <p className="text-sm text-text-muted font-medium">Manage system security and access.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -56,10 +54,10 @@ const SecuritySettings: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-base font-black text-text-primary uppercase tracking-tight">
-                  MFA Enforcement
+                  Multi-Factor Authentication
                 </h3>
                 <p className="text-[0.65rem] text-text-muted font-bold uppercase tracking-widest mt-1">
-                  Multi-Factor Authentication
+                  MFA Enforcement
                 </p>
               </div>
             </div>
@@ -88,21 +86,21 @@ const SecuritySettings: React.FC = () => {
         <div className="bg-surface/50 backdrop-blur-xl border border-border/50 rounded-2xl p-6 hover:border-primary/30 transition-all group">
           <div className="flex items-start justify-between mb-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary group-hover:scale-110 transition-transform">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
                 <Fingerprint size={24} />
               </div>
               <div>
                 <h3 className="text-base font-black text-text-primary uppercase tracking-tight">
-                  Biometric Auth
+                  Biometric Authentication
                 </h3>
                 <p className="text-[0.65rem] text-text-muted font-bold uppercase tracking-widest mt-1">
-                  FaceID & TouchID Integration
+                  Enable FaceID & TouchID
                 </p>
               </div>
             </div>
             <button
               onClick={() => toggleFlag('biometrics_required')}
-              className={`w-12 h-6 rounded-full transition-all relative ${systemFlags.biometrics_required ? 'bg-secondary' : 'bg-muted-bg'}`}
+              className={`w-12 h-6 rounded-full transition-all relative ${systemFlags.biometrics_required ? 'bg-primary' : 'bg-muted-bg'}`}
             >
               <div
                 className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${systemFlags.biometrics_required ? 'left-7' : 'left-1'}`}
@@ -126,21 +124,21 @@ const SecuritySettings: React.FC = () => {
           <Globe className="absolute -right-4 -bottom-4 w-24 h-24 opacity-5 rotate-12" />
           <div className="flex items-start justify-between mb-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500">
+              <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center text-warning">
                 <Globe size={24} />
               </div>
               <div>
                 <h3 className="text-base font-black text-text-primary uppercase tracking-tight">
-                  Geo-Fencing
+                  Location Restrictions
                 </h3>
                 <p className="text-[0.65rem] text-text-muted font-bold uppercase tracking-widest mt-1">
-                  IP & Domain RESTRICTIONS
+                  IP & Domain Restrictions
                 </p>
               </div>
             </div>
             <button
               onClick={() => toggleFlag('ip_whitelisting')}
-              className={`w-12 h-6 rounded-full transition-all relative ${systemFlags.ip_whitelisting ? 'bg-orange-500 shadow-lg shadow-orange-500/20' : 'bg-muted-bg'}`}
+              className={`w-12 h-6 rounded-full transition-all relative ${systemFlags.ip_whitelisting ? 'bg-warning shadow-lg shadow-warning/20' : 'bg-muted-bg'}`}
             >
               <div
                 className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${systemFlags.ip_whitelisting ? 'left-7' : 'left-1'}`}
@@ -151,7 +149,7 @@ const SecuritySettings: React.FC = () => {
             Restrict system access to known corporate IP ranges. Highly recommended for production
             environments to prevent unauthorized login attempts.
           </p>
-          <button className="text-[0.6rem] font-black text-orange-500 uppercase tracking-widest hover:underline flex items-center gap-1">
+          <button className="text-[0.6rem] font-black text-warning uppercase tracking-widest hover:underline flex items-center gap-1">
             Manage Whitelist <Lock size={10} />
           </button>
         </div>
@@ -160,7 +158,7 @@ const SecuritySettings: React.FC = () => {
         <div className="bg-surface/50 backdrop-blur-xl border border-border/50 rounded-2xl p-6 hover:border-primary/30 transition-all group">
           <div className="flex items-start justify-between mb-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
+              <div className="w-12 h-12 rounded-xl bg-info/10 flex items-center justify-center text-info">
                 <RefreshCw
                   size={24}
                   className="group-hover:rotate-180 transition-transform duration-700"
@@ -171,16 +169,16 @@ const SecuritySettings: React.FC = () => {
                   className="text-base font-black text-text-primary uppercase tracking-tight"
                   title="Session Isolation"
                 >
-                  Concurrent Auth
+                  Concurrent Sessions
                 </h3>
                 <p className="text-[0.65rem] text-text-muted font-bold uppercase tracking-widest mt-1">
-                  Session Isolation
+                  Prevent multiple simultaneous logins.
                 </p>
               </div>
             </div>
             <button
               onClick={() => toggleFlag('session_isolation')}
-              className={`w-12 h-6 rounded-full transition-all relative ${systemFlags.session_isolation ? 'bg-blue-500 shadow-lg shadow-blue-500/20' : 'bg-muted-bg'}`}
+              className={`w-12 h-6 rounded-full transition-all relative ${systemFlags.session_isolation ? 'bg-info shadow-lg shadow-info/20' : 'bg-muted-bg'}`}
             >
               <div
                 className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${systemFlags.session_isolation ? 'left-7' : 'left-1'}`}
@@ -191,7 +189,7 @@ const SecuritySettings: React.FC = () => {
             Prevent multiple simultaneous logins for the same administrative credential. If enabled,
             a new login will invalidate any previous active sessions.
           </p>
-          <div className="flex items-center gap-2 px-3 py-2 bg-muted-bg/30 rounded-lg border border-border/50 text-blue-400">
+          <div className="flex items-center gap-2 px-3 py-2 bg-muted-bg/30 rounded-lg border border-border/50 text-info">
             <Shield size={12} />
             <span className="text-[0.65rem] font-bold uppercase tracking-widest">
               State Persistence Active
@@ -202,7 +200,7 @@ const SecuritySettings: React.FC = () => {
         {/* Controls Grid */}
         <div className="bg-surface/50 backdrop-blur-xl border border-border/50 rounded-2xl p-6 hover:border-primary/30 transition-all">
           <h3 className="text-xs font-black text-text-primary uppercase tracking-widest mb-6 flex items-center gap-2">
-            <Key size={14} className="text-primary" /> Session & Policy Controls
+            <Key size={14} className="text-primary" /> Session Settings
           </h3>
 
           <div className="space-y-6">
@@ -229,7 +227,7 @@ const SecuritySettings: React.FC = () => {
 
             <div className="space-y-2">
               <label className="text-[0.65rem] font-black text-text-muted uppercase tracking-widest">
-                Password Complexity
+                Password Requirements
               </label>
               <select
                 value={systemFlags.password_complexity || 'Standard'}
@@ -250,11 +248,11 @@ const SecuritySettings: React.FC = () => {
       <div className="bg-surface/50 backdrop-blur-xl border border-border/50 rounded-2xl p-6">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-sm font-black text-text-primary uppercase tracking-tight flex items-center gap-2">
-            <RefreshCw size={16} className="text-primary animate-spin-slow" /> Neural Governance
+            <RefreshCw size={16} className="text-primary animate-spin-slow" /> Advanced Security
           </h3>
           <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full">
             <span className="text-[0.6rem] font-black text-primary uppercase tracking-widest">
-              AI Supervised
+              Active
             </span>
           </div>
         </div>
@@ -263,14 +261,14 @@ const SecuritySettings: React.FC = () => {
           {[
             {
               id: 'neural_bypass',
-              label: 'Neural Bypass',
-              desc: 'Allow AI to override blocked logins',
+              label: 'Security Bypass',
+              desc: 'Allow bypassing strict security checks',
             },
-            { id: 'api_caching', label: 'API Edge Caching', desc: 'Secure local edge performance' },
+            { id: 'api_caching', label: 'API Caching', desc: 'Secure local edge performance' },
             {
               id: 'immutable_logs',
-              label: 'Immutable Logs',
-              desc: 'Blockchain-backed audit trails',
+              label: 'Secure Logs',
+              desc: 'Tamper-proof audit logs',
             },
           ].map((item) => (
             <div

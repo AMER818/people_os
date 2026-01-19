@@ -8,7 +8,7 @@ def get_project_root() -> Path:
 
 
 def init_db():
-    db_path = get_project_root() / "backend" / "data" / "hunzal_hcm.db"
+    db_path = get_project_root() / "backend" / "data" / "people_os.db"
     db_path.parent.mkdir(parents=True, exist_ok=True)
 
     print(f"Initializing database at {db_path}...")
