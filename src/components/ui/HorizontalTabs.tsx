@@ -36,6 +36,8 @@ export const HorizontalTabs: React.FC<HorizontalTabsProps> = ({
   return (
     <div className={`w-full flex ${alignClass} mb-10 ${className}`}>
       <div
+        role="tablist"
+        aria-label="Content Navigation"
         className={`
                 bg-surface/30 backdrop-blur-md border border-border/50 p-1.5 rounded-[2rem] flex items-center gap-1 shadow-2xl max-w-full
                 ${wrap ? `flex-wrap ${alignClass}` : 'overflow-x-auto no-scrollbar flex-nowrap'}

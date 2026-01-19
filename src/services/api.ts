@@ -112,7 +112,7 @@ class ApiService {
 
   constructor() {
     this.rateLimiter = new RateLimiter(100, 60000); // 100 requests per minute
-    this.apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+    this.apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
     this.authToken = secureStorage.getItem('token');
 
     // One-time cache clear to ensure migration to DB-only source.

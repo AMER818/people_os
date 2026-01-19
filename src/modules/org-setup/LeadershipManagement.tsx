@@ -92,16 +92,20 @@ const LeadershipManagement: React.FC = () => {
   }) => (
     <div className="w-full">
       {label && (
-        <label className="block text-xs font-medium text-text-secondary mb-1">{label}</label>
+        <label htmlFor={id} className="block text-xs font-medium text-text-secondary mb-1">
+          {label}
+        </label>
       )}
       <div className="relative">
         <select
+          id={id}
           className={`appearance-none block w-full pl-3 pr-8 py-2 text-sm bg-bg border border-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-sm transition-all hover:bg-surface disabled:opacity-50 ${
             savingId === id ? 'animate-pulse' : ''
           }`}
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
           disabled={savingId === id}
+          aria-label={label || 'Select Employee'}
         >
           <option value="" className="text-text-muted">
             Select Leader...

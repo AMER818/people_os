@@ -61,6 +61,7 @@ class AILayerAnalyzer:
             if "node_modules" not in str(f)
             and "venv" not in str(f)
             and ".venv" not in str(f)
+            and "audit" not in str(f)
         ]
 
         # Use AST analysis for each file
@@ -142,8 +143,8 @@ class AILayerAnalyzer:
                 ):
                     metrics["context_limits"] += 1
 
-                # Fallback behavior (check for try-except with default responses)
-                if re.search(r"except.*:.*(return|response)\s", content):
+                # Fallback behavior (check for try-except/catch with default responses)
+                if re.search(r"(except|catch).*[:\{].*(return|response|throw|Logger\.error)", content, re.DOTALL | re.IGNORECASE):
                     metrics["fallback_behavior"] += 1
 
             except Exception as e:

@@ -63,6 +63,7 @@ const SystemHealth: React.FC = () => {
               onClick={() => runCycle()}
               className="p-3 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all group backdrop-blur-xl"
               title="Run Evolution Cycle"
+              aria-label="Run Evolution Cycle"
             >
               <RefreshCw
                 size={18}

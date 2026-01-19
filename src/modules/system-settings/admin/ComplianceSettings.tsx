@@ -32,7 +32,7 @@ const ComplianceSettings: React.FC = () => {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="bg-surface border border-border rounded-xl p-6 shadow-sm">
         <div className="flex items-center gap-4 mb-6">
-          <div className="p-3 bg-indigo-500/10 text-indigo-500 rounded-xl">
+          <div className="p-3 bg-indigo-500/10 text-indigo-500 rounded-xl" aria-hidden="true">
             <Scale size={24} />
           </div>
           <div>
@@ -46,6 +46,7 @@ const ComplianceSettings: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-4">
             <DateInput
+              id="tax-year-end"
               label="Tax Year End"
               value={localSettings.taxYear || ''}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -53,6 +54,7 @@ const ComplianceSettings: React.FC = () => {
               }
             />
             <Input
+              id="min-wage"
               label="Minimum Wage (PKR)"
               type="number"
               value={localSettings.minWage?.toString() || '0'}
@@ -63,6 +65,7 @@ const ComplianceSettings: React.FC = () => {
           </div>
           <div className="space-y-4">
             <Input
+              id="eobi-rate"
               label="EOBI Rate (%)"
               type="number"
               step="0.1"
@@ -72,6 +75,7 @@ const ComplianceSettings: React.FC = () => {
               }
             />
             <Input
+              id="social-security-rate"
               label="Social Security Rate (%)"
               type="number"
               step="0.1"
@@ -87,8 +91,12 @@ const ComplianceSettings: React.FC = () => {
         </div>
 
         <div className="mt-8 flex justify-end">
-          <Button onClick={handleSave} className="font-black uppercase tracking-widest">
-            <Save size={16} className="mr-2" /> Save Settings
+          <Button
+            onClick={handleSave}
+            className="font-black uppercase tracking-widest"
+            aria-label="Save compliance settings"
+          >
+            <Save size={16} className="mr-2" aria-hidden="true" /> Save Settings
           </Button>
         </div>
       </div>

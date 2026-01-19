@@ -258,6 +258,8 @@ const DepartmentManagement: React.FC<DepartmentManagementProps> = React.memo(({ 
                             : 'text-border cursor-default opacity-50'
                         }`}
                         disabled={!hasSubDepts}
+                        aria-expanded={isExpanded}
+                        aria-label={isExpanded ? 'Collapse' : 'Expand'}
                       >
                         {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
                       </button>
@@ -292,6 +294,7 @@ const DepartmentManagement: React.FC<DepartmentManagementProps> = React.memo(({ 
                           className="h-8 w-8 p-0 text-success hover:text-success/80 hover:bg-success/10"
                           onClick={() => handleAddSubDepartment(dept.id)}
                           title="Add Sub-Department"
+                          aria-label="Add Sub-Department"
                         >
                           <Plus size={16} />
                         </Button>
@@ -300,6 +303,7 @@ const DepartmentManagement: React.FC<DepartmentManagementProps> = React.memo(({ 
                           size="sm"
                           className="h-8 w-8 p-0 text-primary hover:text-primary/80 hover:bg-primary/10"
                           onClick={() => handleEditDepartment(dept)}
+                          aria-label={`Edit ${dept.name}`}
                         >
                           <Edit2 size={16} />
                         </Button>
@@ -308,6 +312,7 @@ const DepartmentManagement: React.FC<DepartmentManagementProps> = React.memo(({ 
                           size="sm"
                           className="h-8 w-8 p-0 text-danger hover:text-danger/80 hover:bg-danger/10"
                           onClick={() => handleDeleteDepartment(dept.id, dept.name)}
+                          aria-label={`Delete ${dept.name}`}
                         >
                           <Trash2 size={16} />
                         </Button>
@@ -345,6 +350,7 @@ const DepartmentManagement: React.FC<DepartmentManagementProps> = React.memo(({ 
                                   size="sm"
                                   className="h-7 w-7 p-0 text-text-muted hover:text-primary"
                                   onClick={() => handleEditSubDepartment(subDept)}
+                                  aria-label={`Edit ${subDept.name}`}
                                 >
                                   <Edit2 size={12} />
                                 </Button>
@@ -355,6 +361,7 @@ const DepartmentManagement: React.FC<DepartmentManagementProps> = React.memo(({ 
                                   onClick={() =>
                                     handleDeleteSubDepartment(subDept.id, subDept.name)
                                   }
+                                  aria-label={`Delete ${subDept.name}`}
                                 >
                                   <Trash2 size={12} />
                                 </Button>

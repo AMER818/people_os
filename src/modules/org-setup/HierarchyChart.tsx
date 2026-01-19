@@ -39,6 +39,16 @@ const TreeNode = ({
           ${type === 'root' ? 'bg-primary text-primary-foreground border-primary shadow-[0_0_15px_rgba(37,99,235,0.6)]' : 'card-vibrant hover:border-primary hover:shadow-[0_0_15px_rgba(37,99,235,0.3)]'}
         `}
         onClick={() => setIsExpanded(!isExpanded)}
+        role="button"
+        aria-expanded={isExpanded}
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setIsExpanded(!isExpanded);
+          }
+        }}
+        aria-label={`${label} (${type})`}
       >
         <Icon
           size={16}
@@ -229,6 +239,7 @@ const HierarchyChart: React.FC = () => {
               onClick={handleExpandAll}
               className="p-1.5 text-text-muted hover:text-primary hover:bg-primary/10 rounded-md transition-colors"
               title="Expand All"
+              aria-label="Expand All"
             >
               <Maximize2 size={18} />
             </button>
@@ -236,6 +247,7 @@ const HierarchyChart: React.FC = () => {
               onClick={handleCollapseAll}
               className="p-1.5 text-text-muted hover:text-primary hover:bg-primary/10 rounded-md transition-colors"
               title="Collapse All"
+              aria-label="Collapse All"
             >
               <Minimize2 size={18} />
             </button>

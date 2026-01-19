@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from .models import AuditFinding, AuditReport, DimensionScore
-from .utils import get_project_root
+from backend.config import settings
 
 
 class AuditPersistence:
@@ -19,8 +19,8 @@ class AuditPersistence:
 
     def __init__(self, db_path: Optional[Path] = None):
         if db_path is None:
-            # Default to project database
-            self.db_path = get_project_root() / "backend" / "data" / "hunzal_hcm.db"
+            # Use unified project database setting
+            self.db_path = settings.DB_PATH
         else:
             self.db_path = db_path
 

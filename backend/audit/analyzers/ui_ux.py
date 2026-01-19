@@ -31,8 +31,8 @@ class UIUXAnalyzer:
         }
 
         # Check for hardcoded styles in TSX files
-        modules_dir = self.project_root / "modules"
-        components_dir = self.project_root / "components"
+        modules_dir = self.project_root / "src" / "modules"
+        components_dir = self.project_root / "src" / "components"
 
         tsx_files = []
         if modules_dir.exists():

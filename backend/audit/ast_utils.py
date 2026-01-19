@@ -47,8 +47,8 @@ class PythonASTAnalyzer:
         "anthropic",
         "gemini",
         "ChatCompletion",
-        "Completion",
-        "create",
+        # "Completion",  # Too generic
+        # "create",     # Too generic, causes false positives in React/Factories
     ]
 
     def __init__(self, file_path: Path):
@@ -224,24 +224,29 @@ class TypeScriptASTAnalyzer:
             return self._fallback_regex_extraction()
 
         self.calls = []
-        self._traverse(self.ast)
+        self._traverse(self.ast, in_try=False)
         return self.calls
 
-    def _traverse(self, node: Any):
+    def _traverse(self, node: Any, in_try: bool = False):
         """Recursively traverse the Esprima AST"""
         if isinstance(node, dict):
+            # Check if entering a try block
+            current_in_try = in_try
+            if node.get("type") == "TryStatement":
+                current_in_try = True
+
             if node.get("type") == "CallExpression":
-                ai_call = self._analyze_call_node(node)
+                ai_call = self._analyze_call_node(node, current_in_try)
                 if ai_call:
                     self.calls.append(ai_call)
 
             for key, value in node.items():
-                self._traverse(value)
+                self._traverse(value, current_in_try)
         elif isinstance(node, list):
             for item in node:
-                self._traverse(item)
+                self._traverse(item, in_try)
 
-    def _analyze_call_node(self, node: Dict[str, Any]) -> Optional[AICall]:
+    def _analyze_call_node(self, node: Dict[str, Any], in_try: bool) -> Optional[AICall]:
         """Analyze a CallExpression node"""
         callee = node.get("callee")
         if not callee:
@@ -250,13 +255,20 @@ class TypeScriptASTAnalyzer:
         func_name = self._get_function_name(callee)
         if not any(
             pattern in func_name
-            for pattern in ["openai", "anthropic", "gemini", "create", "completion"]
+            for pattern in ["openai", "anthropic", "gemini", "create", "completion", "generateContent"]
         ):
             return None
 
         # Extract arguments
         args = node.get("arguments", [])
         params = self._extract_params(args)
+        
+        # Check grounding in params/args
+        has_grounding = self._check_grounding_in_args(args)
+        
+        # DEBUG: Print status
+        status = "✅" if has_grounding else "❌"
+        print(f"  AST Call: {func_name} (Line {node.get('loc', {}).get('start', {}).get('line', 0)}) - Grounding: {status} - InTry: {in_try}")
 
         return AICall(
             file_path=str(self.file_path),
@@ -264,12 +276,18 @@ class TypeScriptASTAnalyzer:
             line_number=node.get("loc", {}).get("start", {}).get("line", 0),
             model=params.get("model"),
             temperature=params.get("temperature"),
-            has_grounding=False,  # TODO: Implement grounding check for TS
+            has_grounding=has_grounding,
             has_validation=False,
-            has_error_handling=False,  # TODO: Implement parent tracking for TS
+            has_error_handling=in_try,
             has_rate_limiting=False,
             has_pii_redaction=False,
         )
+
+    def _check_grounding_in_args(self, args: List[Any]) -> bool:
+        """Recursively search arguments for grounding keywords"""
+        serialized = str(args).lower()
+        keywords = ["only use provided", "context", "grounding", "based on", "system:", "context:"]
+        return any(kw in serialized for kw in keywords)
 
     def _get_function_name(self, node: Dict[str, Any]) -> str:
         """Get function name from MemberExpression or Identifier"""

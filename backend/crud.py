@@ -2,8 +2,11 @@ import datetime as dt
 import json
 import uuid
 import time
+import hashlib
+import secrets
 from datetime import datetime
 from typing import List, Optional
+import bcrypt
 from fastapi import HTTPException
 
 from sqlalchemy.orm import Session, joinedload, selectinload
@@ -13,12 +16,18 @@ from .utils import format_to_db
 import backend.domains.core.models as core_models
 import backend.domains.hcm.models as hcm_models
 
+
 # Map models for generic usage if needed, or replace usages
 class ModelsProxy:
     def __getattr__(self, name):
-        if hasattr(core_models, name): return getattr(core_models, name)
-        if hasattr(hcm_models, name): return getattr(hcm_models, name)
-        raise AttributeError(f"Model {name} not found in Core or HCM domains")
+        if hasattr(core_models, name):
+            return getattr(core_models, name)
+        if hasattr(hcm_models, name):
+            return getattr(hcm_models, name)
+        raise AttributeError(
+            f"Model {name} not found in Core or HCM domains"
+        )
+
 
 models = ModelsProxy()
 
@@ -64,11 +73,8 @@ def get_employees(db: Session, skip: int = 0, limit: int = 100):
     )
 
 
-    return db.query(models.DBEmployee).offset(skip).limit(limit).all()
-
-
 # --- RBAC Persistence CRUD ---
-# (Legacy JSON-based functions removed. See correct implementations at bottom of file)
+# (Legacy JSON-based functions removed. See standard implementations at bottom)
 
 
 
@@ -76,16 +82,13 @@ def create_employee(db: Session, employee: schemas.EmployeeCreate, user_id: str)
     # Construct name if missing
     full_name = employee.name
     if not full_name:
-        full_name = (
-            f"{employee.firstName or ''} {employee.lastName or ''}".strip() or "Unknown"
-        )
+        parts = [employee.firstName or "", employee.lastName or ""]
+        full_name = " ".join(parts).strip() or "Unknown"
 
     # Use hireDate if join_date not provided
     join_date_value = employee.join_date or employee.hireDate
 
     # Generate ID if missing
-    import time
-
     generated_id = employee.id
     if not generated_id:
         generated_id = f"EMP-{int(time.time())}"
@@ -333,9 +336,8 @@ def delete_employee(db: Session, employee_id: str):
     """Delete employee and all related records"""
     # Security: Prevent deletion of System Accounts
     if employee_id in ["0", "1"]:
-        print(
-            f"SECURITY ALERT: Attempt to delete System Account {employee_id} blocked."
-        )
+        logger_msg = f"SECURITY ALERT: Attempt to delete System Account {employee_id} blocked."
+        print(logger_msg)
         return None
 
     db_employee = (
@@ -644,150 +646,9 @@ def update_organization(
     return db_org
 
 
-# --- Plants ---
 
-
-def get_plants(db: Session, org_id: str = None):
-    query = db.query(models.DBHRPlant)
-    if org_id:
-        query = query.filter(models.DBHRPlant.organization_id == org_id)
-    return query.all()
-
-
-def create_plant(db: Session, plant: schemas.PlantCreate, user_id: str):
-    plant_id = plant.id or str(uuid.uuid4())
-
-    db_plant = models.DBHRPlant(
-        id=plant_id,
-        code=plant.code,
-        name=plant.name,
-        location=plant.location,
-        organization_id=plant.organization_id,  # Using organization_id from schema
-        current_sequence=plant.current_sequence,
-        is_active=plant.is_active,
-        head_of_plant=plant.head_of_plant,
-        contact_number=plant.contact_number,
-        created_by=user_id,
-        updated_by=user_id,
-    )
-    db.add(db_plant)
-
-    if plant.divisions:
-        for div in plant.divisions:
-            div_id = div.id or str(uuid.uuid4())
-            db_div = models.DBPlantDivision(
-                id=div_id,
-                plant_id=plant_id,
-                name=div.name,
-                code=div.code,
-                is_active=div.is_active,
-                created_by=user_id,
-                updated_by=user_id,
-            )
-            db.add(db_div)
-
-    db.commit()
-    db.refresh(db_plant)
-    return db_plant
-
-
-def get_plant(db: Session, plant_id: str):
-    return db.query(models.DBHRPlant).filter(models.DBHRPlant.id == plant_id).first()
-
-
-def update_plant(db: Session, plant_id: str, plant: schemas.PlantCreate, user_id: str):
-    db_plant = (
-        db.query(models.DBHRPlant).filter(models.DBHRPlant.id == plant_id).first()
-    )
-    if db_plant:
-        db_plant.name = plant.name
-        db_plant.location = plant.location
-        db_plant.code = plant.code
-        db_plant.organization_id = plant.organization_id
-        db_plant.current_sequence = plant.current_sequence
-        db_plant.is_active = plant.is_active
-        db_plant.head_of_plant = plant.head_of_plant
-        db_plant.contact_number = plant.contact_number
-
-        # Update Divisions (Full Replace)
-        db.query(models.DBPlantDivision).filter(
-            models.DBPlantDivision.plant_id == plant_id
-        ).delete()
-        if plant.divisions:
-            for div in plant.divisions:
-                div_id = div.id or str(uuid.uuid4())
-                db_div = models.DBPlantDivision(
-                    id=div_id,
-                    plant_id=plant_id,
-                    name=div.name,
-                    code=div.code,
-                    is_active=div.is_active,
-                    created_by=user_id,
-                    updated_by=user_id,
-                )
-                db.add(db_div)
-
-        db_plant.updated_by = user_id
-        db.commit()
-        db.refresh(db_plant)
-    return db_plant
-
-
-def delete_plant(db: Session, plant_id: str):
-    db_plant = (
-        db.query(models.DBHRPlant).filter(models.DBHRPlant.id == plant_id).first()
-    )
-    if db_plant:
-        db.delete(db_plant)
-        db.commit()
-    return db_plant
-
-
-# --- Employment Levels ---
-
-def get_employment_levels(db: Session, org_id: str = None):
-    query = db.query(models.DBEmploymentLevel)
-    if org_id:
-        query = query.filter(models.DBEmploymentLevel.organization_id == org_id)
-    return query.all()
-
-
-def create_employment_level(db: Session, employment_level: schemas.EmploymentLevelCreate, user_id: str):
-    db_emp_level = models.DBEmploymentLevel(
-        id=employment_level.id or str(uuid.uuid4()),
-        name=employment_level.name,
-        code=employment_level.code,
-        description=employment_level.description,
-        is_active=employment_level.is_active,
-        organization_id=employment_level.organization_id,
-        created_by=user_id,
-        updated_by=user_id,
-    )
-    db.add(db_emp_level)
-    db.commit()
-    db.refresh(db_emp_level)
-    return db_emp_level
-
-
-def update_employment_level(db: Session, level_id: str, employment_level: schemas.EmploymentLevelCreate, user_id: str):
-    db_emp_level = db.query(models.DBEmploymentLevel).filter(models.DBEmploymentLevel.id == level_id).first()
-    if db_emp_level:
-        db_emp_level.name = employment_level.name
-        db_emp_level.code = employment_level.code
-        db_emp_level.description = employment_level.description
-        db_emp_level.is_active = employment_level.is_active
-        db_emp_level.updated_by = user_id
-        db.commit()
-        db.refresh(db_emp_level)
-    return db_emp_level
-
-
-def delete_employment_level(db: Session, level_id: str):
-    db_emp_level = db.query(models.DBEmploymentLevel).filter(models.DBEmploymentLevel.id == level_id).first()
-    if db_emp_level:
-        db.delete(db_emp_level)
-        db.commit()
-    return db_emp_level
+# --- Plants (Locations) & Divisions ---
+# (Moved to Standard Implementations section at bottom)
 
 
 # --- RBAC Permissions CRUD ---
@@ -1554,9 +1415,8 @@ def update_payroll_settings(
     return db_settings
 
 
-import hashlib
+
 # ===== API Key CRUD =====
-import secrets
 
 
 def _hash_key(key: str) -> str:
@@ -1852,250 +1712,10 @@ def create_webhook_log(
     return db_log
 
 
-# ===== System Flags CRUD =====
-def get_or_create_system_flags(db: Session, org_id: str, user_id: str):
-    """Get or create system flags for organization"""
-    flags = (
-        db.query(models.DBSystemFlags)
-        .filter(models.DBSystemFlags.organization_id == org_id)
-        .first()
-    )
 
-    if not flags:
-        flags = models.DBSystemFlags(
-            id=str(uuid.uuid4()),
-            organization_id=org_id,
-            created_by=user_id,
-            updated_by=user_id,
-        )
-        db.add(flags)
-        db.commit()
-        db.refresh(flags)
+# ===== System Flags & Notification Settings =====
+# (Moved to Standard Implementations section at bottom)
 
-    return _format_system_flags(flags)
-
-
-def get_system_flags(db: Session, org_id: str):
-    """Get system flags for organization"""
-    flags = (
-        db.query(models.DBSystemFlags)
-        .filter(models.DBSystemFlags.organization_id == org_id)
-        .first()
-    )
-
-    if not flags:
-        return None
-
-    return _format_system_flags(flags)
-
-
-def update_system_flags(
-    db: Session, org_id: str, flags_data: schemas.SystemFlagsUpdate, user_id: str
-):
-    """Update system flags for organization"""
-    db_flags = (
-        db.query(models.DBSystemFlags)
-        .filter(models.DBSystemFlags.organization_id == org_id)
-        .first()
-    )
-
-    if not db_flags:
-        # Create if not exists
-        db_flags = models.DBSystemFlags(
-            id=str(uuid.uuid4()),
-            organization_id=org_id,
-            created_by=user_id,
-            updated_by=user_id,
-        )
-        db.add(db_flags)
-
-    # Update only provided fields
-    update_data = flags_data.dict(exclude_unset=True)
-
-    # Handle custom_flags separately
-    custom_flags = update_data.pop("custom_flags", None)
-
-    for field, value in update_data.items():
-        setattr(db_flags, field, value)
-
-    if custom_flags is not None:
-        db_flags.custom_flags = json.dumps(custom_flags)
-
-    db_flags.updated_by = user_id
-    db.commit()
-    db.refresh(db_flags)
-
-    return _format_system_flags(db_flags)
-
-
-def _format_system_flags(db_flags) -> dict:
-    """Format system flags response"""
-    custom_flags = {}
-    if db_flags.custom_flags:
-        try:
-            custom_flags = json.loads(db_flags.custom_flags)
-        except:
-            custom_flags = {}
-
-    return {
-        "id": db_flags.id,
-        "organization_id": db_flags.organization_id,
-        "ai_enabled": db_flags.ai_enabled,
-        "advanced_analytics_enabled": db_flags.advanced_analytics_enabled,
-        "employee_self_service_enabled": db_flags.employee_self_service_enabled,
-        "maintenance_mode": db_flags.maintenance_mode,
-        "read_only_mode": db_flags.read_only_mode,
-        "cache_enabled": db_flags.cache_enabled,
-        "cache_ttl": db_flags.cache_ttl,
-        "db_optimization_enabled": db_flags.db_optimization_enabled,
-        "db_optimization_last_run": db_flags.db_optimization_last_run,
-        "debug_logging_enabled": db_flags.debug_logging_enabled,
-        "log_retention_days": db_flags.log_retention_days,
-        "rate_limit_enabled": db_flags.rate_limit_enabled,
-        "rate_limit_requests_per_minute": db_flags.rate_limit_requests_per_minute,
-        "webhooks_enabled": db_flags.webhooks_enabled,
-        "webhooks_retry_enabled": db_flags.webhooks_retry_enabled,
-        "webhooks_max_retries": db_flags.webhooks_max_retries,
-        # Restored Security Flags
-        "mfa_enforced": db_flags.mfa_enforced,
-        "biometrics_required": db_flags.biometrics_required,
-        "ip_whitelisting": db_flags.ip_whitelisting,
-        "session_timeout": db_flags.session_timeout,
-        "password_complexity": db_flags.password_complexity,
-        "session_isolation": db_flags.session_isolation,
-        # Restored Neural/Audit Flags
-        "neural_bypass": db_flags.neural_bypass,
-        "api_caching": db_flags.api_caching,
-        "immutable_logs": db_flags.immutable_logs,
-        "custom_flags": custom_flags,
-        "created_at": db_flags.created_at,
-        "updated_at": db_flags.updated_at,
-        "created_by": db_flags.created_by,
-        "updated_by": db_flags.updated_by,
-    }
-
-
-# ===== Notification Settings CRUD =====
-def get_or_create_notification_settings(db: Session, org_id: str, user_id: str):
-    """Get or create notification settings for organization"""
-    settings = (
-        db.query(models.DBNotificationSettings)
-        .filter(models.DBNotificationSettings.organization_id == org_id)
-        .first()
-    )
-
-    if not settings:
-        settings = models.DBNotificationSettings(
-            id=str(uuid.uuid4()),
-            organization_id=org_id,
-            email_from_address=f"noreply@hcm-{org_id[:8]}.local",
-            email_from_name="HCM System",
-            created_by=user_id,
-            updated_by=user_id,
-        )
-        db.add(settings)
-        db.commit()
-        db.refresh(settings)
-
-    return _format_notification_settings(settings)
-
-
-def get_notification_settings(db: Session, org_id: str):
-    """Get notification settings for organization"""
-    settings = (
-        db.query(models.DBNotificationSettings)
-        .filter(models.DBNotificationSettings.organization_id == org_id)
-        .first()
-    )
-
-    if not settings:
-        return None
-
-    return _format_notification_settings(settings)
-
-
-def update_notification_settings(
-    db: Session,
-    org_id: str,
-    settings_data: schemas.NotificationSettingsCreate,
-    user_id: str,
-):
-    """Update notification settings for organization"""
-    db_settings = (
-        db.query(models.DBNotificationSettings)
-        .filter(models.DBNotificationSettings.organization_id == org_id)
-        .first()
-    )
-
-    if not db_settings:
-        db_settings = models.DBNotificationSettings(
-            id=str(uuid.uuid4()),
-            organization_id=org_id,
-            created_by=user_id,
-            updated_by=user_id,
-        )
-        db.add(db_settings)
-
-    update_data = settings_data.dict(exclude_unset=True)
-    custom_settings = update_data.pop("custom_settings", None)
-
-    for field, value in update_data.items():
-        setattr(db_settings, field, value)
-
-    if custom_settings is not None:
-        db_settings.custom_settings = json.dumps(custom_settings)
-
-    db_settings.updated_by = user_id
-    db.commit()
-    db.refresh(db_settings)
-
-    return _format_notification_settings(db_settings)
-
-
-def _format_notification_settings(db_settings) -> dict:
-    """Format notification settings response"""
-    custom_settings = {}
-    if db_settings.custom_settings:
-        try:
-            custom_settings = json.loads(db_settings.custom_settings)
-        except:
-            custom_settings = {}
-
-    return {
-        "id": db_settings.id,
-        "organization_id": db_settings.organization_id,
-        "email_enabled": db_settings.email_enabled,
-        "email_provider": db_settings.email_provider,
-        "email_from_address": db_settings.email_from_address,
-        "email_from_name": db_settings.email_from_name,
-        "email_on_employee_created": db_settings.email_on_employee_created,
-        "email_on_leave_request": db_settings.email_on_leave_request,
-        "email_on_payroll_processed": db_settings.email_on_payroll_processed,
-        "email_on_system_alert": db_settings.email_on_system_alert,
-        "sms_enabled": db_settings.sms_enabled,
-        "sms_provider": db_settings.sms_provider,
-        "sms_from_number": db_settings.sms_from_number,
-        "sms_on_leave_approval": db_settings.sms_on_leave_approval,
-        "sms_on_payroll_processed": db_settings.sms_on_payroll_processed,
-        "sms_on_system_alert": db_settings.sms_on_system_alert,
-        "slack_enabled": db_settings.slack_enabled,
-        "slack_webhook_url": db_settings.slack_webhook_url,
-        "slack_channel": db_settings.slack_channel,
-        "slack_on_critical_alerts": db_settings.slack_on_critical_alerts,
-        "digest_enabled": db_settings.digest_enabled,
-        "digest_frequency": db_settings.digest_frequency,
-        "quiet_hours_enabled": db_settings.quiet_hours_enabled,
-        "quiet_hours_start": db_settings.quiet_hours_start,
-        "quiet_hours_end": db_settings.quiet_hours_end,
-        "dnd_enabled": db_settings.dnd_enabled,
-        "dnd_start_date": db_settings.dnd_start_date,
-        "dnd_end_date": db_settings.dnd_end_date,
-        "custom_settings": custom_settings,
-        "created_at": db_settings.created_at,
-        "updated_at": db_settings.updated_at,
-        "created_by": db_settings.created_by,
-        "updated_by": db_settings.updated_by,
-    }
 
 
 # ===== Background Job CRUD =====
@@ -2201,13 +1821,13 @@ def _format_background_job(db_job) -> dict:
     if db_job.payload:
         try:
             payload = json.loads(db_job.payload)
-        except:
+        except Exception:
             payload = {}
 
     if db_job.result:
         try:
             result = json.loads(db_job.result)
-        except:
+        except Exception:
             result = {}
 
     return {
@@ -2335,7 +1955,13 @@ def save_payroll_settings(
 # --- User Management CRUD ---
 
 
+
+def get_users(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.DBUser).offset(skip).limit(limit).all()
+
+
 def get_user(db: Session, user_id: str):
+
     return db.query(models.DBUser).filter(models.DBUser.id == user_id).first()
 
 
@@ -2366,8 +1992,6 @@ def create_user(db: Session, user: schemas.UserCreate, creator_id: str = None):
         # We will use a simple specialized function or import from utils if available.
         # Given `main.py` uses direct bcrypt, we'll replicate or better, move hashing to a util.
         # For this step, to avoid breaking, I'll assumme the schema might have `password` and we hash it.
-
-        import bcrypt
 
         pwd_bytes = user.password.encode("utf-8")
         salt = bcrypt.gensalt()
@@ -2407,8 +2031,6 @@ def update_user(
 
     # Handle Password Update
     if "password" in update_data and update_data["password"]:
-        import bcrypt
-
         pwd_bytes = update_data["password"].encode("utf-8")
         salt = bcrypt.gensalt()
         update_data["password_hash"] = bcrypt.hashpw(pwd_bytes, salt).decode("utf-8")

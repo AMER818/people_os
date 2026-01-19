@@ -164,6 +164,7 @@ const PlantManagement: React.FC = () => {
                   size="sm"
                   onClick={() => openEditModal(plant)}
                   className="h-8 w-8 p-0 text-text-muted hover:text-primary"
+                  aria-label={`Edit ${plant.name}`}
                 >
                   <Edit2 size={14} />
                 </Button>
@@ -172,6 +173,7 @@ const PlantManagement: React.FC = () => {
                   size="sm"
                   onClick={() => handleDeleteClick(plant.id)}
                   className="h-8 w-8 p-0 text-text-muted hover:text-danger"
+                  aria-label={`Delete ${plant.name}`}
                 >
                   <Trash2 size={14} />
                 </Button>
@@ -341,6 +343,7 @@ const PlantManagement: React.FC = () => {
                     type="button"
                     onClick={() => remove(index)}
                     className="p-2 text-text-muted hover:text-danger hover:bg-danger/10 rounded transition"
+                    aria-label="Remove Division"
                   >
                     <X size={14} />
                   </button>

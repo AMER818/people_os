@@ -203,6 +203,7 @@ const JobLevelManagement: React.FC<{ onSync: () => void }> = ({ onSync }) => {
                     size="sm"
                     className="h-8 w-8 p-0"
                     onClick={() => handleEdit(level)}
+                    aria-label={`Edit ${level.name}`}
                   >
                     <Pencil size={14} className="text-primary" />
                   </Button>
@@ -211,6 +212,7 @@ const JobLevelManagement: React.FC<{ onSync: () => void }> = ({ onSync }) => {
                     size="sm"
                     className="h-8 w-8 p-0"
                     onClick={() => handleDeleteClick(level.id)}
+                    aria-label={`Delete ${level.name}`}
                   >
                     <Trash2 size={14} className="text-danger" />
                   </Button>
@@ -256,6 +258,7 @@ const JobLevelManagement: React.FC<{ onSync: () => void }> = ({ onSync }) => {
                             size="sm"
                             onClick={() => handleEditGrade(grade)}
                             className="h-6 w-6 p-0 hover:bg-surface rounded"
+                            aria-label={`Edit ${grade.name}`}
                           >
                             <Pencil size={12} className="text-primary" />
                           </Button>
@@ -264,6 +267,7 @@ const JobLevelManagement: React.FC<{ onSync: () => void }> = ({ onSync }) => {
                             size="sm"
                             onClick={() => handleDeleteGradeClick(grade.id)}
                             className="h-6 w-6 p-0 hover:bg-surface rounded"
+                            aria-label={`Delete ${grade.name}`}
                           >
                             <Trash2 size={12} className="text-danger" />
                           </Button>

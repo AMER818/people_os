@@ -50,6 +50,7 @@ const PayrollRules: React.FC = () => {
               size="sm"
               className="h-8 w-8 p-0 text-text-muted hover:text-text-primary hover:bg-muted-bg"
               onClick={() => setIsEditing(true)}
+              aria-label="Edit Payroll Settings"
             >
               <Edit2 size={14} />
             </Button>
@@ -60,6 +61,7 @@ const PayrollRules: React.FC = () => {
                 size="sm"
                 onClick={handleCancel}
                 className="h-8 w-8 p-0 text-danger hover:bg-danger/10 rounded-full"
+                aria-label="Cancel"
               >
                 <X size={14} />
               </Button>
@@ -68,6 +70,7 @@ const PayrollRules: React.FC = () => {
                 size="sm"
                 onClick={handleSave}
                 className="h-8 w-8 p-0 text-success hover:bg-success/10 rounded-full"
+                aria-label="Save"
               >
                 <Save size={14} />
               </Button>
@@ -92,6 +95,7 @@ const PayrollRules: React.FC = () => {
                     updatePayrollSettings({ ...payrollSettings, taxYearEnd: e.target.value })
                   }
                   className="w-full bg-muted-bg/50 border border-border/50 rounded-xl px-12 py-4 text-sm font-bold text-text-primary appearance-none outline-none focus:border-primary/50 transition-all disabled:opacity-50"
+                  aria-label="Tax Year End"
                 >
                   <option value="June">June (Standard)</option>
                   <option value="December">December (Calendar)</option>
@@ -140,6 +144,7 @@ const PayrollRules: React.FC = () => {
                     })
                   }
                   className="w-full bg-muted-bg/50 border border-border/50 rounded-xl px-12 py-4 text-sm font-bold text-text-primary appearance-none outline-none focus:border-primary/50 transition-all disabled:opacity-50"
+                  aria-label="Calculation Method"
                 >
                   <option value="Per Month">Per Month</option>
                   <option value="Per Hour">Per Hour</option>

@@ -1,19 +1,57 @@
 import sqlite3
 import bcrypt
+import uuid
+import datetime
 
-conn = sqlite3.connect("backend/data/people_os.db")
-c = conn.cursor()
+DB_PATH = "backend/data/people_os.db"
 
-# Check current hash
-c.execute("SELECT username, password_hash FROM core_users WHERE username = 'admin'")
-row = c.fetchone()
-print(f"Username: {row[0]}")
-print(f"Current Hash: {row[1]}")
 
-# Reset password to 'admin'
-new_hash = bcrypt.hashpw("admin".encode(), bcrypt.gensalt()).decode()
-c.execute("UPDATE core_users SET password_hash = ? WHERE username = 'admin'", (new_hash,))
-conn.commit()
-print(f"Password reset to 'admin'. New hash: {new_hash}")
+def reset_admin():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
 
-conn.close()
+    username = "admin"
+    password = "admin"
+    password_hash = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+    # Check if admin exists
+    c.execute("SELECT id FROM core_users WHERE username = ?", (username,))
+    row = c.fetchone()
+
+    if row:
+        print(f"User '{username}' found. Updating password...")
+        now = datetime.datetime.now().isoformat()
+        c.execute(
+            "UPDATE core_users SET password_hash = ?, updated_at = ? "
+            "WHERE username = ?",
+            (password_hash, now, username)
+        )
+    else:
+        print(f"User '{username}' not found. Creating...")
+        user_id = str(uuid.uuid4())
+        now = datetime.datetime.now().isoformat()
+        c.execute("""
+            INSERT INTO core_users (
+                id, username, password_hash, role, name, email,
+                is_active, created_at, updated_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            user_id,
+            username,
+            password_hash,
+            "SystemAdmin",
+            "System Administrator",
+            "admin@people-os.com",
+            1,
+            now,
+            now
+        ))
+
+    conn.commit()
+    print(f"✅ User '{username}' password is now '{password}'")
+    conn.close()
+
+
+if __name__ == "__main__":
+    reset_admin()

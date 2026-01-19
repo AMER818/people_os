@@ -56,6 +56,7 @@ export const SystemLogViewer: React.FC = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full bg-background border border-border rounded-lg pl-9 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none"
+              aria-label="Search logs"
             />
           </div>
         </div>

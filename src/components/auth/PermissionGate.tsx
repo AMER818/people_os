@@ -9,6 +9,7 @@ interface PermissionGateProps {
   fallback?: ReactNode;
 }
 
+// Logic wrapper: Accessibility attributes (aria-label) should be provided by children components.
 export const PermissionGate: React.FC<PermissionGateProps> = ({
   children,
   permission,

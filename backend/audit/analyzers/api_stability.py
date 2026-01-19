@@ -11,8 +11,8 @@ from typing import Any, Dict, List
 
 from fastapi.openapi.utils import get_openapi
 
-from ..models import ActionItem, AuditFinding, DimensionScore
-from ..utils import calculate_score, get_project_root
+from backend.audit.models import ActionItem, AuditFinding, DimensionScore
+from backend.audit.utils import calculate_score, get_project_root
 
 
 class APIAnalyzer:

@@ -66,6 +66,7 @@ const EmployeeMaster: React.FC<EmployeeMasterProps> = ({
 
   return (
     <DetailLayout
+      aria-label="Employee Details"
       header={<EmployeeDetailHeader employee={currentEmployee} aiSuggestions={aiSuggestions} />}
       tabs={<EmployeeTabs activeTab={activeTab} onTabChange={setActiveTab} disabled={isDisabled} />}
     >

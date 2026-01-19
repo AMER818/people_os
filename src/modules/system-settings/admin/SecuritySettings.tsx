@@ -64,6 +64,9 @@ const SecuritySettings: React.FC = () => {
             <button
               onClick={() => toggleFlag('mfa_enforced')}
               className={`w-12 h-6 rounded-full transition-all relative ${systemFlags.mfa_enforced ? 'bg-primary shadow-lg shadow-primary/20' : 'bg-muted-bg'}`}
+              role="switch"
+              aria-checked={systemFlags.mfa_enforced}
+              aria-label="Toggle Multi-Factor Authentication"
             >
               <div
                 className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${systemFlags.mfa_enforced ? 'left-7' : 'left-1'}`}
@@ -101,6 +104,9 @@ const SecuritySettings: React.FC = () => {
             <button
               onClick={() => toggleFlag('biometrics_required')}
               className={`w-12 h-6 rounded-full transition-all relative ${systemFlags.biometrics_required ? 'bg-primary' : 'bg-muted-bg'}`}
+              role="switch"
+              aria-checked={systemFlags.biometrics_required}
+              aria-label="Toggle Biometric Authentication"
             >
               <div
                 className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${systemFlags.biometrics_required ? 'left-7' : 'left-1'}`}
@@ -139,6 +145,9 @@ const SecuritySettings: React.FC = () => {
             <button
               onClick={() => toggleFlag('ip_whitelisting')}
               className={`w-12 h-6 rounded-full transition-all relative ${systemFlags.ip_whitelisting ? 'bg-warning shadow-lg shadow-warning/20' : 'bg-muted-bg'}`}
+              role="switch"
+              aria-checked={systemFlags.ip_whitelisting}
+              aria-label="Toggle IP Whitelisting"
             >
               <div
                 className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${systemFlags.ip_whitelisting ? 'left-7' : 'left-1'}`}
@@ -179,6 +188,9 @@ const SecuritySettings: React.FC = () => {
             <button
               onClick={() => toggleFlag('session_isolation')}
               className={`w-12 h-6 rounded-full transition-all relative ${systemFlags.session_isolation ? 'bg-info shadow-lg shadow-info/20' : 'bg-muted-bg'}`}
+              role="switch"
+              aria-checked={systemFlags.session_isolation}
+              aria-label="Toggle Session Isolation"
             >
               <div
                 className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${systemFlags.session_isolation ? 'left-7' : 'left-1'}`}
@@ -222,6 +234,7 @@ const SecuritySettings: React.FC = () => {
                 value={systemFlags.session_timeout || '30'}
                 onChange={(e) => handleValueChange('session_timeout', e.target.value)}
                 className="w-full h-1.5 bg-muted-bg rounded-full appearance-none cursor-pointer accent-primary"
+                aria-label="Session Timeout Slider"
               />
             </div>
 
@@ -233,6 +246,7 @@ const SecuritySettings: React.FC = () => {
                 value={systemFlags.password_complexity || 'Standard'}
                 onChange={(e) => handleValueChange('password_complexity', e.target.value)}
                 className="w-full bg-muted-bg border border-border/50 rounded-lg p-3 text-xs font-bold text-text-primary focus:outline-none focus:border-primary transition-all appearance-none"
+                aria-label="Password Complexity"
               >
                 <option value="Basic">Basic (8 chars)</option>
                 <option value="Standard">Standard (Mixed Case, 10 chars)</option>
@@ -282,6 +296,9 @@ const SecuritySettings: React.FC = () => {
                 <button
                   onClick={() => toggleFlag(item.id as any)}
                   className={`w-8 h-4 rounded-full transition-all relative ${systemFlags[item.id as keyof typeof systemFlags] ? 'bg-primary' : 'bg-border/50'}`}
+                  role="switch"
+                  aria-checked={systemFlags[item.id as keyof typeof systemFlags] as boolean}
+                  aria-label={`Toggle ${item.label}`}
                 >
                   <div
                     className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${systemFlags[item.id as keyof typeof systemFlags] ? 'left-4.5' : 'left-0.5'}`}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { DEFAULT_SHIFT_COLOR } from '../../utils/themeColors';
 import { Clock, Plus, Edit2, Trash2, Zap, Users } from 'lucide-react';
 import { useOrgStore } from '../../store/orgStore';
 import { Shift } from '../../types';
@@ -48,7 +49,7 @@ const ShiftManagement: React.FC<ShiftManagementProps> = React.memo(({ onSync }) 
     gracePeriod: 15,
     breakDuration: 60,
     workDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-    color: '#3b82f6', // Default Blue
+    color: DEFAULT_SHIFT_COLOR, // Default Blue
     description: '',
   });
   const [deleteData, setDeleteData] = useState<{ id: string; name: string }>({ id: '', name: '' });
@@ -64,7 +65,7 @@ const ShiftManagement: React.FC<ShiftManagementProps> = React.memo(({ onSync }) 
       gracePeriod: 15,
       breakDuration: 60,
       workDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-      color: '#3b82f6',
+      color: DEFAULT_SHIFT_COLOR,
       description: '',
     });
     shiftModal.open();
@@ -190,15 +191,15 @@ const ShiftManagement: React.FC<ShiftManagementProps> = React.memo(({ onSync }) 
                 {/* Color accent bar */}
                 <div
                   className="absolute top-0 left-0 w-full h-0.5"
-                  style={{ backgroundColor: s.color || '#3b82f6' }}
+                  style={{ backgroundColor: s.color || DEFAULT_SHIFT_COLOR }}
                 ></div>
 
                 <div className="flex items-center gap-2.5 mb-2">
                   <div
                     className="w-8 h-8 rounded-md flex items-center justify-center font-bold text-sm shrink-0"
                     style={{
-                      backgroundColor: `${s.color || '#3b82f6'}15`,
-                      color: s.color || '#3b82f6',
+                      backgroundColor: `${s.color || DEFAULT_SHIFT_COLOR}15`,
+                      color: s.color || DEFAULT_SHIFT_COLOR,
                     }}
                   >
                     {s.code}
@@ -318,7 +319,7 @@ const ShiftManagement: React.FC<ShiftManagementProps> = React.memo(({ onSync }) 
                     <td className="px-6 py-4">
                       <div
                         className="w-3 h-3 rounded-full shadow-sm"
-                        style={{ backgroundColor: shift.color || '#3b82f6' }}
+                        style={{ backgroundColor: shift.color || DEFAULT_SHIFT_COLOR }}
                       ></div>
                     </td>
                     <td className="px-6 py-4">
@@ -366,6 +367,7 @@ const ShiftManagement: React.FC<ShiftManagementProps> = React.memo(({ onSync }) 
                           size="sm"
                           className="h-8 w-8 p-0"
                           onClick={() => handleEditShift(shift)}
+                          aria-label={`Edit ${shift.name}`}
                         >
                           <Edit2 size={14} />
                         </Button>
@@ -374,6 +376,7 @@ const ShiftManagement: React.FC<ShiftManagementProps> = React.memo(({ onSync }) 
                           size="sm"
                           className="h-8 w-8 p-0 hover:text-danger hover:bg-danger/10"
                           onClick={() => handleDeleteShift(shift.id, shift.name)}
+                          aria-label={`Delete ${shift.name}`}
                         >
                           <Trash2 size={14} />
                         </Button>

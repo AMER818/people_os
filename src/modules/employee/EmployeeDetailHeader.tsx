@@ -66,7 +66,10 @@ const EmployeeDetailHeader: React.FC<EmployeeDetailHeaderProps> = ({
               className="w-32 h-32 rounded-full border-2 border-blue-500/20 shadow-2xl object-cover transition-all duration-500"
               alt={employee?.name}
             />
-            <Button className="absolute bottom-1 right-1 bg-blue-600 p-2.5 rounded-full shadow-lg text-white border-4 border-surface hover:bg-blue-500 active:scale-95 transition-all h-auto w-auto">
+            <Button
+              className="absolute bottom-1 right-1 bg-blue-600 p-2.5 rounded-full shadow-lg text-white border-4 border-surface hover:bg-blue-500 active:scale-95 transition-all h-auto w-auto"
+              aria-label="Edit Profile Picture"
+            >
               <Edit3 className="w-3.5 h-3.5" />
             </Button>
           </div>

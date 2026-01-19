@@ -19,6 +19,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
       <input
         type="text"
         className={`w-full bg-surface border border-border/40 rounded-lg pl-9 pr-4 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 outline-none transition-all ${className || ''}`}
+        aria-label="Search"
         {...props}
       />
     </div>

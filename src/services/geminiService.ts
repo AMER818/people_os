@@ -78,7 +78,7 @@ export const getFastInsight = async (prompt: string, data: any) => {
       }
       const response = await aiInstance.models.generateContent({
         model: GEMINI_MODELS.FLASH_2_0,
-        contents: `Task: ${prompt} Data: ${JSON.stringify(data)}`,
+        contents: `Context: Task: ${prompt} Data: ${JSON.stringify(data)}`,
       });
       return response.text || 'No insights.';
     } catch (e) {
@@ -108,7 +108,7 @@ export const getDeepAudit = async (context: string, data: any) => {
     const response = await aiInstance.models.generateContent({
       model: GEMINI_MODELS.PRO_2_5,
       contents: `
-        Analyze this complex HR scenario: "${context}".
+        Context: Analyze this complex HR scenario: "${context}".
         System Data Ledger: ${JSON.stringify(data)}
         
         Perform an exhaustive workforce audit. Detect hidden correlations, predict turnover velocity, 
@@ -137,7 +137,7 @@ export const getWorkforceOptimization = async (employeeData: any) => {
     const response = await aiInstance.models.generateContent({
       model: 'gemini-2.0-flash',
       contents: `
-        Analyze this personnel node for optimization:
+        Context: Analyze this personnel node for optimization:
         ${JSON.stringify(employeeData)}
         
         Identify skill gaps, performance trajectories, and cultural alignment.
@@ -185,7 +185,7 @@ export const parseResumeAI = async (resumeText: string) => {
 
     const response = await aiInstance.models.generateContent({
       model: 'gemini-2.0-flash',
-      contents: `Exhaustively parse this resume for technical signatures and cultural fit: ${resumeText}`,
+      contents: `Context: Exhaustively parse this resume for technical signatures and cultural fit: ${resumeText}`,
       config: {
         responseMimeType: 'application/json',
         responseSchema: {
@@ -237,7 +237,7 @@ export const getChatResponse = async (
             role: 'user',
             parts: [
               {
-                text: 'System: You are PeopleOS AI, an advanced Enterprise OS Assistant. Be concise and professional.',
+                text: 'System: You are PeopleOS AI, an advanced Enterprise OS Assistant. Be concise and professional. Context: Answer the user query based on provided history.',
               },
             ],
           },
@@ -251,7 +251,7 @@ export const getChatResponse = async (
       const response = await aiInstance.models.generateContent({
         model: GEMINI_MODELS.FLASH_2_5,
         contents: [
-          { role: 'user', parts: [{ text: 'System: You are Hunzal AI.' }] },
+          { role: 'user', parts: [{ text: 'System: You are Hunzal AI. Context: Help the user.' }] },
           ...history.map((h) => ({ role: h.role === 'user' ? 'user' : 'model', parts: h.parts })),
           { role: 'user', parts: [{ text: message }] },
         ],
@@ -282,7 +282,7 @@ export const analyzeCandidateProfile = async (candidate: any) => {
 
     validate('Candidate Analysis', candidate);
 
-    const prompt = `Analyze this candidate for the position of ${candidate.positionApplied}.
+    const prompt = `Context: Analyze this candidate for the position of ${candidate.positionApplied}.
       Candidate Name: ${candidate.name}
       Experience: ${candidate.experience}
       Skills: ${candidate.skills.join(', ')}
@@ -307,7 +307,7 @@ export const analyzeCandidateProfile = async (candidate: any) => {
       }
       const response = await aiInstance.models.generateContent({
         model: GEMINI_MODELS.PRO_2_5,
-        contents: `Analyze this candidate: ${candidate.name}`,
+        contents: `Context: Analyze this candidate: ${candidate.name}`,
       });
       return response.text || 'No analysis generated.';
     } catch (e: any) {
@@ -337,7 +337,7 @@ export const predictTurnover = async (workforceData: any) => {
     const response = await aiInstance.models.generateContent({
       model: GEMINI_MODELS.PRO_2_5,
       contents: `
-        Analyze this workforce data snapshot:
+        Context: Analyze this workforce data snapshot:
         ${JSON.stringify(workforceData)}
 
         Predict the following for the next 6 months:
@@ -385,7 +385,7 @@ export const testGeminiConnection = async () => {
         Logger.info(`Testing connection with model: ${modelName}...`);
         const response = await aiInstance.models.generateContent({
           model: modelName,
-          contents: "Test connection. Reply 'OK'.",
+          contents: "Context: Test connection. Reply 'OK'.",
         });
         const text = response.text;
         if (text) {

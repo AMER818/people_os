@@ -33,7 +33,7 @@ class DriftDetector:
         # In a real scenario, this would call AI with the prompts created earlier
 
         # Check: UI should not import from repository or db directly
-        modules_dir = root / "modules"
+        modules_dir = root / "src"
         for py_file in modules_dir.rglob("*.tsx"):
             try:
                 content = py_file.read_text(encoding="utf-8")

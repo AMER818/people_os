@@ -137,6 +137,16 @@ export const SystemCleanup: React.FC = () => {
                         ? 'bg-primary/5 border-primary shadow-sm'
                         : 'bg-muted-bg/30 border-border hover:border-primary/50'
                     }`}
+                    role="checkbox"
+                    aria-checked={isSelected}
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        toggleCleaner(cleaner.id);
+                      }
+                    }}
+                    aria-label={`Select ${cleaner.label}`}
                   >
                     <div
                       className={`p-2 rounded-md ${isSelected ? 'bg-primary text-white' : 'bg-muted-bg text-text-muted'}`}

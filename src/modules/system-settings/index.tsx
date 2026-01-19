@@ -155,11 +155,17 @@ const SystemSettings: React.FC = () => {
       header={
         <div className="max-w-[1400px] mx-auto px-6 pt-6 mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 card-vibrant p-6 shadow-xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:rotate-12 transition-transform duration-1000">
+            <div
+              className="absolute top-0 right-0 p-6 opacity-5 group-hover:rotate-12 transition-transform duration-1000"
+              aria-hidden="true"
+            >
               <Settings size={80} />
             </div>
             <div className="relative z-10 flex items-center gap-6">
-              <div className="p-3 bg-primary/10 rounded-2xl text-primary border border-primary/20">
+              <div
+                className="p-3 bg-primary/10 rounded-2xl text-primary border border-primary/20"
+                aria-hidden="true"
+              >
                 <Settings size={24} />
               </div>
               <div>
@@ -178,8 +184,13 @@ const SystemSettings: React.FC = () => {
                 onClick={handleSyncSettings}
                 disabled={isSyncing}
                 className="px-6 h-11 rounded-xl font-black uppercase tracking-widest shadow-lg shadow-primary/10 hover:scale-105 active:scale-95 transition-all text-[0.65rem] bg-primary text-white"
+                aria-label="Sync system settings"
               >
-                <RefreshCw size={14} className={`mr-2.5 ${isSyncing ? 'animate-spin' : ''}`} />
+                <RefreshCw
+                  size={14}
+                  className={`mr-2.5 ${isSyncing ? 'animate-spin' : ''}`}
+                  aria-hidden="true"
+                />
                 {isSyncing ? 'Syncing...' : 'Sync Settings'}
               </Button>
             </div>

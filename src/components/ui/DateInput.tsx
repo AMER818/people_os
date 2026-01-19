@@ -30,7 +30,7 @@ export interface DateInputProps
     Omit<VariantProps<typeof inputVariants>, 'hasIcon' | 'hasError'> {
   label?: string;
   value: string; // Expects ISO YYYY-MM-DD
-  onChange: (e: React.ChangeEvent<HTMLInputElement> | { target: { value: string } }) => void;
+  onChange: React.ChangeEventHandler<HTMLInputElement>;
   error?: string;
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
 }
@@ -45,6 +45,8 @@ export function DateInput({
   ...props
 }: DateInputProps) {
   const dateInputRef = useRef<HTMLInputElement>(null);
+  const generatedId = React.useId();
+  const inputId = props.id || generatedId;
 
   // Local state for the text input to allow "natural typing"
   const [textValue, setTextValue] = React.useState('');
@@ -148,9 +150,12 @@ export function DateInput({
   };
 
   return (
-    <div className="space-y-2 w-full">
+    <div className={cn('space-y-2 w-full', className)}>
       {label && (
-        <label className="text-[0.65rem] font-black uppercase tracking-[0.2em] text-text-muted px-1">
+        <label
+          htmlFor={inputId}
+          className="text-[0.65rem] font-black uppercase tracking-[0.2em] text-text-muted px-1"
+        >
           {label}
         </label>
       )}
@@ -158,12 +163,22 @@ export function DateInput({
         <div
           className="absolute left-4 top-1/2 -translate-y-1/2 cursor-pointer z-10"
           onClick={handleIconClick}
+          role="button"
+          tabIndex={0}
+          aria-label="Open calendar"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleIconClick();
+            }
+          }}
         >
           <Calendar className="w-4 h-4 text-text-muted group-hover:text-primary transition-colors" />
         </div>
 
         {/* Visible Text Input: Editable, validates on Tab */}
         <input
+          id={inputId}
           type="text"
           className={cn(
             inputVariants({ hasIcon: true, hasError: !!error, className }),

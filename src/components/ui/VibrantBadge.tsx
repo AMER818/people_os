@@ -78,7 +78,11 @@ function VibrantBadge({ className, variant, color, children, ...props }: BadgePr
   }
 
   return (
-    <div className={cn(badgeVariants({ variant: finalVariant }), className)} {...props}>
+    <div
+      className={cn(badgeVariants({ variant: finalVariant }), className)}
+      {...props}
+      aria-label={typeof children === 'string' ? children : 'Badge'}
+    >
       {children}
     </div>
   );

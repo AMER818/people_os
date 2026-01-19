@@ -49,6 +49,7 @@ const OvertimeConfiguration: React.FC = () => {
               size="sm"
               className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-secondary"
               onClick={() => setIsEditing(true)}
+              aria-label="Edit Configuration"
             >
               <Edit2 size={14} />
             </Button>
@@ -59,6 +60,7 @@ const OvertimeConfiguration: React.FC = () => {
                 size="sm"
                 onClick={handleCancel}
                 className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 rounded-full"
+                aria-label="Cancel"
               >
                 <X size={14} />
               </Button>
@@ -67,6 +69,7 @@ const OvertimeConfiguration: React.FC = () => {
                 size="sm"
                 onClick={handleSave}
                 className="h-8 w-8 p-0 text-success hover:bg-success/10 rounded-full"
+                aria-label="Save"
               >
                 <Save size={14} />
               </Button>
@@ -86,6 +89,7 @@ const OvertimeConfiguration: React.FC = () => {
             <button
               role="checkbox"
               aria-checked={payrollSettings.overtimeEnabled}
+              aria-label="Enable Overtime"
               disabled={!isEditing}
               className={`relative inline-block w-14 h-8 align-middle select-none transition duration-200 ease-in rounded-full border-2 ${
                 payrollSettings.overtimeEnabled

@@ -271,7 +271,9 @@ export function truncateText(text: string, maxLength: number, ellipsis: string =
  * @returns ISO date string (YYYY-MM-DD) or null
  */
 export function parseDisplayDateToISO(displayDate: string): string | null {
-  if (!displayDate) return null;
+  if (!displayDate) {
+    return null;
+  }
 
   // Regex for DD-MMM-YYYY (loose matching)
   // \d{1,2} : 1 or 2 digits day
@@ -280,7 +282,9 @@ export function parseDisplayDateToISO(displayDate: string): string | null {
   const regex = /^(\d{1,2})[-/ ]?([a-zA-Z]{3})[-/ ]?(\d{4})$/;
   const match = displayDate.trim().match(regex);
 
-  if (!match) return null;
+  if (!match) {
+    return null;
+  }
 
   const [, day, monthStr, year] = match;
 
@@ -303,7 +307,9 @@ export function parseDisplayDateToISO(displayDate: string): string | null {
   const monthLower = monthStr.toLowerCase();
   const month = monthMap[monthLower];
 
-  if (!month) return null;
+  if (!month) {
+    return null;
+  }
 
   // Pad day with 0 if needed
   const dayPadded = day.length === 1 ? `0${day}` : day;
@@ -316,7 +322,9 @@ export function parseDisplayDateToISO(displayDate: string): string | null {
   // Date parsing in JS assumes UTC or local, but YYYY-MM-DD is parsed as UTC.
   // We just want to check if the component values match.
   // Actually, '2024-02-30' becomes Mar 1 or 2.
-  if (isNaN(dateObj.getTime())) return null;
+  if (isNaN(dateObj.getTime())) {
+    return null;
+  }
 
   // Strict check
   const parts = isoDate.split('-');

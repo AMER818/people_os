@@ -21,10 +21,10 @@ class DBOrganization(Base, PrismaAuditMixin):
     name = Column(String, unique=True)
     is_active = Column(Boolean, default=True)
     enabled_modules = Column(String, default='["hcm"]')  # JSON List
-    head_id = Column(String, nullable=True)  # Soft Link to Employee ID
+    head_id = Column(String, ForeignKey("core_users.id"), nullable=True)  # Soft Link to Employee ID
 
     # Modern Fields
-    tax_id = Column(String, nullable=True)
+    tax_identifier = Column(String, nullable=True)
     registration_number = Column(String, nullable=True)
     founded_date = Column(String, nullable=True)
     email = Column(String)
@@ -66,7 +66,7 @@ class DBUser(Base, PrismaAuditMixin):
     organization_id = Column(
         String, ForeignKey("core_organizations.id"), index=True, nullable=True
     )
-    employee_id = Column(String, nullable=True)  # Soft Link
+    employee_id = Column(String, ForeignKey("hcm_employees.id"), nullable=True)  # Soft Link
     is_active = Column(Boolean, default=True)
     is_system_user = Column(Boolean, default=False)
 
@@ -123,8 +123,8 @@ class DBDepartment(Base, PrismaAuditMixin):
         String, ForeignKey("core_organizations.id"), nullable=False, index=True
     )
     # plant_id removed as Departments are now Organization-wide
-    hod_id = Column(String, nullable=True)  # Soft Link
-    manager_id = Column(String, nullable=True)  # Soft Link
+    hod_id = Column(String, ForeignKey("core_users.id"), nullable=True)  # Soft Link
+    manager_id = Column(String, ForeignKey("core_users.id"), nullable=True)  # Soft Link
 
     @property
     def is_active(self):
@@ -148,7 +148,7 @@ class DBSubDepartment(Base, PrismaAuditMixin):
     parent_department_id = Column(
         String, ForeignKey("core_departments.id"), nullable=False
     )
-    manager_id = Column(String, nullable=True)
+    manager_id = Column(String, ForeignKey("core_users.id"), nullable=True)
 
     @property
     def isActive(self):

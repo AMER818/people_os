@@ -39,6 +39,7 @@ export const DetailLayout: React.FC<DetailLayoutProps> = ({
         {tabs}
         <main
           role="main"
+          aria-label="Main Content"
           className={cn(
             'flex-1 p-8 lg:p-12 overflow-y-auto bg-app custom-scrollbar',
             contentClassName

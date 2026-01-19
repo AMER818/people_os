@@ -110,15 +110,15 @@ async def startup_event():
 # II. CORE: IDENTITY & ACCESS CONTROL
 # =================================================================
 
-@app.get("/api/rbac/permissions", tags=["RBAC"])
+@app.get("/api/v1/rbac/permissions", tags=["RBAC"])
 def get_permissions(db: Session = Depends(get_db)):
     return crud.get_all_role_permissions(db)
 
-@app.post("/api/rbac/permissions", tags=["RBAC"])
+@app.post("/api/v1/rbac/permissions", tags=["RBAC"])
 def save_permissions(payload: schemas.RolePermissionCreate, db: Session = Depends(get_db), current_user: dict = Depends(requires_role("SystemAdmin"))):
     return crud.update_role_permissions(db, payload.role, payload.permissions)
 
-@app.post("/api/auth/login", tags=["Authentication"])
+@app.post("/api/v1/auth/login", tags=["Authentication"])
 @limiter.limit(auth_config.LOGIN_RATE_LIMIT)
 def login(login_data: schemas.LoginRequest, request: Request, db: Session = Depends(get_db)):
     user = db.query(models.DBUser).filter(models.DBUser.username == login_data.username).first()
@@ -138,21 +138,21 @@ def login(login_data: schemas.LoginRequest, request: Request, db: Session = Depe
         }
     }
 
-@app.get("/api/users", response_model=List[schemas.User], tags=["Users"])
+@app.get("/api/v1/users", response_model=List[schemas.User], tags=["Users"])
 def get_users(
     db: Session = Depends(get_db),
     current_user: dict = Depends(requires_role("SystemAdmin"))
 ):
     return crud.get_users(db)
 
-@app.post("/api/users", response_model=schemas.User, tags=["Users"])
+@app.post("/api/v1/users", response_model=schemas.User, tags=["Users"])
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db), current_user: dict = Depends(requires_role("SystemAdmin"))):
     try:
         return crud.create_user(db=db, user=user, creator_id=current_user["id"])
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@app.put("/api/users/{user_id}", response_model=schemas.User, tags=["Users"])
+@app.put("/api/v1/users/{user_id}", response_model=schemas.User, tags=["Users"])
 def update_user(user_id: str, user: schemas.UserUpdate, db: Session = Depends(get_db), current_user: dict = Depends(check_permission("edit_users"))):
     return crud.update_user(db, user_id, user, updater_id=current_user["id"])
 
@@ -160,87 +160,87 @@ def update_user(user_id: str, user: schemas.UserUpdate, db: Session = Depends(ge
 # III. CORE: ORGANIZATION SETUP
 # =================================================================
 
-@app.get("/api/organizations", response_model=List[schemas.OrganizationList], tags=["Organizations"])
+@app.get("/api/v1/organizations", response_model=List[schemas.OrganizationList], tags=["Organizations"])
 def get_organizations(db: Session = Depends(get_db)):
     return crud.get_organizations(db)
 
-@app.put("/api/organizations/{org_id}", response_model=schemas.Organization, tags=["Organizations"])
+@app.put("/api/v1/organizations/{org_id}", response_model=schemas.Organization, tags=["Organizations"])
 def update_organization(org_id: str, org: schemas.OrganizationCreate, db: Session = Depends(get_db), current_user: dict = Depends(requires_role("SystemAdmin", "Business Admin"))):
     return crud.update_organization(db, org_id, org, user_id=current_user["id"])
 
-@app.get("/api/plants", response_model=List[schemas.Plant], tags=["Organizations"])
+@app.get("/api/v1/plants", response_model=List[schemas.Plant], tags=["Organizations"])
 def get_plants(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     return crud.get_plants(db, organization_id=current_user.get("organization_id"))
 
-@app.post("/api/plants", response_model=schemas.Plant, tags=["Organizations"])
+@app.post("/api/v1/plants", response_model=schemas.Plant, tags=["Organizations"])
 def create_plant(plant: schemas.PlantCreate, db: Session = Depends(get_db), current_user: dict = Depends(requires_role("SystemAdmin", "Business Admin"))):
     return crud.create_plant(db, plant, user_id=current_user["id"])
 
-@app.get("/api/departments", response_model=List[schemas.Department], tags=["Organizations"])
+@app.get("/api/v1/departments", response_model=List[schemas.Department], tags=["Organizations"])
 def get_departments(db: Session = Depends(get_db)):
     return crud.get_departments(db)
 
-@app.post("/api/departments", response_model=schemas.Department, tags=["Organizations"])
+@app.post("/api/v1/departments", response_model=schemas.Department, tags=["Organizations"])
 def create_department(dept: schemas.DepartmentCreate, db: Session = Depends(get_db), current_user: dict = Depends(requires_role("SystemAdmin", "Business Admin"))):
     return crud.create_department(db, dept, user_id=current_user["id"])
 
-@app.get("/api/sub-departments", response_model=List[schemas.SubDepartment], tags=["Organizations"])
+@app.get("/api/v1/sub-departments", response_model=List[schemas.SubDepartment], tags=["Organizations"])
 def get_sub_departments(db: Session = Depends(get_db)):
     return crud.get_sub_departments(db)
 
-@app.get("/api/grades", response_model=List[schemas.Grade], tags=["Organizations"])
+@app.get("/api/v1/grades", response_model=List[schemas.Grade], tags=["Organizations"])
 def get_grades(db: Session = Depends(get_db)):
     return crud.get_grades(db)
 
-@app.post("/api/grades", response_model=schemas.Grade, tags=["Organizations"])
+@app.post("/api/v1/grades", response_model=schemas.Grade, tags=["Organizations"])
 def create_grade(grade: schemas.GradeCreate, db: Session = Depends(get_db), current_user: dict = Depends(requires_role("SystemAdmin", "Business Admin"))):
     return crud.create_grade(db, grade, user_id=current_user["id"])
 
-@app.get("/api/designations", response_model=List[schemas.Designation], tags=["Organizations"])
+@app.get("/api/v1/designations", response_model=List[schemas.Designation], tags=["Organizations"])
 def get_designations(db: Session = Depends(get_db)):
     return crud.get_designations(db)
 
-@app.post("/api/designations", response_model=schemas.Designation, tags=["Organizations"])
+@app.post("/api/v1/designations", response_model=schemas.Designation, tags=["Organizations"])
 def create_designation(desig: schemas.DesignationCreate, db: Session = Depends(get_db), current_user: dict = Depends(requires_role("SystemAdmin", "Business Admin"))):
     return crud.create_designation(db, desig, user_id=current_user["id"], org_id=current_user.get("organization_id"))
 
-@app.get("/api/shifts", response_model=List[schemas.Shift], tags=["Organizations"])
+@app.get("/api/v1/shifts", response_model=List[schemas.Shift], tags=["Organizations"])
 def get_shifts(db: Session = Depends(get_db)):
     return crud.get_shifts(db)
 
-@app.post("/api/shifts", response_model=schemas.Shift, tags=["Organizations"])
+@app.post("/api/v1/shifts", response_model=schemas.Shift, tags=["Organizations"])
 def create_shift(shift: schemas.ShiftCreate, db: Session = Depends(get_db), current_user: dict = Depends(requires_role("SystemAdmin", "Business Admin"))):
     return crud.create_shift(db, shift, user_id=current_user["id"])
 
-@app.get("/api/positions", response_model=List[schemas.Position], tags=["Organizations"])
+@app.get("/api/v1/positions", response_model=List[schemas.Position], tags=["Organizations"])
 def get_positions(db: Session = Depends(get_db)):
     return crud.get_positions(db)
 
-@app.post("/api/positions", response_model=schemas.Position, tags=["Organizations"])
+@app.post("/api/v1/positions", response_model=schemas.Position, tags=["Organizations"])
 def create_position(position: schemas.PositionCreate, db: Session = Depends(get_db), current_user: dict = Depends(requires_role("SystemAdmin", "Business Admin"))):
     return crud.create_position(db, position, user_id=current_user["id"])
 
-@app.get("/api/holidays", response_model=List[schemas.Holiday], tags=["Organizations"])
+@app.get("/api/v1/holidays", response_model=List[schemas.Holiday], tags=["Organizations"])
 def get_holidays(db: Session = Depends(get_db)):
     return crud.get_holidays(db)
 
-@app.post("/api/holidays", response_model=schemas.Holiday, tags=["Organizations"])
+@app.post("/api/v1/holidays", response_model=schemas.Holiday, tags=["Organizations"])
 def create_holiday(holiday: schemas.HolidayCreate, db: Session = Depends(get_db), current_user: dict = Depends(requires_role("SystemAdmin", "Business Admin"))):
     return crud.create_holiday(db, holiday, user_id=current_user["id"])
 
-@app.get("/api/banks", response_model=List[schemas.Bank], tags=["Organizations"])
+@app.get("/api/v1/banks", response_model=List[schemas.Bank], tags=["Organizations"])
 def get_banks(db: Session = Depends(get_db)):
     return crud.get_banks(db)
 
-@app.post("/api/banks", response_model=schemas.Bank, tags=["Organizations"])
+@app.post("/api/v1/banks", response_model=schemas.Bank, tags=["Organizations"])
 def create_bank(bank: schemas.BankCreate, db: Session = Depends(get_db), current_user: dict = Depends(requires_role("SystemAdmin", "Business Admin"))):
     return crud.create_bank(db, bank, user_id=current_user["id"])
 
-@app.get("/api/employment-levels", response_model=List[schemas.EmploymentLevel], tags=["Organizations"])
+@app.get("/api/v1/employment-levels", response_model=List[schemas.EmploymentLevel], tags=["Organizations"])
 def get_employment_levels(db: Session = Depends(get_db)):
     return crud.get_employment_levels(db)
 
-@app.post("/api/employment-levels", response_model=schemas.EmploymentLevel, tags=["Organizations"])
+@app.post("/api/v1/employment-levels", response_model=schemas.EmploymentLevel, tags=["Organizations"])
 def create_employment_level(level: schemas.EmploymentLevelCreate, db: Session = Depends(get_db), current_user: dict = Depends(requires_role("SystemAdmin", "Business Admin"))):
     return crud.create_employment_level(db, level, user_id=current_user["id"])
 
@@ -248,39 +248,39 @@ def create_employment_level(level: schemas.EmploymentLevelCreate, db: Session = 
 # IV. BUSINESS: HUMAN RESOURCES
 # =================================================================
 
-@app.get("/api/employees", response_model=List[schemas.Employee], tags=["Employees"])
+@app.get("/api/v1/employees", response_model=List[schemas.Employee], tags=["Employees"])
 def get_employees(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: dict = Depends(check_permission("view_employees"))):
     return crud.get_employees(db, skip=skip, limit=limit)
 
-@app.post("/api/employees", response_model=schemas.Employee, tags=["Employees"])
+@app.post("/api/v1/employees", response_model=schemas.Employee, tags=["Employees"])
 def create_employee(employee: schemas.EmployeeCreate, db: Session = Depends(get_db), current_user: dict = Depends(requires_role("SystemAdmin"))):
     return crud.create_employee(db, employee, user_id=current_user["id"])
 
-@app.get("/api/employees/{employee_id}", response_model=schemas.Employee, tags=["Employees"])
+@app.get("/api/v1/employees/{employee_id}", response_model=schemas.Employee, tags=["Employees"])
 def read_employee(employee_id: str, db: Session = Depends(get_db)):
     return crud.get_employee(db, employee_id=employee_id)
 
-@app.put("/api/employees/{employee_id}", response_model=schemas.Employee, tags=["Employees"])
+@app.put("/api/v1/employees/{employee_id}", response_model=schemas.Employee, tags=["Employees"])
 def update_employee(employee_id: str, employee: schemas.EmployeeCreate, db: Session = Depends(get_db), current_user: dict = Depends(check_permission("edit_employee"))):
     return crud.update_employee(db, employee_id, employee, user_id=current_user["id"])
 
-@app.post("/api/jobs", response_model=schemas.JobVacancy, tags=["Recruitment"])
+@app.post("/api/v1/jobs", response_model=schemas.JobVacancy, tags=["Recruitment"])
 def create_job_vacancy(job: schemas.JobVacancyCreate, db: Session = Depends(get_db), current_user: dict = Depends(check_permission("manage_recruitment"))):
     return crud.create_job_vacancy(db, job, user_id=current_user["id"])
 
-@app.get("/api/jobs", response_model=List[schemas.JobVacancy], tags=["Recruitment"])
+@app.get("/api/v1/jobs", response_model=List[schemas.JobVacancy], tags=["Recruitment"])
 def get_job_vacancies(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return crud.get_job_vacancies(db, skip=skip, limit=limit)
 
-@app.post("/api/candidates", response_model=schemas.Candidate, tags=["Recruitment"])
+@app.post("/api/v1/candidates", response_model=schemas.Candidate, tags=["Recruitment"])
 def create_candidate(candidate: schemas.CandidateCreate, db: Session = Depends(get_db), current_user: dict = Depends(check_permission("manage_recruitment"))):
     return crud.create_candidate(db, candidate, user_id=current_user["id"])
 
-@app.get("/api/candidates", response_model=List[schemas.Candidate], tags=["Recruitment"])
+@app.get("/api/v1/candidates", response_model=List[schemas.Candidate], tags=["Recruitment"])
 def get_candidates(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return crud.get_candidates(db, skip=skip, limit=limit)
 
-@app.post("/api/performance-reviews", response_model=schemas.PerformanceReview, tags=["Performance"])
+@app.post("/api/v1/performance-reviews", response_model=schemas.PerformanceReview, tags=["Performance"])
 def create_performance_review(review: schemas.PerformanceReviewCreate, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     return crud.create_performance_review(db, review, user_id=current_user["id"])
 
@@ -288,21 +288,21 @@ def create_performance_review(review: schemas.PerformanceReviewCreate, db: Sessi
 # V. SYSTEM: GOVERNANCE & AUDITING
 # =================================================================
 
-@app.get("/api/system/flags", response_model=schemas.SystemFlags, tags=["System"])
+@app.get("/api/v1/system/flags", response_model=schemas.SystemFlags, tags=["System"])
 def read_system_flags(db: Session = Depends(get_db), current_user: dict = Depends(requires_role("SystemAdmin"))):
     org_id = current_user.get("organization_id") or "system-default"
     return crud.get_system_flags(db, org_id)
 
-@app.post("/api/system/flags", response_model=schemas.SystemFlags, tags=["System"])
+@app.post("/api/v1/system/flags", response_model=schemas.SystemFlags, tags=["System"])
 def update_system_flags(flags_update: schemas.SystemFlagsUpdate, db: Session = Depends(get_db), current_user: dict = Depends(requires_role("SystemAdmin"))):
     org_id = current_user.get("organization_id") or "system-default"
     return crud.update_system_flags(db, org_id, flags_update, current_user.get("id"))
 
-@app.get("/api/audit-logs", response_model=List[schemas.AuditLog], tags=["System"])
+@app.get("/api/v1/audit-logs", response_model=List[schemas.AuditLog], tags=["System"])
 def get_audit_logs(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: dict = Depends(check_permission("view_audit_logs"))):
     return crud.get_audit_logs(db, skip=skip, limit=limit)
 
-@app.post("/api/system/audit/run", tags=["System"])
+@app.post("/api/v1/system/audit/run", tags=["System"])
 async def run_audit_endpoint(
     db: Session = Depends(get_db),
     current_user: dict = Depends(requires_role("SystemAdmin"))
@@ -311,7 +311,7 @@ async def run_audit_endpoint(
     report = run_system_audit(executed_by=current_user["id"])
     return {"status": "success", "report_id": report.id, "overall_score": report.overall_score}
 
-@app.get("/api/system/api-keys", response_model=schemas.ApiKeyList, tags=["System"])
+@app.get("/api/v1/system/api-keys", response_model=schemas.ApiKeyList, tags=["System"])
 def list_api_keys(
     db: Session = Depends(get_db),
     current_user: dict = Depends(requires_role("SystemAdmin"))
@@ -321,7 +321,7 @@ def list_api_keys(
     return {"keys": keys, "total": len(keys)}
 
 @app.post(
-    "/api/system/webhooks",
+    "/api/v1/system/webhooks",
     response_model=schemas.WebhookResponse,
     tags=["System"]
 )
@@ -337,7 +337,7 @@ def create_webhook(
 
 
 @app.get(
-    "/api/system/webhooks",
+    "/api/v1/system/webhooks",
     response_model=List[schemas.WebhookResponse],
     tags=["System"]
 )
@@ -349,7 +349,7 @@ def list_webhooks(
     return crud.get_webhooks(db, org_id)
 
 
-@app.delete("/api/system/webhooks/{webhook_id}", tags=["System"])
+@app.delete("/api/v1/system/webhooks/{webhook_id}", tags=["System"])
 def delete_webhook(
     webhook_id: str,
     db: Session = Depends(get_db),
@@ -360,7 +360,7 @@ def delete_webhook(
 # ===== Background Job Endpoints =====
 
 @app.post(
-    "/api/system/background-jobs",
+    "/api/v1/system/background-jobs",
     response_model=schemas.BackgroundJobResponse,
     tags=["System"]
 )
@@ -376,7 +376,7 @@ def create_background_job(
 
 
 @app.get(
-    "/api/system/background-jobs",
+    "/api/v1/system/background-jobs",
     response_model=List[schemas.BackgroundJobResponse],
     tags=["System"]
 )
@@ -386,7 +386,7 @@ def get_background_jobs(db: Session = Depends(get_db), current_user: dict = Depe
 
 # ===== System Maintenance Endpoints =====
 
-@app.post("/api/system/restore", tags=["System"])
+@app.post("/api/v1/system/restore", tags=["System"])
 async def restore_system(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
@@ -425,7 +425,7 @@ async def restore_system(
             os.remove(temp_path)
         raise HTTPException(status_code=500, detail=f"Restore failed: {str(e)}")
 
-@app.get("/api/system/maintenance/backups", tags=["System"])
+@app.get("/api/v1/system/maintenance/backups", tags=["System"])
 def get_backups(current_user: dict = Depends(requires_role("SystemAdmin"))):
     """List available database backups."""
     data_dir = os.path.dirname(settings.DB_PATH)
@@ -441,7 +441,7 @@ def get_backups(current_user: dict = Depends(requires_role("SystemAdmin"))):
             })
     return sorted(backups, key=lambda x: x["created_at"], reverse=True)
 
-@app.post("/api/system/maintenance/restore/{filename}", tags=["System"])
+@app.post("/api/v1/system/maintenance/restore/{filename}", tags=["System"])
 def restore_from_server_backup(
     filename: str,
     current_user: dict = Depends(requires_role("SystemAdmin"))
@@ -465,12 +465,12 @@ def restore_from_server_backup(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/system/maintenance/flush-cache", tags=["System"])
+@app.post("/api/v1/system/maintenance/flush-cache", tags=["System"])
 def flush_cache(current_user: dict = Depends(requires_role("SystemAdmin"))):
     # Stub for cache flushing
     return {"status": "success", "message": "Cache flushed successfully"}
 
-@app.post("/api/system/maintenance/optimize-db", tags=["System"])
+@app.post("/api/v1/system/maintenance/optimize-db", tags=["System"])
 def optimize_db_endpoint(db: Session = Depends(get_db), current_user: dict = Depends(requires_role("SystemAdmin"))):
     try:
         db.execute(text("VACUUM"))
@@ -478,7 +478,7 @@ def optimize_db_endpoint(db: Session = Depends(get_db), current_user: dict = Dep
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/system/maintenance/rotate-logs", tags=["System"])
+@app.post("/api/v1/system/maintenance/rotate-logs", tags=["System"])
 def rotate_logs_endpoint(current_user: dict = Depends(requires_role("SystemAdmin"))):
     # Stub for log rotation
     return {"status": "success", "message": "Logs rotated successfully"}
@@ -487,12 +487,12 @@ def rotate_logs_endpoint(current_user: dict = Depends(requires_role("SystemAdmin
 # VI. SYSTEM: AI & INTELLIGENCE
 # =================================================================
 
-@app.get("/api/ai/config", response_model=schemas.AIConfigurationResponse, tags=["AI"])
+@app.get("/api/v1/ai/config", response_model=schemas.AIConfigurationResponse, tags=["AI"])
 def get_ai_configuration(db: Session = Depends(get_db), current_user: dict = Depends(requires_role("SystemAdmin"))):
     org_id = current_user.get("organization_id") or "org-1"
     return crud.get_ai_config(db, org_id)
 
-@app.post("/api/ai/predict/attrition", tags=["AI"])
+@app.post("/api/v1/ai/predict/attrition", tags=["AI"])
 def predict_attrition(request: schemas.AttritionPredictionRequest, db: Session = Depends(get_db), current_user: dict = Depends(requires_role("SystemAdmin"))):
     employee = crud.get_employee(db, request.employee_id)
     if not employee: raise HTTPException(status_code=404, detail="Employee not found")
@@ -503,32 +503,32 @@ def predict_attrition(request: schemas.AttritionPredictionRequest, db: Session =
 # VII. HCM MODULES
 # =================================================================
 
-@app.get("/api/hcm/attendance", response_model=List[schemas.Attendance], tags=["Attendance"])
+@app.get("/api/v1/hcm/attendance", response_model=List[schemas.Attendance], tags=["Attendance"])
 def get_attendance_records(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: dict = Depends(check_permission("view_attendance"))):
     return crud.get_attendance_records(db, skip=skip, limit=limit)
 
-@app.post("/api/hcm/attendance", response_model=schemas.Attendance, tags=["Attendance"])
+@app.post("/api/v1/hcm/attendance", response_model=schemas.Attendance, tags=["Attendance"])
 def create_attendance(attendance: schemas.AttendanceCreate, db: Session = Depends(get_db), current_user: dict = Depends(check_permission("edit_attendance"))):
     return crud.create_attendance_record(db, attendance, user_id=current_user["id"])
 
-@app.get("/api/hcm/payroll", response_model=List[schemas.PayrollLedger], tags=["Payroll"])
+@app.get("/api/v1/hcm/payroll", response_model=List[schemas.PayrollLedger], tags=["Payroll"])
 def get_payroll_records(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: dict = Depends(check_permission("view_payroll"))):
     return crud.get_payroll_records(db, skip=skip, limit=limit)
 
-@app.post("/api/hcm/payroll", response_model=schemas.PayrollLedger, tags=["Payroll"])
+@app.post("/api/v1/hcm/payroll", response_model=schemas.PayrollLedger, tags=["Payroll"])
 def create_payroll_entry(payroll: schemas.PayrollLedgerCreate, db: Session = Depends(get_db), current_user: dict = Depends(check_permission("run_payroll"))):
     return crud.create_payroll_ledger_entry(db, payroll, user_id=current_user["id"])
 
-@app.get("/api/payroll-settings", response_model=schemas.PayrollSettings, tags=["Payroll"])
+@app.get("/api/v1/payroll-settings", response_model=schemas.PayrollSettings, tags=["Payroll"])
 def get_payroll_settings(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     org_id = get_user_org(current_user)
     return crud.get_payroll_settings(db, org_id)
 
-@app.get("/api/hcm/leaves", response_model=List[schemas.LeaveRequest], tags=["Leaves"])
+@app.get("/api/v1/hcm/leaves", response_model=List[schemas.LeaveRequest], tags=["Leaves"])
 def get_leaves(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: dict = Depends(check_permission("view_leaves"))):
     return crud.get_leave_requests(db, skip=skip, limit=limit)
 
-@app.post("/api/hcm/leaves", response_model=schemas.LeaveRequest, tags=["Leaves"])
+@app.post("/api/v1/hcm/leaves", response_model=schemas.LeaveRequest, tags=["Leaves"])
 def create_leave(leave: schemas.LeaveRequestCreate, db: Session = Depends(get_db), current_user: dict = Depends(check_permission("request_leave"))):
     return crud.create_leave_request(db, leave, user_id=current_user["id"])
 
@@ -536,7 +536,7 @@ def create_leave(leave: schemas.LeaveRequestCreate, db: Session = Depends(get_db
 # VIII. DEPLOYMENT & HEALTH
 # =================================================================
 
-@app.get("/api/health", tags=["System"])
+@app.get("/api/v1/health", tags=["System"])
 def health_check(db: Session = Depends(get_db)):
     try:
         db.execute(text("SELECT 1"))

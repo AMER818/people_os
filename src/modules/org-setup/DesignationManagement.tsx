@@ -178,6 +178,7 @@ const DesignationManagement: React.FC<DesignationManagementProps> = React.memo((
                             className="h-8 w-8 p-0"
                             onClick={() => handleAddDesigToGrade(grade.id)}
                             title="Add Designation to this Grade"
+                            aria-label={`Add Designation to ${grade.name}`}
                           >
                             <Plus size={16} className="text-primary" />
                           </Button>
@@ -213,6 +214,7 @@ const DesignationManagement: React.FC<DesignationManagementProps> = React.memo((
                                       size="sm"
                                       onClick={() => handleEditDesig(desig)}
                                       className="h-6 w-6 p-0 hover:bg-surface rounded"
+                                      aria-label={`Edit ${desig.name}`}
                                     >
                                       <Edit2 size={12} className="text-primary" />
                                     </Button>
@@ -221,6 +223,7 @@ const DesignationManagement: React.FC<DesignationManagementProps> = React.memo((
                                       size="sm"
                                       onClick={() => handleDeleteDesig(desig.id, desig.name)}
                                       className="h-6 w-6 p-0 hover:bg-surface rounded"
+                                      aria-label={`Delete ${desig.name}`}
                                     >
                                       <Trash2 size={12} className="text-danger" />
                                     </Button>
@@ -273,6 +276,7 @@ const DesignationManagement: React.FC<DesignationManagementProps> = React.memo((
                           size="sm"
                           onClick={() => handleEditDesig(desig)}
                           className="h-6 w-6 p-0"
+                          aria-label={`Edit ${desig.name}`}
                         >
                           <Edit2 size={12} />
                         </Button>
@@ -281,6 +285,7 @@ const DesignationManagement: React.FC<DesignationManagementProps> = React.memo((
                           size="sm"
                           onClick={() => handleDeleteDesig(desig.id, desig.name)}
                           className="h-6 w-6 p-0"
+                          aria-label={`Delete ${desig.name}`}
                         >
                           <Trash2 size={12} className="text-danger" />
                         </Button>

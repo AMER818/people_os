@@ -96,6 +96,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 onChange={(e) => setUsername(e.target.value)}
                 className="w-full bg-white/50 dark:bg-slate-900/50 border border-border focus:border-primary focus:ring-4 focus:ring-primary/10 rounded-xl py-4 pl-12 pr-4 text-text-primary font-bold placeholder:text-text-muted/50 outline-none transition-all"
                 placeholder="sysadmin"
+                aria-label="Username"
                 disabled={loading || success}
               />
             </div>
@@ -123,6 +124,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full bg-white/50 dark:bg-slate-900/50 border border-border focus:border-primary focus:ring-4 focus:ring-primary/10 rounded-xl py-4 pl-12 pr-4 text-text-primary font-bold placeholder:text-text-muted/50 outline-none transition-all"
                 placeholder="••••••••"
+                aria-label="Password"
                 disabled={loading || success}
               />
             </div>

@@ -56,6 +56,7 @@ const OrganizationSetup: React.FC = () => {
 
   return (
     <DetailLayout
+      aria-label="Organization Setup"
       className="animate-in fade-in duration-500"
       containerClassName="max-w-[1600px]"
       header={
